@@ -33,21 +33,21 @@ Le script crée 16 boutons SysEx correspondant aux poussoirs d'encodeurs utilis�
 
 | Index interne | Encodeur | Fonction Ableton | Adaptation du prototype |
 |---:|---:|---|---|
-| 0 | 1 | Première piste | Indisponible : pas de commande publique trouvée |
-| 1 | 2 | Piste précédente | Snapshot global précédent |
-| 2 | 3 | Piste suivante | Snapshot global suivant |
-| 3 | 4 | Dernière piste | Indisponible |
+| 0 | 1 | Première piste | Première banque |
+| 1 | 2 | Piste précédente | Banque précédente |
+| 2 | 3 | Piste suivante | Banque suivante |
+| 3 | 4 | Dernière piste | Dernière banque |
 | 4 | 5 | Premier device/plugin | Indisponible |
 | 5 | 6 | Device/plugin précédent | Plugin précédent |
 | 6 | 7 | Device/plugin suivant | Plugin suivant |
 | 7 | 8 | Dernier device/plugin | Indisponible |
-| 8 | 9 | Première banque | Première banque |
-| 9 | 10 | Banque précédente | Banque précédente |
-| 10 | 11 | Banque suivante | Banque suivante |
-| 11 | 12 | Dernière banque | Dernière banque |
+| 8 | 9 | Première banque | Indisponible : pas de commande première chaîne |
+| 9 | 10 | Banque précédente | Chaîne précédente |
+| 10 | 11 | Banque suivante | Chaîne suivante |
+| 11 | 12 | Dernière banque | Indisponible : pas de commande dernière chaîne |
 | 12 | 13 | Device actif/inactif | Traitement plugin actif/inactif |
-| 13 | 14 | Verrouiller le device | Banque précédente |
-| 14 | 15 | Afficher/masquer le device | Banque suivante |
+| 13 | 14 | Verrouiller le device | Snapshot global précédent |
+| 14 | 15 | Afficher/masquer le device | Snapshot global suivant |
 | 15 | 16 | Afficher/masquer la vue rack | Afficher/masquer le plugin |
 
 Le **push simple de l'encodeur 16** déclenche le Tap Tempo. Les push simples 1 à 15 gardent l'affichage du détail du paramètre. Les actions de banque et de snapshot ci-dessus exigent bien Shift+push.
@@ -177,7 +177,7 @@ F0 00 00 00 4E 2C 1B 4E 22 13 4A (20|offset_hi) (10|offset_lo)
 
 Un écran complet de 80 caractères fait 257 octets. Pour effacer et masquer l'overlay, le dernier bloc `4E 22 14` est remplacé par `4E 22 15` après l'envoi de 80 espaces.
 
-La version 0.4.0 réutilise également cet écran total sous forme de grille persistante 4 × 4. Chaque cellule contient le nom court d'un paramètre. Après l'overlay temporaire d'une valeur, la grille de la banque active est renvoyée au lieu de revenir aux libellés enregistrés dans le groupe EC4.
+Depuis la version 0.4.0, cet écran total est également réutilisé sous forme de grille persistante 4 × 4. Chaque cellule contient le nom court d'un paramètre. Après l'overlay temporaire d'une valeur, la grille de la banque active est renvoyée au lieu de revenir aux libellés enregistrés dans le groupe EC4.
 
 La table de caractères issue du script prend en charge les caractères ASCII usuels, `Ä`, `Ö`, `Ü`, `ä`, `ö`, `ü`, `à`, `²`, `³`, `§`, crochets, barre oblique inverse et signes de comparaison. Un caractère inconnu est remplacé par le code `1F`.
 

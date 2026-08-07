@@ -83,6 +83,10 @@ class EC4LiveProfessorBridge:
         self._reconnect_thread: threading.Thread | None = None
         self._overlay_timer: threading.Timer | None = None
         self._last_feedback: dict[int, tuple[int, float]] = {}
+        self._motion_log_times: dict[int, float] = {}
+        self._feedback_timers: dict[int, threading.Timer] = {}
+        self._pending_feedback: dict[int, int] = {}
+        self._feedback_sequence = 0
         self._midi_learn_callback: MidiLearnCallback | None = None
         self._received_companion_names = False
 
@@ -151,6 +155,10 @@ class EC4LiveProfessorBridge:
         if self._overlay_timer:
             self._overlay_timer.cancel()
             self._overlay_timer = None
+        for timer in self._feedback_timers.values():
+            timer.cancel()
+        self._feedback_timers.clear()
+        self._pending_feedback.clear()
         self._osc_server.stop()
         self._midi.close()
         if self._reconnect_thread and self._reconnect_thread.is_alive():
@@ -220,11 +228,73 @@ class EC4LiveProfessorBridge:
             return f"/Companion/Rotary{number}"
         return f"{self.config.generic_prefix}{number}"
 
-    def _send_parameter(self, global_index: int, normalized: float) -> None:
+    def _send_parameter(
+        self,
+        global_index: int,
+        normalized: float,
+        *,
+        physical_index: int | None = None,
+        midi_control: int | None = None,
+        midi_value: int | None = None,
+    ) -> None:
         normalized = max(0.0, min(1.0, normalized))
         self.values[global_index] = normalized
         self.display_values[global_index] = f"{normalized * 100:.1f}%"
-        self._send_osc(self._rotary_address(global_index), normalized)
+        address = self._rotary_address(global_index)
+        self._send_osc(address, normalized)
+        if physical_index is not None:
+            now = time.monotonic()
+            last_log = self._motion_log_times.get(physical_index, 0.0)
+            if now - last_log >= 0.25:
+                midi_details = ""
+                if midi_control is not None and midi_value is not None:
+                    midi_details = f" CC{midi_control}={midi_value}"
+                self._log(
+                    f"EC4 encodeur {physical_index + 1}:{midi_details} -> "
+                    f"{address} = {normalized * 100:.1f}%"
+                )
+                self._motion_log_times[physical_index] = now
+        if self.config.mode == "companion":
+            self._expect_parameter_feedback(global_index)
+
+    def _expect_parameter_feedback(self, global_index: int) -> None:
+        previous = self._feedback_timers.pop(global_index, None)
+        if previous:
+            previous.cancel()
+        self._feedback_sequence += 1
+        sequence = self._feedback_sequence
+        self._pending_feedback[global_index] = sequence
+        timer = threading.Timer(
+            0.8,
+            self._parameter_feedback_timeout,
+            args=(global_index, sequence),
+        )
+        timer.daemon = True
+        self._feedback_timers[global_index] = timer
+        timer.start()
+
+    def _parameter_feedback_timeout(self, global_index: int, sequence: int) -> None:
+        with self._lock:
+            if self._pending_feedback.get(global_index) != sequence:
+                return
+            self._pending_feedback.pop(global_index, None)
+            self._feedback_timers.pop(global_index, None)
+        number = global_index + 1
+        self._log(
+            f"Aucun retour LiveProfessor pour Rotary{number}. Le mouvement EC4 est bien recu; "
+            f"verifiez le port d'entree du Companion Controller ({self.config.liveprofessor_port}) "
+            "et l'affectation dans le Controller Map actif.",
+            logging.WARNING,
+        )
+
+    def _confirm_parameter_feedback(self, global_index: int) -> None:
+        with self._lock:
+            sequence = self._pending_feedback.pop(global_index, None)
+            timer = self._feedback_timers.pop(global_index, None)
+        if timer:
+            timer.cancel()
+        if sequence is not None:
+            self._log(f"LiveProfessor confirme Rotary{global_index + 1}")
 
     def _global_index(self, physical_index: int) -> int | None:
         index = self.active_bank * self.config.bank_size + physical_index
@@ -317,7 +387,13 @@ class EC4LiveProfessorBridge:
                 if global_index is None:
                     return
                 normalized = message.value / 127.0
-                self._send_parameter(global_index, normalized)
+                self._send_parameter(
+                    global_index,
+                    normalized,
+                    physical_index=physical,
+                    midi_control=message.control,
+                    midi_value=message.value,
+                )
                 self._show_parameter(global_index)
                 return
 
@@ -399,38 +475,36 @@ class EC4LiveProfessorBridge:
         if kind != "shift_push" or index is None:
             return
         commands = {
-            1: (
-                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-                "Snapshot precedent",
-            ),
-            2: (
-                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
-                "Snapshot suivant",
-            ),
             5: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent"),
             6: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant"),
+            9: ("/Command/PluginWindows/SelectPreviousChain", "Chaine precedente"),
+            10: ("/Command/PluginWindows/SelectNextChain", "Chaine suivante"),
             12: (
                 "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
                 "Traitement plugin active/desactive",
             ),
+            13: (
+                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+                "Snapshot precedent",
+            ),
+            14: (
+                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
+                "Snapshot suivant",
+            ),
             15: ("/Command/PluginWindows/ShowHideselectedplugin", "Afficher/masquer plugin"),
         }
-        if index == 8:
+        if index == 0:
             self.set_bank(0)
-        elif index == 9:
+        elif index == 1:
             self.change_bank(-1)
-        elif index == 10:
+        elif index == 2:
             self.change_bank(1)
-        elif index == 11:
+        elif index == 3:
             self.set_bank(self.bank_count - 1)
-        elif index == 13:
-            self.change_bank(-1)
-        elif index == 14:
-            self.change_bank(1)
         elif index in commands:
             address, label = commands[index]
             self._command(address, label)
-        elif index in {0, 3, 4, 7}:
+        elif index in {4, 7, 8, 11}:
             self._show_overlay(["Navigation", "Premier/dernier", "non expose par", "l'API LiveProfessor"])
 
     def _command(self, address: str, label: str) -> None:
@@ -597,6 +671,7 @@ class EC4LiveProfessorBridge:
     def _update_value(self, index: int, normalized: float) -> None:
         if not 0 <= index < self.config.max_controls:
             return
+        self._confirm_parameter_feedback(index)
         normalized = max(0.0, min(1.0, normalized))
         self.values[index] = normalized
         if self.display_values[index] in {"", "-"} or self.display_values[index].endswith("%"):

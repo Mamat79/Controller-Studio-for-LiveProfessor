@@ -56,6 +56,8 @@ Cette opération remplace les MIDI Learn répétés par une déclaration unique 
 
 La map est spécifique au **type** de plugin. Ne présumez pas qu'une map VST2 est interchangeable avec une VST3 du même produit.
 
+Attention à ne pas confondre les deux apprentissages : **Learn** dans Hardware Controllers Setup apprend à LiveProfessor quel message OSC correspond à un `RotaryN`; il ne relie pas encore ce contrôle à un paramètre audio. Cette deuxième liaison se fait dans le **Controller Map actif**. Avec Quick Assign, activer `QA`, bouger le paramètre du plugin à la souris et tourner l'encodeur EC4 pendant le même apprentissage.
+
 ### Configurer et lancer le pont
 
 Dans l'interface du pont :
@@ -109,13 +111,14 @@ Sans profil, l'écran montre `P001`, `P002`, etc. Le contrôleur OSC générique
 | Action EC4 | Résultat |
 |---|---|
 | Tourner les encodeurs 1–16 | Modifier les 16 paramètres de la banque active |
-| Shift+push encodeur 2 | Rappeler le snapshot global précédent |
-| Shift+push encodeur 3 | Rappeler le snapshot global suivant |
-| Shift+push encodeur 14 | Banque précédente |
-| Shift+push encodeur 15 | Banque suivante |
+| Shift+push encodeurs 1/4 | Première/dernière banque |
+| Shift+push encodeurs 2/3 | Banque précédente/suivante |
+| Shift+push encodeurs 6/7 | Plugin précédent/suivant dans la chaîne |
+| Shift+push encodeurs 10/11 | Chaîne précédente/suivante |
+| Shift+push encodeurs 14/15 | Snapshot global précédent/suivant |
+| Shift+push encodeur 13 | Activer/désactiver le traitement du plugin sélectionné |
+| Shift+push encodeur 16 | Afficher/masquer le plugin sélectionné |
 | Push simple encodeur 16 | Tap Tempo |
-| Shift+push encodeurs 9/10/11/12 | Première/précédente/suivante/dernière banque, raccourcis de compatibilité |
-| Notes device précédent/suivant | Plugin précédent/suivant |
 | Appuyer sur un encodeur | Afficher temporairement nom, valeur, banque et numéro |
 | Bouton **Tester l'écran EC4** | Afficher un écran de diagnostic sans toucher à l'audio |
 
@@ -143,7 +146,9 @@ Les champs d'identifiants sont conservés pour une future API, mais ne sont pas 
 ## Diagnostic et journal
 
 - **Diagnostic** vérifie localement l'encodage OSC/SysEx et liste les ports MIDI.
+- **Raccourcis EC4** rappelle directement la disposition des touches Shift.
 - Journal : `%LOCALAPPDATA%\EC4LiveProfessorBridge\bridge.log`.
+- Lorsqu'un encodeur tourne, le journal indique le CC reçu et le `/Companion/RotaryN` envoyé. `LiveProfessor confirme RotaryN` valide le trajet complet. Si aucun retour n'arrive après 0,8 seconde, le pont indique de vérifier le port d'entrée du Companion Controller et le Controller Map actif.
 - Quatre fichiers maximum sont conservés : le journal courant et trois rotations de 2 Mo.
 - Si l'EC4 est débranché, le pont ferme les ports disparus et tente une reconnexion toutes les deux secondes.
 
@@ -170,6 +175,8 @@ Un autre logiciel l'utilise probablement, souvent Bitfocus Companion. Fermer l'a
 - En mode Companion, vérifier le retour UDP 8011 et la déclaration Companion Controller.
 - Vérifier qu'une Controller Map est appliquée au plugin et que ses rotatifs possèdent des noms.
 - Vérifier que le plugin concerné est bien celui sélectionné dans LiveProfessor.
+- Vérifier que le nom affiché en haut de LiveProfessor est bien la map modifiée : apprendre un contrôle dans Hardware Controllers Setup ne l'assigne pas au plugin.
+- En Quick Assign, activer `QA`, modifier le paramètre à la souris et tourner l'EC4 pendant l'apprentissage.
 - En mode Generic, sélectionner un profil JSON ; les noms dynamiques ne sont pas attendus.
 
 ### Un plugin réinséré n'est plus contrôlé

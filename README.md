@@ -37,16 +37,19 @@ L'exécutable est autonome : copiez `EC4-LiveProfessor-Bridge.exe` sur le PC, br
 | Geste | Action |
 |---|---|
 | Tourner les encodeurs 1–16 | Modifier les paramètres de la banque active |
-| Shift + push 2 | Snapshot global précédent |
-| Shift + push 3 | Snapshot global suivant |
-| Shift + push 14 | Banque précédente |
-| Shift + push 15 | Banque suivante |
+| Shift + push 1 / 4 | Première / dernière banque |
+| Shift + push 2 / 3 | Banque précédente / suivante |
+| Shift + push 6 / 7 | Plugin précédent / suivant dans la chaîne |
+| Shift + push 10 / 11 | Chaîne précédente / suivante |
+| Shift + push 14 / 15 | Snapshot global précédent / suivant |
+| Shift + push 13 | Activer / désactiver le traitement du plugin |
+| Shift + push 16 | Afficher / masquer le plugin sélectionné |
 | Push simple 16 | Tap Tempo |
 
 ## Démarrage rapide
 
 1. Dans LiveProfessor, ajouter un **Companion Controller** avec entrée `8010` et feedback `8011`.
-2. Créer ou appliquer une Controller Map au plugin, idéalement avec **Only If Selected**.
+2. Dans le **Controller Map actif**, relier les `RotaryN` aux paramètres du plugin, idéalement avec **Only If Selected**. Le bouton Learn de la définition du contrôleur apprend seulement le message OSC ; il ne crée pas cette affectation au plugin.
 3. Brancher l'EC4 et lancer `EC4-LiveProfessor-Bridge.exe`.
 4. Choisir les ports `Faderfox EC4`, puis cliquer sur **Démarrer**.
 5. Sélectionner le setup/groupe EC4 souhaité et cliquer sur **Utiliser le setup/groupe actuel**.
@@ -71,7 +74,7 @@ $env:PYTHONPATH = "src"
 .\scripts\build.ps1
 ```
 
-La version 0.4.0 passe 23 tests unitaires ainsi que les diagnostics autonomes `--self-test` et `--list-midi`.
+La version 0.4.1 trace chaque mouvement EC4 jusqu'au `RotaryN` envoyé et confirme le retour LiveProfessor. Elle passe les tests unitaires ainsi que les diagnostics autonomes `--self-test` et `--list-midi`.
 
 ## Statut juridique
 

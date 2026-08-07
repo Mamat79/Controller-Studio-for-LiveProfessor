@@ -162,10 +162,14 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(bridge._midi.cc[-1], (2, 20, 32))
         self.assertEqual(bridge._push_index(3, 60), 0)
 
-    def test_shift_pushes_control_snapshots_and_banks_then_push16_taps_tempo(self):
+    def test_shift_pushes_control_banks_snapshots_navigation_and_tap_tempo(self):
         bridge = self.make_bridge()
-        bridge._handle_sysex_button("shift_push", 1)
         bridge._handle_sysex_button("shift_push", 2)
+        self.assertEqual(bridge.active_bank, 1)
+        bridge._handle_sysex_button("shift_push", 1)
+        self.assertEqual(bridge.active_bank, 0)
+        bridge._handle_sysex_button("shift_push", 13)
+        bridge._handle_sysex_button("shift_push", 14)
         self.assertEqual(
             [message[0] for message in bridge._osc_client.messages[-2:]],
             [
@@ -173,14 +177,33 @@ class BridgeTests(unittest.TestCase):
                 "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
             ],
         )
-        bridge._handle_sysex_button("shift_push", 14)
-        self.assertEqual(bridge.active_bank, 1)
-        bridge._handle_sysex_button("shift_push", 13)
-        self.assertEqual(bridge.active_bank, 0)
+        bridge._handle_sysex_button("shift_push", 5)
+        bridge._handle_sysex_button("shift_push", 6)
+        bridge._handle_sysex_button("shift_push", 9)
+        bridge._handle_sysex_button("shift_push", 10)
+        self.assertEqual(
+            [message[0] for message in bridge._osc_client.messages[-4:]],
+            [
+                "/Command/PluginWindows/SelectPreviousPlugin",
+                "/Command/PluginWindows/SelectNextPlugin",
+                "/Command/PluginWindows/SelectPreviousChain",
+                "/Command/PluginWindows/SelectNextChain",
+            ],
+        )
         bridge._handle_parameter_push(15)
         self.assertEqual(
             bridge._osc_client.messages[-1][0], "/Command/Transport&Tempo/TempoTap"
         )
+
+    def test_parameter_motion_is_confirmed_by_liveprofessor_feedback(self):
+        bridge = self.make_bridge()
+        bridge._on_midi(
+            SimpleNamespace(type="control_change", channel=12, control=48, value=64)
+        )
+        self.assertIn(0, bridge._pending_feedback)
+        bridge._on_osc("/Companion/Rotary1", [64 / 127])
+        self.assertNotIn(0, bridge._pending_feedback)
+        self.assertNotIn(0, bridge._feedback_timers)
 
 
 if __name__ == "__main__":

@@ -233,6 +233,9 @@ class BridgeGUI:
         self.stop_button.pack(side="left", padx=6)
         ttk.Button(action_frame, text="Enregistrer", command=self.save).pack(side="left", padx=6)
         ttk.Button(action_frame, text="Diagnostic", command=self.diagnostic).pack(side="left", padx=6)
+        ttk.Button(action_frame, text="Raccourcis EC4", command=self.show_shortcuts).pack(
+            side="left", padx=6
+        )
         ttk.Button(action_frame, text="Tester l'ecran EC4", command=self.demo_display).pack(
             side="left", padx=6
         )
@@ -508,6 +511,20 @@ class BridgeGUI:
         except Exception as exc:
             lines.append(f"ERREUR: {exc}")
         self.messagebox.showinfo("Diagnostic", "\n".join(lines))
+
+    def show_shortcuts(self) -> None:
+        self.messagebox.showinfo(
+            "Raccourcis EC4",
+            "Shift + push 1 : premiere banque\n"
+            "Shift + push 2 / 3 : banque precedente / suivante\n"
+            "Shift + push 4 : derniere banque\n\n"
+            "Shift + push 6 / 7 : plugin precedent / suivant\n"
+            "Shift + push 10 / 11 : chaine precedente / suivante\n\n"
+            "Shift + push 14 / 15 : snapshot precedent / suivant\n"
+            "Shift + push 13 : activer / desactiver le plugin\n"
+            "Shift + push 16 : afficher / masquer le plugin\n"
+            "Push 16 seul : Tap Tempo",
+        )
 
     def _queue_snapshot(self, snapshot: BridgeSnapshot) -> None:
         self.root.after(0, self._apply_snapshot, snapshot)
