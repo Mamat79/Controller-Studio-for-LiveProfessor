@@ -1,4 +1,4 @@
-# SiLeMI/O EC4 LiveProfessor Bridge
+# EC4 LiveProfessor Bridge
 
 Passerelle Windows portable reliant un **Faderfox EC4** à **LiveProfessor** par MIDI, SysEx et OSC. Le pont reste entièrement hors du chemin audio : il ne charge aucun plugin, n'installe aucun pilote et ne modifie pas les projets LiveProfessor.
 
