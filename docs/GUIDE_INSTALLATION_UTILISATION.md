@@ -40,6 +40,8 @@ Les intitulés peuvent varier selon la version :
 5. Configurer la sortie/feedback vers `127.0.0.1:8011`.
 6. Vérifier que ce contrôleur propose `Rotary1` à `Rotary99` et leurs retours.
 
+Le module Bitfocus Companion 2.0 installé sur la machine de référence ne documente par défaut que `Rotary1` à `Rotary4`. Pour exploiter les 16 encodeurs de la première banque, ajouter des contrôles rotatifs dans Hardware Controllers Setup et leur apprendre successivement les messages `Rotary5` à `Rotary16` envoyés par le pont. Le journal indique désormais combien de rotatifs LiveProfessor a réellement renvoyés et liste ceux qui manquent.
+
 Si ce type de contrôleur n'existe pas, la version de LiveProfessor est trop ancienne : ne tentez pas de contourner le problème avec une injection ou une automatisation d'écran.
 
 ### Créer une map par type de plugin

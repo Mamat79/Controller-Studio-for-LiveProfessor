@@ -48,7 +48,7 @@ L'exécutable est autonome : copiez `EC4-LiveProfessor-Bridge.exe` sur le PC, br
 
 ## Démarrage rapide
 
-1. Dans LiveProfessor, ajouter un **Companion Controller** avec entrée `8010` et feedback `8011`.
+1. Dans LiveProfessor, ajouter un **Companion Controller** avec entrée `8010` et feedback `8011`, puis vérifier que `Rotary1` à `Rotary16` existent pour la première banque. Le preset Companion standard peut n'en proposer que quatre ; ajouter les rotatifs manquants dans Hardware Controllers Setup.
 2. Dans le **Controller Map actif**, relier les `RotaryN` aux paramètres du plugin, idéalement avec **Only If Selected**. Le bouton Learn de la définition du contrôleur apprend seulement le message OSC ; il ne crée pas cette affectation au plugin.
 3. Brancher l'EC4 et lancer `EC4-LiveProfessor-Bridge.exe`.
 4. Choisir les ports `Faderfox EC4`, puis cliquer sur **Démarrer**.

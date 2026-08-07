@@ -66,6 +66,19 @@ class BridgeTests(unittest.TestCase):
         bridge._on_osc("/Companion/ControllerValues", ["Rotary1", "-12.0 dB"])
         self.assertEqual((bridge.names[0], bridge.display_values[0]), ("Threshold", "-12.0 dB"))
 
+    def test_companion_reports_missing_first_bank_rotaries(self):
+        logs = []
+        bridge = EC4LiveProfessorBridge(
+            BridgeConfig(display_enabled=False, restrict_to_target=False),
+            log_callback=logs.append,
+        )
+        bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
+        bridge._name_inventory_timer.cancel()
+        bridge._name_inventory_timer = None
+        bridge._report_companion_inventory()
+        self.assertIn("1/16 rotatifs", logs[-1])
+        self.assertIn("2, 3, 4", logs[-1])
+
     def test_navigation_uses_documented_liveprofessor_command(self):
         bridge = self.make_bridge()
         bridge._handle_note(12, 113)

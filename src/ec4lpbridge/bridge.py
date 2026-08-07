@@ -87,6 +87,8 @@ class EC4LiveProfessorBridge:
         self._feedback_timers: dict[int, threading.Timer] = {}
         self._pending_feedback: dict[int, int] = {}
         self._feedback_sequence = 0
+        self._received_control_numbers: set[int] = set()
+        self._name_inventory_timer: threading.Timer | None = None
         self._midi_learn_callback: MidiLearnCallback | None = None
         self._received_companion_names = False
 
@@ -159,6 +161,9 @@ class EC4LiveProfessorBridge:
             timer.cancel()
         self._feedback_timers.clear()
         self._pending_feedback.clear()
+        if self._name_inventory_timer:
+            self._name_inventory_timer.cancel()
+            self._name_inventory_timer = None
         self._osc_server.stop()
         self._midi.close()
         if self._reconnect_thread and self._reconnect_thread.is_alive():
@@ -295,6 +300,32 @@ class EC4LiveProfessorBridge:
             timer.cancel()
         if sequence is not None:
             self._log(f"LiveProfessor confirme Rotary{global_index + 1}")
+
+    def _schedule_companion_inventory_report(self) -> None:
+        if self._name_inventory_timer:
+            self._name_inventory_timer.cancel()
+        timer = threading.Timer(0.8, self._report_companion_inventory)
+        timer.daemon = True
+        self._name_inventory_timer = timer
+        timer.start()
+
+    def _report_companion_inventory(self) -> None:
+        self._name_inventory_timer = None
+        expected = min(self.config.bank_size, self.config.max_controls)
+        available = len({number for number in self._received_control_numbers if number <= expected})
+        if available < expected:
+            missing = [
+                str(number)
+                for number in range(1, expected + 1)
+                if number not in self._received_control_numbers
+            ]
+            self._log(
+                f"Companion n'a renvoye que {available}/{expected} rotatifs pour la premiere banque. "
+                f"Definissez et mappez les Rotary manquants dans LiveProfessor: {', '.join(missing)}.",
+                logging.WARNING,
+            )
+        else:
+            self._log(f"Companion confirme les {expected} rotatifs de la premiere banque")
 
     def _global_index(self, physical_index: int) -> int | None:
         index = self.active_bank * self.config.bank_size + physical_index
@@ -642,7 +673,9 @@ class EC4LiveProfessorBridge:
             number = self._control_number(args[0])
             if number:
                 self._received_companion_names = True
+                self._received_control_numbers.add(number)
                 self._update_name(number - 1, str(args[1]))
+                self._schedule_companion_inventory_report()
             return
         if address.casefold().endswith("/controllervalues") and len(args) >= 2:
             number = self._control_number(args[0])
