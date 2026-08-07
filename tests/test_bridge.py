@@ -192,15 +192,24 @@ class BridgeTests(unittest.TestCase):
         )
         bridge._handle_sysex_button("shift_push", 5)
         bridge._handle_sysex_button("shift_push", 6)
+        bridge._handle_sysex_button("shift_push", 7)
         bridge._handle_sysex_button("shift_push", 9)
-        bridge._handle_sysex_button("shift_push", 10)
         self.assertEqual(
             [message[0] for message in bridge._osc_client.messages[-4:]],
             [
+                "/Command/PluginWindows/SelectPreviousChain",
                 "/Command/PluginWindows/SelectPreviousPlugin",
                 "/Command/PluginWindows/SelectNextPlugin",
-                "/Command/PluginWindows/SelectPreviousChain",
                 "/Command/PluginWindows/SelectNextChain",
+            ],
+        )
+        bridge._handle_sysex_button("shift_push", 10)
+        bridge._handle_sysex_button("shift_push", 11)
+        self.assertEqual(
+            [message[0] for message in bridge._osc_client.messages[-2:]],
+            [
+                "/Command/PluginWindows/SelectPreviousPlugin",
+                "/Command/PluginWindows/SelectNextPlugin",
             ],
         )
         bridge._handle_parameter_push(15)

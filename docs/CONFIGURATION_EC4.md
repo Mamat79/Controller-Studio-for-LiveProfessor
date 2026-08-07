@@ -43,6 +43,11 @@ L'exemple [config.example.json](../config.example.json) contient :
 - banques de 16 ;
 - OSC `127.0.0.1:8010` et feedback `127.0.0.1:8011` ;
 - garde anti-écho de 100 ms ;
+- intervalle minimum entre deux rafraîchissements de l'overlay de paramètre (120 ms),
+- délai de rafraîchissement Companion après commande (250 ms),
+- délai de rafraîchissement des noms (70 ms),
+- timeout de confirmation des retours Companion (800 ms),
+- durée de l'overlay affiché (1200 ms) ;
 - reconnexion MIDI toutes les 2 secondes ;
 - protection des setups/groupes d'affichage.
 - grille permanente des paramètres (`persistent_parameter_display`) ;

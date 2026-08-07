@@ -15,6 +15,11 @@ class ConfigTests(unittest.TestCase):
                 plugin_label="Test",
                 target_setup=9,
                 target_group=13,
+                parameter_overlay_interval_ms=150,
+                companion_refresh_delay_ms=300,
+                name_refresh_delay_ms=90,
+                feedback_confirm_timeout_ms=1200,
+                overlay_display_duration_ms=900,
                 encoder_mappings={
                     "9:13": [
                         {
@@ -39,6 +44,16 @@ class ConfigTests(unittest.TestCase):
                     len(restored.encoder_mappings["9:13"]),
                 ),
                 ("generic", 32, "Test", 9, 13, 16),
+            )
+            self.assertEqual(
+                (
+                    restored.parameter_overlay_interval_ms,
+                    restored.companion_refresh_delay_ms,
+                    restored.name_refresh_delay_ms,
+                    restored.feedback_confirm_timeout_ms,
+                    restored.overlay_display_duration_ms,
+                ),
+                (150, 300, 90, 1200, 900),
             )
 
     def test_unknown_fields_survive_round_trip(self):

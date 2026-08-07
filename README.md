@@ -39,12 +39,21 @@ L'exécutable est autonome : copiez `EC4-LiveProfessor-Bridge.exe` sur le PC, br
 | Tourner les encodeurs 1–16 | Modifier les paramètres de la banque active |
 | Shift + push 1 / 4 | Première / dernière banque |
 | Shift + push 2 / 3 | Banque précédente / suivante |
-| Shift + push 6 / 7 | Plugin précédent / suivant dans la chaîne |
-| Shift + push 10 / 11 | Chaîne précédente / suivante |
+| Shift + push 6 | Chaîne précédente |
+| Shift + push 7 / 8 | Plugin précédent / suivant |
+| Shift + push 10 | Chaîne suivante |
+| Shift + push 11 / 12 | Plugin précédent / suivant |
 | Shift + push 14 / 15 | Snapshot global précédent / suivant |
 | Shift + push 13 | Activer / désactiver le traitement du plugin |
 | Shift + push 16 | Afficher / masquer le plugin sélectionné |
 | Push simple 16 | Tap Tempo |
+
+Install simple sur un autre PC :
+
+1. Télécharger l'archive de release depuis GitHub.
+2. Décompresser dans `C:\\Apps\\EC4-LiveProfessor-Bridge`.
+3. Lancer `install-ec4-liveprofessor-bridge.bat` (ou `install-ec4-liveprofessor-bridge.ps1`) pour copier l'application, créer le raccourci et préparer `config.json`.
+4. Lancer l'application depuis le raccourci.
 
 ## Démarrage rapide
 

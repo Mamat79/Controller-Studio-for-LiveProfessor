@@ -115,8 +115,10 @@ Sans profil, l'écran montre `P001`, `P002`, etc. Le contrôleur OSC générique
 | Tourner les encodeurs 1–16 | Modifier les 16 paramètres de la banque active |
 | Shift+push encodeurs 1/4 | Première/dernière banque |
 | Shift+push encodeurs 2/3 | Banque précédente/suivante |
-| Shift+push encodeurs 6/7 | Plugin précédent/suivant dans la chaîne |
-| Shift+push encodeurs 10/11 | Chaîne précédente/suivante |
+| Shift+push encodeur 6 | Chaîne précédente |
+| Shift+push encodeurs 7/8 | Plugin précédent/suivant |
+| Shift+push encodeur 10 | Chaîne suivante |
+| Shift+push encodeurs 11/12 | Plugin précédent/suivant |
 | Shift+push encodeurs 14/15 | Snapshot global précédent/suivant |
 | Shift+push encodeur 13 | Activer/désactiver le traitement du plugin sélectionné |
 | Shift+push encodeur 16 | Afficher/masquer le plugin sélectionné |
@@ -154,6 +156,27 @@ Les champs d'identifiants sont conservés pour une future API, mais ne sont pas 
 - Quatre fichiers maximum sont conservés : le journal courant et trois rotations de 2 Mo.
 - Si l'EC4 est débranché, le pont ferme les ports disparus et tente une reconnexion toutes les deux secondes.
 
+## Déployer sur un autre PC
+
+### Méthode simple (recommandée)
+
+1. Télécharger l'archive de release depuis GitHub (`EC4-LiveProfessor-Bridge-*.zip`).
+2. Décompresser le ZIP.
+3. Ouvrir un terminal PowerShell dans le dossier extrait.
+4. Lancer :
+   - `.\install-ec4-liveprofessor-bridge.bat` (ou `.\install-ec4-liveprofessor-bridge.ps1`)
+5. Le script :
+   - copie l'exécutable dans `C:\Users\\<vous>\\AppData\\Local\\Programs\\EC4LiveProfessorBridge` (par défaut),
+   - crée un raccourci sur le bureau (optionnel),
+   - crée un raccourci **Démarrer** dans le menu Démarrer (si disponible),
+   - laisse la configuration portable (`config.json`) à côté de l'exécutable.
+
+### Méthode portable
+
+1. Copier le dossier de livraison (avec `EC4-LiveProfessor-Bridge.exe`) où vous voulez.
+2. Copier `config.json` si vous l'avez personnalisé.
+3. Lancer l'exécutable.
+
 ## Dépannage
 
 ### L'état reste « EC4 déconnecté »
@@ -184,3 +207,14 @@ Un autre logiciel l'utilise probablement, souvent Bitfocus Companion. Fermer l'a
 ### Un plugin réinséré n'est plus contrôlé
 
 Appliquer son preset de Controller Map dans LiveProfessor. Le pont n'écrit pas directement dans les projets et ne peut pas forcer cette opération sans API officielle.
+
+### L'icône du .exe ou du raccourci reste ancienne dans Explorer/Taskbar
+
+Quand l'icône ne se rafraîchit pas :
+
+- Quitter l'application et vérifier le fichier réel lancé :
+  `D:\IA\Projets\Codex\Applis Persos\FaderFox EC4\output\windows\EC4-LiveProfessor-Bridge.exe`.
+- Si c'est le bon EXE, lancer le script :
+  `scripts\refresh_windows_icon_cache.ps1`
+- Désancrer puis ré-ancrer le raccourci (desktop / barre des tâches) après nettoyage.
+- Si la valeur reste bloquée, démarrer l'exécutable directement depuis le dossier `output\windows` au moins une fois pour régénérer le cache de chemin.

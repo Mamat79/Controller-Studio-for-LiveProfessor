@@ -29,12 +29,18 @@ class BridgeConfig:
     max_controls: int = 99
     start_bank: int = 0
     echo_guard_ms: int = 100
+    parameter_overlay_interval_ms: int = 120
+    companion_refresh_delay_ms: int = 250
+    name_refresh_delay_ms: int = 70
+    feedback_confirm_timeout_ms: int = 800
+    overlay_display_duration_ms: int = 1200
     reconnect_interval_s: float = 2.0
     display_enabled: bool = True
     persistent_parameter_display: bool = True
     display_only_supported_setups: bool = True
     target_setup: int = 13
     target_group: int = 3
+    ui_language: str = "fr"
     restrict_to_target: bool = True
     encoder_mappings: dict[str, list[dict[str, int]]] = field(default_factory=dict)
     setup_request_on_connect: bool = True
@@ -58,12 +64,24 @@ class BridgeConfig:
             raise ValueError("start_bank ne peut pas etre negatif")
         if self.echo_guard_ms < 0:
             raise ValueError("echo_guard_ms ne peut pas etre negatif")
+        if not 1 <= self.parameter_overlay_interval_ms <= 2000:
+            raise ValueError("parameter_overlay_interval_ms doit etre entre 1 et 2000")
+        if not 1 <= self.companion_refresh_delay_ms <= 2000:
+            raise ValueError("companion_refresh_delay_ms doit etre entre 1 et 2000")
+        if not 1 <= self.name_refresh_delay_ms <= 2000:
+            raise ValueError("name_refresh_delay_ms doit etre entre 1 et 2000")
+        if not 100 <= self.feedback_confirm_timeout_ms <= 10000:
+            raise ValueError("feedback_confirm_timeout_ms doit etre entre 100 et 10000")
+        if not 200 <= self.overlay_display_duration_ms <= 5000:
+            raise ValueError("overlay_display_duration_ms doit etre entre 200 et 5000")
         if self.reconnect_interval_s < 0.2:
             raise ValueError("reconnect_interval_s doit etre au moins 0,2 s")
         if not 1 <= self.target_setup <= 16:
             raise ValueError("target_setup doit etre compris entre 1 et 16")
         if not 1 <= self.target_group <= 16:
             raise ValueError("target_group doit etre compris entre 1 et 16")
+        if self.ui_language not in {"fr", "en"}:
+            raise ValueError("ui_language doit être 'fr' ou 'en'")
         for key, mapping in self.encoder_mappings.items():
             if not isinstance(key, str) or not isinstance(mapping, list) or len(mapping) != 16:
                 raise ValueError("chaque mapping d'encodeurs doit contenir exactement 16 controles")

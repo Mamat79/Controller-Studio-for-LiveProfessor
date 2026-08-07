@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import math
+import unicodedata
 import re
 import threading
 import time
@@ -64,6 +65,8 @@ class EC4LiveProfessorBridge:
         self.log_callback = log_callback
         self.profile = load_profile(config.profile_file)
         self.names, self.short_names = profile_names(self.profile, config.max_controls)
+        if self.config.mode == "companion":
+            self.names, self.short_names = self._sanitize_profile_labels(self.names)
         self.display_values = ["-"] * config.max_controls
         self.values = [0.0] * config.max_controls
         self.active_bank = min(config.start_bank, self.bank_count - 1)
@@ -89,8 +92,17 @@ class EC4LiveProfessorBridge:
         self._feedback_sequence = 0
         self._received_control_numbers: set[int] = set()
         self._name_inventory_timer: threading.Timer | None = None
+        self._companion_refresh_timer: threading.Timer | None = None
+        self._name_refresh_timer: threading.Timer | None = None
+        self._parameter_overlay_timer: threading.Timer | None = None
+        self._pending_overlay_index: int | None = None
+        self._last_parameter_overlay_update: float = 0.0
+        self._min_parameter_overlay_interval_s: float = max(
+            0.001, self.config.parameter_overlay_interval_ms / 1000.0
+        )
         self._midi_learn_callback: MidiLearnCallback | None = None
         self._received_companion_names = False
+        self._overlay_parameter_index: int | None = None
 
     @property
     def bank_count(self) -> int:
@@ -164,6 +176,21 @@ class EC4LiveProfessorBridge:
         if self._name_inventory_timer:
             self._name_inventory_timer.cancel()
             self._name_inventory_timer = None
+        if self._companion_refresh_timer:
+            self._companion_refresh_timer.cancel()
+            self._companion_refresh_timer = None
+        if self._name_refresh_timer:
+            self._name_refresh_timer.cancel()
+            self._name_refresh_timer = None
+        if self._parameter_overlay_timer:
+            self._parameter_overlay_timer.cancel()
+            self._parameter_overlay_timer = None
+            self._pending_overlay_index = None
+        if hasattr(self._osc_client, "close"):
+            try:
+                self._osc_client.close()
+            except Exception:
+                pass
         self._osc_server.stop()
         self._midi.close()
         if self._reconnect_thread and self._reconnect_thread.is_alive():
@@ -227,6 +254,39 @@ class EC4LiveProfessorBridge:
         if log_request:
             self._log("Demande des noms et valeurs Companion envoyee")
 
+    def _schedule_companion_refresh(self, delay: float | None = None) -> None:
+        if self.config.mode != "companion":
+            return
+        if delay is None:
+            delay = self.config.companion_refresh_delay_ms / 1000.0
+        if self._companion_refresh_timer:
+            self._companion_refresh_timer.cancel()
+        timer = threading.Timer(delay, self._perform_companion_refresh)
+        timer.daemon = True
+        self._companion_refresh_timer = timer
+        timer.start()
+
+    def _perform_companion_refresh(self) -> None:
+        if self.config.mode != "companion":
+            self._companion_refresh_timer = None
+            return
+        self._companion_refresh_timer = None
+        self.refresh_companion(log_request=False)
+
+    def _schedule_name_refresh(self, delay: float | None = None) -> None:
+        if delay is None:
+            delay = self.config.name_refresh_delay_ms / 1000.0
+        if self._name_refresh_timer:
+            self._name_refresh_timer.cancel()
+        timer = threading.Timer(delay, self._flush_name_refresh)
+        timer.daemon = True
+        self._name_refresh_timer = timer
+        timer.start()
+
+    def _flush_name_refresh(self) -> None:
+        self._name_refresh_timer = None
+        self._refresh_main_display()
+
     def _rotary_address(self, global_index: int) -> str:
         number = global_index + 1
         if self.config.mode == "companion":
@@ -244,7 +304,10 @@ class EC4LiveProfessorBridge:
     ) -> None:
         normalized = max(0.0, min(1.0, normalized))
         self.values[global_index] = normalized
-        self.display_values[global_index] = f"{normalized * 100:.1f}%"
+        if self.config.mode != "companion":
+            self.display_values[global_index] = f"{normalized * 100:.1f}%"
+        else:
+            self.display_values[global_index] = "-"
         address = self._rotary_address(global_index)
         self._send_osc(address, normalized)
         if physical_index is not None:
@@ -270,7 +333,7 @@ class EC4LiveProfessorBridge:
         sequence = self._feedback_sequence
         self._pending_feedback[global_index] = sequence
         timer = threading.Timer(
-            0.8,
+            max(0.1, self.config.feedback_confirm_timeout_ms / 1000.0),
             self._parameter_feedback_timeout,
             args=(global_index, sequence),
         )
@@ -304,7 +367,10 @@ class EC4LiveProfessorBridge:
     def _schedule_companion_inventory_report(self) -> None:
         if self._name_inventory_timer:
             self._name_inventory_timer.cancel()
-        timer = threading.Timer(0.8, self._report_companion_inventory)
+        timer = threading.Timer(
+            max(0.1, self.config.feedback_confirm_timeout_ms / 1000.0),
+            self._report_companion_inventory,
+        )
         timer.daemon = True
         self._name_inventory_timer = timer
         timer.start()
@@ -425,7 +491,7 @@ class EC4LiveProfessorBridge:
                     midi_control=message.control,
                     midi_value=message.value,
                 )
-                self._show_parameter(global_index)
+                self._schedule_parameter_overlay(global_index)
                 return
 
             if message.type in {"note_on", "note_off"}:
@@ -475,9 +541,17 @@ class EC4LiveProfessorBridge:
         elif channel == MIDI_CHANNEL_14 and note == 113:
             self.change_bank(1)
         elif channel == MIDI_CHANNEL_13 and note == 114:
-            self._command("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent")
+            self._command(
+                "/Command/PluginWindows/SelectPreviousPlugin",
+                "Plugin precedent",
+                refresh_companion=True,
+            )
         elif channel == MIDI_CHANNEL_13 and note == 115:
-            self._command("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant")
+            self._command(
+                "/Command/PluginWindows/SelectNextPlugin",
+                "Plugin suivant",
+                refresh_companion=True,
+            )
         elif channel == MIDI_CHANNEL_13 and note == 112:
             self._command("/Command/PluginWindows/ShowHideselectedplugin", "Afficher/masquer plugin")
         elif channel == MIDI_CHANNEL_13 and note == 113:
@@ -490,9 +564,17 @@ class EC4LiveProfessorBridge:
         elif channel == MIDI_CHANNEL_13 and note == 117:
             self._show_overlay(["Verrouillage plugin", "non expose par", "l'API LiveProfessor"])
         elif channel == MIDI_CHANNEL_13 and note == 118:
-            self._command("/Command/PluginWindows/SelectPreviousChain", "Chaine precedente")
+            self._command(
+                "/Command/PluginWindows/SelectPreviousChain",
+                "Chaine precedente",
+                refresh_companion=True,
+            )
         elif channel == MIDI_CHANNEL_13 and note == 119:
-            self._command("/Command/PluginWindows/SelectNextChain", "Chaine suivante")
+            self._command(
+                "/Command/PluginWindows/SelectNextChain",
+                "Chaine suivante",
+                refresh_companion=True,
+            )
 
     def _handle_parameter_push(self, physical_index: int) -> None:
         if physical_index == 15:
@@ -506,10 +588,12 @@ class EC4LiveProfessorBridge:
         if kind != "shift_push" or index is None:
             return
         commands = {
-            5: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent"),
-            6: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant"),
-            9: ("/Command/PluginWindows/SelectPreviousChain", "Chaine precedente"),
-            10: ("/Command/PluginWindows/SelectNextChain", "Chaine suivante"),
+            5: ("/Command/PluginWindows/SelectPreviousChain", "Chaine precedente", True),
+            6: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent", True),
+            7: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant", True),
+            9: ("/Command/PluginWindows/SelectNextChain", "Chaine suivante", True),
+            10: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent", True),
+            11: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant", True),
             12: (
                 "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
                 "Traitement plugin active/desactive",
@@ -533,14 +617,27 @@ class EC4LiveProfessorBridge:
         elif index == 3:
             self.set_bank(self.bank_count - 1)
         elif index in commands:
-            address, label = commands[index]
-            self._command(address, label)
-        elif index in {4, 7, 8, 11}:
+            command = commands[index]
+            if len(command) == 3:
+                address, label, refresh = command
+            else:
+                address, label = command
+                refresh = False
+            self._command(address, label, refresh_companion=refresh)
+        elif index in {4, 8}:
             self._show_overlay(["Navigation", "Premier/dernier", "non expose par", "l'API LiveProfessor"])
 
-    def _command(self, address: str, label: str) -> None:
+    def _command(
+        self,
+        address: str,
+        label: str,
+        *,
+        refresh_companion: bool = False,
+    ) -> None:
         self._send_osc(address, 1.0)
         self._show_overlay([label, self.profile.plugin_label, f"Banque {self.active_bank + 1}/{self.bank_count}"])
+        if refresh_companion:
+            self._schedule_companion_refresh()
 
     def change_bank(self, delta: int) -> None:
         self.set_bank(self.active_bank + delta)
@@ -591,6 +688,10 @@ class EC4LiveProfessorBridge:
             return
         start = self.active_bank * self.config.bank_size
         labels = self.short_names[start : start + self.config.bank_size]
+        labels = [
+            self._display_short_label(start + offset, label)
+            for offset, label in enumerate(labels)
+        ]
         try:
             self._midi.send_sysex(main_display_message(labels))
             if self.config.persistent_parameter_display and self._overlay_timer is None:
@@ -599,11 +700,55 @@ class EC4LiveProfessorBridge:
             self._log(str(exc), logging.WARNING)
 
     def _show_parameter(self, global_index: int) -> None:
-        name = self.names[global_index]
-        value = self.display_values[global_index]
+        self._overlay_parameter_index = global_index
+        name = self._display_name(global_index)
+        value = self._format_companion_value_for_display(global_index)
         bank = global_index // self.config.bank_size + 1
         slot = global_index % self.config.bank_size + 1
-        self._show_overlay([name, value, f"Banque {bank}/{self.bank_count}", f"Encodeur {slot}"])
+        self._show_overlay(
+            [name, value, f"Banque {bank}/{self.bank_count}", f"Encodeur {slot}"],
+            parameter_index=global_index,
+        )
+
+    def _schedule_parameter_overlay(self, global_index: int) -> None:
+        if self.config.mode != "companion":
+            return
+
+        now = time.monotonic()
+        if self._overlay_parameter_index != global_index:
+            self._show_parameter(global_index)
+            self._last_parameter_overlay_update = now
+            return
+
+        elapsed = now - self._last_parameter_overlay_update
+        if elapsed >= self._min_parameter_overlay_interval_s:
+            self._show_parameter(global_index)
+            self._last_parameter_overlay_update = now
+            return
+
+        if self._parameter_overlay_timer:
+            self._parameter_overlay_timer.cancel()
+        self._pending_overlay_index = global_index
+        timer = threading.Timer(
+            self._min_parameter_overlay_interval_s - elapsed,
+            self._flush_parameter_overlay,
+        )
+        timer.daemon = True
+        self._parameter_overlay_timer = timer
+        timer.start()
+
+    def _flush_parameter_overlay(self) -> None:
+        self._parameter_overlay_timer = None
+        if not self._display_allowed():
+            return
+        global_index = self._pending_overlay_index
+        self._pending_overlay_index = None
+        if global_index is None:
+            return
+        if self._overlay_parameter_index != global_index:
+            return
+        self._show_parameter(global_index)
+        self._last_parameter_overlay_update = time.monotonic()
 
     def _show_bank_overlay(self) -> None:
         start = self.active_bank * self.config.bank_size
@@ -617,9 +762,17 @@ class EC4LiveProfessorBridge:
             ]
         )
 
-    def _show_overlay(self, lines: list[str], duration: float = 1.2) -> None:
+    def _show_overlay(
+        self,
+        lines: list[str],
+        duration: float | None = None,
+        parameter_index: int | None = None,
+    ) -> None:
         if not self._display_allowed():
             return
+        if duration is None:
+            duration = max(0.2, self.config.overlay_display_duration_ms / 1000.0)
+        self._overlay_parameter_index = parameter_index
         if self._overlay_timer:
             self._overlay_timer.cancel()
         try:
@@ -633,12 +786,17 @@ class EC4LiveProfessorBridge:
 
     def _hide_overlay(self) -> None:
         self._overlay_timer = None
+        self._overlay_parameter_index = None
         if not self._display_allowed():
             return
         try:
             if self.config.persistent_parameter_display:
                 start = self.active_bank * self.config.bank_size
                 labels = self.short_names[start : start + self.config.bank_size]
+                labels = [
+                    self._display_short_label(start + offset, label)
+                    for offset, label in enumerate(labels)
+                ]
                 self._midi.send_sysex(parameter_grid_message(labels))
             else:
                 self._midi.send_sysex(hide_total_display_message())
@@ -680,7 +838,9 @@ class EC4LiveProfessorBridge:
         if address.casefold().endswith("/controllervalues") and len(args) >= 2:
             number = self._control_number(args[0])
             if number and number <= self.config.max_controls:
-                self.display_values[number - 1] = str(args[1])
+                self.display_values[number - 1] = self._normalize_companion_value(args[1])
+                if self._overlay_parameter_index == number - 1:
+                    self._schedule_parameter_overlay(number - 1)
             return
         if address.casefold().endswith("/touchandturnchange") and args:
             self._show_overlay(["Touch & Turn", str(args[0]), self.profile.plugin_label])
@@ -694,12 +854,96 @@ class EC4LiveProfessorBridge:
     def _update_name(self, index: int, name: str) -> None:
         if not 0 <= index < self.config.max_controls:
             return
-        name = name.strip() or f"Parametre {index + 1}"
+        name = self._coerce_companion_name(index, name)
         changed = name != self.names[index]
         self.names[index] = name
-        self.short_names[index] = short_label(name, index)
+        self.short_names[index] = "" if not name else short_label(name, index)
         if changed and index // self.config.bank_size == self.active_bank:
-            self._refresh_main_display()
+            self._schedule_name_refresh()
+
+    def _display_name(self, index: int) -> str:
+        name = self.names[index]
+        if self.config.mode == "companion" and self._is_default_label(name):
+            return ""
+        return name
+
+    def _display_short_label(self, index: int, label: str) -> str:
+        if self.config.mode != "companion":
+            return label
+        if not self._is_control_mapped(index):
+            return ""
+        return label
+
+    @staticmethod
+    def _normalize_default_token(name: str) -> str:
+        value = unicodedata.normalize("NFD", (name or "").strip().lower())
+        value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
+        value = re.sub(r"[^0-9a-zà-ÿ]", " ", value)
+        value = re.sub(r"\s+", " ", value).strip()
+        return value
+
+    @classmethod
+    def _is_default_label(cls, name: str) -> bool:
+        value = cls._normalize_default_token(name)
+        if not value:
+            return True
+        if re.fullmatch(r"parametre\s*[:#-]?\s*\d+", value):
+            return True
+        if re.fullmatch(r"parameter\s*[:#-]?\s*\d+", value):
+            return True
+        if re.fullmatch(r"rotary\s*[:#-]?\s*\d+", value):
+            return True
+        if re.fullmatch(r"encoder\s*[:#-]?\s*\d+", value):
+            return True
+        return False
+
+    def _is_control_mapped(self, index: int) -> bool:
+        if self.config.mode != "companion":
+            return True
+        if not (0 <= index < len(self.names)):
+            return False
+        name = self.names[index].strip()
+        return bool(name) and not self._is_default_label(name)
+
+    def _format_companion_value_for_display(self, index: int) -> str:
+        value = self.display_values[index]
+        if self.config.mode == "companion":
+            return self._normalize_companion_value(value)
+        return value
+
+    @staticmethod
+    def _normalize_companion_value(value: Any) -> str:
+        text = str(value).strip()
+        if not text:
+            return text
+        match = re.fullmatch(r"([-+]?\d+[.,]?\d*)\s*%", text)
+        if match:
+            return match.group(1).replace(",", ".")
+        return text
+
+    @staticmethod
+    def _coerce_companion_name(index: int, name: str) -> str:
+        value = (name or "").strip()
+        return "" if value and EC4LiveProfessorBridge._is_default_label(value) else value
+
+    @staticmethod
+    def _sanitize_profile_label(index: int, name: str) -> str:
+        value = (name or "").strip()
+        if not value:
+            return ""
+        return "" if EC4LiveProfessorBridge._is_default_label(value) else value
+
+    def _sanitize_profile_labels(
+        self,
+        names: list[str],
+    ) -> tuple[list[str], list[str]]:
+        clean_names: list[str] = []
+        clean_shorts: list[str] = []
+        for index, name in enumerate(names):
+            name = self._sanitize_profile_label(index, name)
+            clean_names.append(name)
+            clean_shorts.append("" if not name else short_label(name, index))
+        return clean_names, clean_shorts
 
     def _update_value(self, index: int, normalized: float) -> None:
         if not 0 <= index < self.config.max_controls:
@@ -707,8 +951,12 @@ class EC4LiveProfessorBridge:
         self._confirm_parameter_feedback(index)
         normalized = max(0.0, min(1.0, normalized))
         self.values[index] = normalized
-        if self.display_values[index] in {"", "-"} or self.display_values[index].endswith("%"):
-            self.display_values[index] = f"{normalized * 100:.1f}%"
+        if self.config.mode != "companion":
+            if (
+                self.display_values[index] in {"", "-"}
+                or self.display_values[index].endswith("%")
+            ):
+                self.display_values[index] = f"{normalized * 100:.1f}%"
         if index // self.config.bank_size != self.active_bank:
             return
         if self.config.restrict_to_target and not self._target_active():

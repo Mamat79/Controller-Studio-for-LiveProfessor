@@ -1,0 +1,96 @@
+param(
+    [string]$InstallPath = "$env:LOCALAPPDATA\Programs\EC4LiveProfessorBridge",
+    [bool]$CreateDesktopShortcut = $true,
+    [bool]$CreateStartMenuShortcut = $true,
+    [bool]$OverwriteConfig = $false
+)
+
+$ErrorActionPreference = "Stop"
+
+function Write-Info {
+    param([string]$Message)
+    Write-Host "[EC4] $Message" -ForegroundColor Cyan
+}
+
+function New-Shortcut {
+    param(
+        [string]$TargetPath,
+        [string]$ShortcutPath,
+        [string]$Name
+    )
+    $wscript = New-Object -ComObject WScript.Shell
+    $directory = Split-Path -Parent $ShortcutPath
+    if (-not (Test-Path -LiteralPath $directory)) {
+        New-Item -ItemType Directory -Path $directory -Force | Out-Null
+    }
+
+    $link = $wscript.CreateShortcut($ShortcutPath)
+    $link.TargetPath = $TargetPath
+    $link.WorkingDirectory = Split-Path -Parent $TargetPath
+    $link.Description = $Name
+    $link.IconLocation = "$TargetPath,0"
+    $link.Save()
+}
+
+function Get-ScriptSource {
+    param([string]$SourceRoot)
+
+    $candidates = @(
+        (Join-Path $SourceRoot "EC4-LiveProfessor-Bridge.exe"),
+        (Join-Path $SourceRoot "output\windows\EC4-LiveProfessor-Bridge.exe")
+    )
+
+    foreach ($candidate in $candidates) {
+        if (Test-Path -LiteralPath $candidate) {
+            return (Resolve-Path -LiteralPath $candidate).Path
+        }
+    }
+
+    throw "Executable EC4-LiveProfessor-Bridge.exe introuvable. Lancez d'abord build.ps1 ou indiquez un dossier contenant l'exe."
+}
+
+$sourceRoot = (Resolve-Path (Split-Path -Parent $MyInvocation.MyCommand.Path)).Path
+$exePath = Get-ScriptSource -SourceRoot $sourceRoot
+$installDir = Join-Path $InstallPath "EC4LiveProfessorBridge"
+$targetExe = Join-Path $installDir "EC4-LiveProfessor-Bridge.exe"
+
+New-Item -ItemType Directory -Path $installDir -Force | Out-Null
+Copy-Item -LiteralPath $exePath -Destination $targetExe -Force
+Write-Info "EXE installé dans : $installDir"
+
+$sourceConfig = Join-Path $sourceRoot "config.json"
+$portableExample = Join-Path $sourceRoot "config.example.json"
+$targetConfig = Join-Path $installDir "config.json"
+
+if (Test-Path -LiteralPath $sourceConfig -PathType Leaf -and (-not (Test-Path -LiteralPath $targetConfig) -or $OverwriteConfig)) {
+    Copy-Item -LiteralPath $sourceConfig -Destination $targetConfig -Force
+}
+elseif (-not (Test-Path -LiteralPath $targetConfig) -and (Test-Path -LiteralPath $portableExample)) {
+    Copy-Item -LiteralPath $portableExample -Destination (Join-Path $installDir "config.example.json") -Force
+}
+
+foreach ($folder in @("docs", "profiles")) {
+    $sourceFolder = Join-Path $sourceRoot $folder
+    $targetFolder = Join-Path $installDir $folder
+    if (Test-Path -LiteralPath $sourceFolder -PathType Container) {
+        Copy-Item -LiteralPath $sourceFolder -Destination $targetFolder -Recurse -Force
+    }
+}
+
+$shortcutCount = 0
+if ($CreateDesktopShortcut) {
+    $desktop = [Environment]::GetFolderPath("Desktop")
+    $desktopShortcut = Join-Path $desktop "EC4 LiveProfessor Bridge.lnk"
+    New-Shortcut -TargetPath $targetExe -ShortcutPath $desktopShortcut -Name "EC4 LiveProfessor Bridge"
+    $shortcutCount++
+}
+
+if ($CreateStartMenuShortcut) {
+    $menuDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\EC4 LiveProfessor Bridge"
+    $startShortcut = Join-Path $menuDir "EC4 LiveProfessor Bridge.lnk"
+    New-Shortcut -TargetPath $targetExe -ShortcutPath $startShortcut -Name "EC4 LiveProfessor Bridge"
+    $shortcutCount++
+}
+
+Write-Info "Installation terminée : $shortcutCount raccourci(s) crée(s)."
+Write-Info "Vous pouvez lancer : $targetExe"
