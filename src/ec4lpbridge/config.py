@@ -1,0 +1,131 @@
+from __future__ import annotations
+
+import json
+import os
+import sys
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any
+
+
+@dataclass(slots=True)
+class BridgeConfig:
+    """Configuration persistante du pont.
+
+    Le mode ``companion`` vise LiveProfessor >= 2023.0.8. Le mode ``generic``
+    utilise un controleur OSC generique et reste utilisable avec LiveProfessor
+    2.2.1, mais LiveProfessor ne fournit alors pas les noms de parametres.
+    """
+
+    mode: str = "companion"
+    midi_input: str = "Faderfox EC4"
+    midi_output: str = "Faderfox EC4"
+    liveprofessor_host: str = "127.0.0.1"
+    liveprofessor_port: int = 8010
+    feedback_host: str = "127.0.0.1"
+    feedback_port: int = 8011
+    generic_prefix: str = "/EC4/Rotary"
+    bank_size: int = 16
+    max_controls: int = 99
+    start_bank: int = 0
+    echo_guard_ms: int = 100
+    reconnect_interval_s: float = 2.0
+    display_enabled: bool = True
+    persistent_parameter_display: bool = True
+    display_only_supported_setups: bool = True
+    target_setup: int = 13
+    target_group: int = 3
+    restrict_to_target: bool = True
+    encoder_mappings: dict[str, list[dict[str, int]]] = field(default_factory=dict)
+    setup_request_on_connect: bool = True
+    plugin_label: str = "LiveProfessor"
+    profile_file: str = ""
+    log_level: str = "INFO"
+    extra: dict[str, Any] = field(default_factory=dict)
+
+    def validate(self) -> None:
+        if self.mode not in {"companion", "generic"}:
+            raise ValueError("mode doit valoir 'companion' ou 'generic'")
+        if not 1 <= self.liveprofessor_port <= 65535:
+            raise ValueError("liveprofessor_port doit etre compris entre 1 et 65535")
+        if not 1 <= self.feedback_port <= 65535:
+            raise ValueError("feedback_port doit etre compris entre 1 et 65535")
+        if self.bank_size != 16:
+            raise ValueError("l'EC4 utilise exactement 16 encodeurs par banque")
+        if not 1 <= self.max_controls <= 512:
+            raise ValueError("max_controls doit etre compris entre 1 et 512")
+        if self.start_bank < 0:
+            raise ValueError("start_bank ne peut pas etre negatif")
+        if self.echo_guard_ms < 0:
+            raise ValueError("echo_guard_ms ne peut pas etre negatif")
+        if self.reconnect_interval_s < 0.2:
+            raise ValueError("reconnect_interval_s doit etre au moins 0,2 s")
+        if not 1 <= self.target_setup <= 16:
+            raise ValueError("target_setup doit etre compris entre 1 et 16")
+        if not 1 <= self.target_group <= 16:
+            raise ValueError("target_group doit etre compris entre 1 et 16")
+        for key, mapping in self.encoder_mappings.items():
+            if not isinstance(key, str) or not isinstance(mapping, list) or len(mapping) != 16:
+                raise ValueError("chaque mapping d'encodeurs doit contenir exactement 16 controles")
+            for item in mapping:
+                channel = int(item.get("channel", -1))
+                control = int(item.get("control", -1))
+                if not 0 <= channel <= 15 or not 0 <= control <= 127:
+                    raise ValueError("mapping d'encodeur MIDI invalide")
+                has_push_channel = "push_channel" in item
+                has_push_note = "push_note" in item
+                if has_push_channel != has_push_note:
+                    raise ValueError("mapping de push MIDI incomplet")
+                if has_push_channel:
+                    push_channel = int(item["push_channel"])
+                    push_note = int(item["push_note"])
+                    if not 0 <= push_channel <= 15 or not 0 <= push_note <= 127:
+                        raise ValueError("mapping de push MIDI invalide")
+        if not self.generic_prefix.startswith("/"):
+            raise ValueError("generic_prefix doit commencer par '/'")
+
+
+def default_data_dir() -> Path:
+    base = os.environ.get("LOCALAPPDATA")
+    if base:
+        return Path(base) / "EC4LiveProfessorBridge"
+    return Path.home() / ".ec4-liveprofessor-bridge"
+
+
+def executable_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path.cwd()
+
+
+def default_config_path() -> Path:
+    portable = executable_dir() / "config.json"
+    if portable.exists():
+        return portable
+    return default_data_dir() / "config.json"
+
+
+def load_config(path: Path | None = None) -> BridgeConfig:
+    path = path or default_config_path()
+    if not path.exists():
+        config = BridgeConfig()
+        config.validate()
+        return config
+    raw = json.loads(path.read_text(encoding="utf-8-sig"))
+    known = set(BridgeConfig.__dataclass_fields__)
+    kwargs = {key: value for key, value in raw.items() if key in known}
+    config = BridgeConfig(**kwargs)
+    config.extra.update({key: value for key, value in raw.items() if key not in known})
+    config.validate()
+    return config
+
+
+def save_config(config: BridgeConfig, path: Path | None = None) -> Path:
+    config.validate()
+    path = path or default_config_path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = asdict(config)
+    extra = data.pop("extra", {})
+    data.update(extra)
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return path

@@ -1,0 +1,18 @@
+.venv/
+build/
+dist/
+*.spec
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+tmp/
+logs/
+config.json
+output/
+
+# Rapports internes non publies
+docs/NOTE_SECURITE_LICENCE.md
+docs/RAPPORT_FAISABILITE.md
+docs/RAPPORT_TESTS.md
+docs/SAUVEGARDE_RESTAURATION_DESINSTALLATION.md
