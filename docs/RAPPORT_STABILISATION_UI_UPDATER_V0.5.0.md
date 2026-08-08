@@ -18,7 +18,7 @@ Le README bilingue publié sur la branche GitHub principale a été repris comme
 
 - **View Sets** : le nombre d'arguments OSC n'est plus utilisé comme index. Le bridge extrait l'index numérique renvoyé par LiveProfessor, suit l'inventaire et parcourt tous les View Sets avec retour circulaire.
 - **Show/Hide** : `Shift + push 5` envoie une seule commande officielle `/Command/PluginWindows/ShowHideselectedplugin`.
-- **Enable/Disable** : `Shift + push 9` envoie une seule commande officielle `/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin`.
+- **Enable/Disable** : `Shift + push 9` envoie une seule commande `/Command/SelectedPlugin/EnableProcessingonselectedplugin`, forme réellement acceptée par l'installation LiveProfessor testée (la variante documentée avec `OnSelectedPlugin` n'y déclenche aucune action).
 - **Cues et snapshots** : une adresse officielle unique est envoyée par action, sans double fallback silencieux.
 - **Boutons simples** : les push 1 à 15 émettent maintenant les états pression `1.0` et relâchement `0.0` vers `/Companion/GenericButtons/ButtonN`. Le push simple 16 reste réservé au Tap Tempo.
 - **Plugins déjà chargés** : le bridge redemande l'état Companion au démarrage et effectue une relance bornée si l'inventaire est incomplet.

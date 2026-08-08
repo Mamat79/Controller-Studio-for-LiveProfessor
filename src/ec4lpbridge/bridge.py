@@ -752,11 +752,8 @@ class EC4LiveProfessorBridge:
             "/Command/SelectedPlugin/ShowHideSelectedPlugin": (
                 "/Command/PluginWindows/ShowHideselectedplugin"
             ),
-            "/Command/SelectedPlugin/EnableProcessingonselectedplugin": (
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
-            ),
-            "/Command/SelectedPlugin/EnableBypassonselectedplugin": (
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin": (
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin"
             ),
             "/Command/CueList/RecallPreviousCue": "/Command/CueLists/FirePreviousCue",
             "/Command/CueList/RecallNextCue": "/Command/CueLists/FireNextCue",

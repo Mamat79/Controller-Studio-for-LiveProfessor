@@ -30,7 +30,7 @@
   "setup_request_on_connect": true,
   "plugin_label": "LiveProfessor",
   "show_hide_command": "/Command/PluginWindows/ShowHideselectedplugin",
-  "enable_processing_command": "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+  "enable_processing_command": "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
   "cue_previous_command": "/Command/CueLists/FirePreviousCue",
   "cue_next_command": "/Command/CueLists/FireNextCue",
   "snapshot_previous_command": "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",

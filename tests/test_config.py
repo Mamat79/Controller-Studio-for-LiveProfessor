@@ -95,7 +95,7 @@ class ConfigTests(unittest.TestCase):
                 "{"
                 "\"mode\":\"companion\","
                 "\"show_hide_command\":\"/Command/PluginWindows/ShowHideSelectedPlugin\","
-                "\"enable_processing_command\":\"/Command/SelectedPlugin/EnableProcessingonselectedplugin\""
+                "\"enable_processing_command\":\"/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin\""
                 "}",
                 encoding="utf-8",
             )
@@ -103,7 +103,7 @@ class ConfigTests(unittest.TestCase):
             self.assertEqual(config.show_hide_command, "/Command/PluginWindows/ShowHideselectedplugin")
             self.assertEqual(
                 config.enable_processing_command,
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
             )
 
 

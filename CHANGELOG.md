@@ -3,7 +3,8 @@
 ## 0.5.0
 
 - correction de la navigation dans tous les View Sets à partir des index réellement renvoyés par LiveProfessor ;
-- utilisation d'une seule adresse OSC officielle par commande Cue, Snapshot, Show/Hide et Enable/Disable ;
+- utilisation d'une seule adresse OSC par commande Cue, Snapshot, Show/Hide et Enable/Disable ;
+- correction de `Shift + push 9` avec la casse OSC réellement acceptée par LiveProfessor ;
 - transmission des push simples 1 à 15 aux boutons Companion, avec messages press/release ;
 - second rafraîchissement Companion au démarrage et nouvelles tentatives bornées en cas d'inventaire incomplet ;
 - sauvegarde atomique de la configuration ;

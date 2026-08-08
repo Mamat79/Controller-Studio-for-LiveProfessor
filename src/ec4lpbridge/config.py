@@ -50,7 +50,9 @@ class BridgeConfig:
     plugin_label: str = "LiveProfessor"
     profile_file: str = ""
     show_hide_command: str = "/Command/PluginWindows/ShowHideselectedplugin"
-    enable_processing_command: str = "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+    # OSC paths are case-sensitive. The installed LiveProfessor build accepts
+    # this historical spelling; the documented `OnSelectedPlugin` variant is a no-op.
+    enable_processing_command: str = "/Command/SelectedPlugin/EnableProcessingonselectedplugin"
     cue_previous_command: str = "/Command/CueLists/FirePreviousCue"
     cue_next_command: str = "/Command/CueLists/FireNextCue"
     snapshot_previous_command: str = "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot"
@@ -151,8 +153,8 @@ def load_config(path: Path | None = None) -> BridgeConfig:
             "/Command/PluginWindows/ShowHideselectedplugin",
         ),
         "enable_processing_command": (
-            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
             "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
         ),
         "cue_previous_command": (
             "/Command/CueList/RecallPreviousCue",

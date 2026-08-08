@@ -84,12 +84,12 @@ class BridgeTests(unittest.TestCase):
         self.assertIn("1/16 rotatifs", logs[-1])
         self.assertIn("2, 3, 4", logs[-1])
 
-    def test_navigation_uses_documented_liveprofessor_command(self):
+    def test_navigation_uses_liveprofessor_compatible_command(self):
         bridge = self.make_bridge()
         bridge._handle_note(12, 113)
         self.assertEqual(
             bridge._osc_client.messages[-1][0],
-            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
         )
 
     def test_plugin_and_chain_navigation_commands(self):
@@ -198,8 +198,8 @@ class BridgeTests(unittest.TestCase):
         )
         bridge._handle_sysex_button("shift_push", 8)
         self.assertEqual(
-            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
-            bridge._osc_client.messages[-1][0],
+            bridge._osc_client.messages[-1],
+            ("/Command/SelectedPlugin/EnableProcessingonselectedplugin", ()),
         )
         bridge._handle_sysex_button("shift_push", 5)
         self.assertEqual(
@@ -279,7 +279,7 @@ class BridgeTests(unittest.TestCase):
             "/Command/PluginWindows/SelectNextPlugin",
         )
 
-    def test_legacy_command_paths_resolve_to_one_official_address(self):
+    def test_command_aliases_resolve_to_one_compatible_address(self):
         self.assertEqual(
             EC4LiveProfessorBridge._command_fallbacks("/Command/CueList/RecallPreviousCue"),
             ("/Command/CueLists/FirePreviousCue",),
@@ -289,6 +289,12 @@ class BridgeTests(unittest.TestCase):
                 "/Command/PluginWindows/ShowHideSelectedPlugin"
             ),
             ("/Command/PluginWindows/ShowHideselectedplugin",),
+        )
+        self.assertEqual(
+            EC4LiveProfessorBridge._command_fallbacks(
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+            ),
+            ("/Command/SelectedPlugin/EnableProcessingonselectedplugin",),
         )
 
     def test_viewset_inventory_uses_feedback_index_not_argument_count(self):
