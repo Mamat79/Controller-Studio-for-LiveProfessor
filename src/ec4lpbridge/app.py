@@ -4,6 +4,7 @@ import argparse
 import logging
 import os
 import queue
+import shutil
 import sys
 import threading
 import time
@@ -105,6 +106,42 @@ from .osc_codec import decode_message, encode_message
 from .update_service import ReleaseInfo, fetch_latest_release, is_newer_version
 
 
+def controller_template_path(candidates: list[Path] | None = None) -> Path:
+    """Locate the neutral LiveProfessor controller shipped with the bridge."""
+
+    if candidates is None:
+        candidates = []
+        bundle_dir = getattr(sys, "_MEIPASS", None)
+        if bundle_dir:
+            candidates.append(Path(bundle_dir) / "Ec4.ctrl2")
+        if getattr(sys, "frozen", False):
+            candidates.append(Path(sys.executable).resolve().parent / "Ec4.ctrl2")
+        candidates.extend(
+            [
+                Path(__file__).resolve().parents[2] / "Ec4.ctrl2",
+                Path.cwd() / "Ec4.ctrl2",
+            ]
+        )
+
+    for candidate in candidates:
+        path = Path(candidate).expanduser()
+        if path.is_file():
+            return path.resolve()
+    raise FileNotFoundError("Ec4.ctrl2 est absent de l'application")
+
+
+def copy_controller_template(destination: Path, source: Path | None = None) -> Path:
+    source_path = (source or controller_template_path()).resolve()
+    destination_path = Path(destination).expanduser()
+    if destination_path.is_dir():
+        destination_path = destination_path / "Ec4.ctrl2"
+    destination_path = destination_path.resolve()
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    if source_path != destination_path:
+        shutil.copy2(source_path, destination_path)
+    return destination_path
+
+
 def tray_action_for_event(l_param: int) -> str | None:
     # Windows can provide the notification either as a plain mouse message
     # (legacy NOTIFYICONDATA behavior) or packed in the low word of lParam
@@ -154,6 +191,9 @@ def protocol_self_test() -> list[str]:
     grid = parameter_grid_message([f"P{i + 1}" for i in range(16)])
     assert grid[0] == 0xF0 and grid[-1] == 0xF7 and len(grid) == 257
     results.append("SysEx grille de parametres: OK")
+    controller = controller_template_path()
+    assert controller.is_file() and controller.stat().st_size > 0
+    results.append("Controleur LiveProfessor Ec4.ctrl2: OK")
     return results
 
 
@@ -194,6 +234,29 @@ UI_TEXT = {
         "save": "Enregistrer",
         "diagnostic": "Diagnostic",
         "shortcuts": "Raccourcis EC4",
+        "copy_controller": "Copier Ec4.ctrl2…",
+        "controller_guide": "Comment importer Ec4.ctrl2…",
+        "controller_copy_title": "Copier le contrôleur LiveProfessor",
+        "controller_file_type": "Contrôleur LiveProfessor",
+        "controller_missing_title": "Fichier contrôleur introuvable",
+        "controller_missing_message": "Le fichier Ec4.ctrl2 intégré est introuvable.",
+        "controller_copy_error_title": "Copie impossible",
+        "controller_copy_success_title": "Contrôleur copié",
+        "controller_copy_success": "Le fichier a été copié ici :\n{path}",
+        "controller_guide_title": "Importer Ec4.ctrl2 dans LiveProfessor",
+        "controller_guide_text": (
+            "1. Dans le bridge, choisissez Outils > Copier Ec4.ctrl2 et enregistrez "
+            "le fichier dans un dossier facile à retrouver.\n\n"
+            "2. Dans LiveProfessor, ouvrez Controllers > Hardware Controllers Setup.\n"
+            "3. Cliquez sur Load from file / Charger depuis un fichier.\n"
+            "4. Sélectionnez Ec4.ctrl2.\n"
+            "5. Sélectionnez le contrôleur EC4 importé et vérifiez : "
+            "127.0.0.1, entrée 8010, retour 8011.\n"
+            "6. Ouvrez Map Controllers pour affecter Rotary1 à Rotary16 et "
+            "GenericButton1 à GenericButton15 aux paramètres du plugin.\n\n"
+            "Pour un bouton marche/arrêt, activez la transformation Toggle. "
+            "Le push 16 reste réservé au Tap Tempo."
+        ),
         "test_display": "Tester l'ecran EC4",
         "minimize": "Réduire",
         "quit": "Quitter",
@@ -311,6 +374,29 @@ UI_TEXT = {
         "save": "Save",
         "diagnostic": "Diagnostics",
         "shortcuts": "EC4 shortcuts",
+        "copy_controller": "Copy Ec4.ctrl2…",
+        "controller_guide": "How to import Ec4.ctrl2…",
+        "controller_copy_title": "Copy the LiveProfessor controller",
+        "controller_file_type": "LiveProfessor controller",
+        "controller_missing_title": "Controller file not found",
+        "controller_missing_message": "The embedded Ec4.ctrl2 file could not be found.",
+        "controller_copy_error_title": "Copy failed",
+        "controller_copy_success_title": "Controller copied",
+        "controller_copy_success": "The file was copied here:\n{path}",
+        "controller_guide_title": "Import Ec4.ctrl2 into LiveProfessor",
+        "controller_guide_text": (
+            "1. In the bridge, choose Tools > Copy Ec4.ctrl2 and save the file "
+            "in an easy-to-find folder.\n\n"
+            "2. In LiveProfessor, open Controllers > Hardware Controllers Setup.\n"
+            "3. Click Load from file.\n"
+            "4. Select Ec4.ctrl2.\n"
+            "5. Select the imported EC4 controller and verify: "
+            "127.0.0.1, input 8010, feedback 8011.\n"
+            "6. Open Map Controllers and assign Rotary1 through Rotary16 and "
+            "GenericButton1 through GenericButton15 to plugin parameters.\n\n"
+            "Enable the Toggle transformation for an on/off parameter. "
+            "Push 16 remains reserved for Tap Tempo."
+        ),
         "test_display": "Test EC4 screen",
         "minimize": "Minimize",
         "quit": "Quit",
@@ -400,10 +486,11 @@ UI_TEXT = {
 class BridgeGUI:
     def __init__(self, config_path: Path) -> None:
         import tkinter as tk
-        from tkinter import messagebox, ttk
+        from tkinter import filedialog, messagebox, ttk
 
         self.tk = tk
         self.ttk = ttk
+        self.filedialog = filedialog
         self.messagebox = messagebox
         self.config_path = config_path
         self.config = load_config(config_path)
@@ -1010,6 +1097,9 @@ class BridgeGUI:
         tools_menu.add_command(label=self._t("connections"), command=self.show_connections_window)
         tools_menu.add_command(label=self._t("learn_button"), command=self.toggle_midi_learn)
         tools_menu.add_command(label=self._t("test_display"), command=self.demo_display)
+        tools_menu.add_command(
+            label=self._t("copy_controller"), command=self.copy_controller_file
+        )
         tools_menu.add_separator()
         tools_menu.add_command(label=self._t("updates"), command=self.check_updates)
         language_menu = tk.Menu(tools_menu, tearoff=0)
@@ -1023,6 +1113,10 @@ class BridgeGUI:
         menu_bar.add_cascade(label=self._t("menu_tools"), menu=tools_menu)
 
         help_menu = tk.Menu(menu_bar, tearoff=0)
+        help_menu.add_command(
+            label=self._t("controller_guide"), command=self.show_controller_guide
+        )
+        help_menu.add_separator()
         help_menu.add_command(
             label=self._t("repository"), command=lambda: self._open_link(REPOSITORY_URL)
         )
@@ -1175,8 +1269,15 @@ class BridgeGUI:
             learn_frame, text=self._t("shortcuts"), command=self.show_shortcuts
         )
         self.shortcuts_button.pack(side="right")
+        self.copy_controller_button = ttk.Button(
+            learn_frame,
+            text=self._t("copy_controller"),
+            command=self.copy_controller_file,
+        )
+        self.copy_controller_button.pack(side="right", padx=(0, 8))
         self._register_text_widget(self.learn_button, "text", "learn_button")
         self._register_text_widget(self.shortcuts_button, "text", "shortcuts")
+        self._register_text_widget(self.copy_controller_button, "text", "copy_controller")
 
         event_frame = ttk.LabelFrame(main, text=self._t("last_event"), padding=8)
         event_frame.grid(row=5, column=0, sticky="nsew", pady=(8, 0))
@@ -2026,6 +2127,48 @@ class BridgeGUI:
 
     def show_shortcuts(self) -> None:
         self.messagebox.showinfo(self._t("shortcuts_title"), self._t("shortcuts_text"))
+
+    def show_controller_guide(self) -> None:
+        self.messagebox.showinfo(
+            self._t("controller_guide_title"),
+            self._t("controller_guide_text"),
+        )
+
+    def copy_controller_file(self) -> None:
+        try:
+            source = controller_template_path()
+        except Exception:
+            self.messagebox.showerror(
+                self._t("controller_missing_title"),
+                self._t("controller_missing_message"),
+            )
+            return
+        destination = self.filedialog.asksaveasfilename(
+            parent=self.root,
+            title=self._t("controller_copy_title"),
+            initialfile="Ec4.ctrl2",
+            defaultextension=".ctrl2",
+            filetypes=(
+                (self._t("controller_file_type"), "*.ctrl2"),
+                (
+                    "Tous les fichiers" if self._language_code() == "fr" else "All files",
+                    "*.*",
+                ),
+            ),
+        )
+        if not destination:
+            return
+        try:
+            copied = copy_controller_template(Path(destination), source=source)
+        except Exception as exc:
+            self.messagebox.showerror(self._t("controller_copy_error_title"), str(exc))
+            return
+        self.messagebox.showinfo(
+            self._t("controller_copy_success_title"),
+            self._t("controller_copy_success", path=copied)
+            + "\n\n"
+            + self._t("controller_guide_text"),
+        )
 
     def _queue_snapshot(self, snapshot: BridgeSnapshot) -> None:
         self.root.after(0, self._apply_snapshot, snapshot)

@@ -55,6 +55,19 @@ Rotary4
 
 The bridge uses 16 Rotary controls per bank and can address up to 99 controls. The simplest method is therefore to load/import the `.ctrl2` file supplied with the project or release package.
 
+The controller file is also embedded in the application. To save it somewhere easy to find:
+
+The supplied copy is intentionally neutral: it contains the 16 rotaries and 16 buttons, without any legacy map tied to a specific plugin.
+
+1. open the bridge;
+2. click **Copy Ec4.ctrl2…** on the main page, or use **Tools > Copy Ec4.ctrl2…**;
+3. choose the Desktop or Documents folder, for example;
+4. in LiveProfessor, open **Controllers > Hardware Controllers Setup**;
+5. click **Load from file**, then select `Ec4.ctrl2`;
+6. select the imported EC4 controller and verify `127.0.0.1`, input port `8010`, and feedback port `8011`.
+
+The **Help > How to import Ec4.ctrl2…** menu also displays these instructions directly in the bridge.
+
 After importing it, check that the controller contains at least:
 
 ```text

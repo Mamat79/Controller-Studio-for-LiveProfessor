@@ -210,6 +210,8 @@ Il faut donc compléter le contrôleur avant de pouvoir exploiter correctement l
 
 Le plus simple est de **charger/importer directement dans LiveProfessor le fichier `.ctrl2` fourni avec le projet**.
 
+Le fichier est aussi intégré dans l’application : cliquez sur **Copier Ec4.ctrl2…** ou utilisez **Outils > Copier Ec4.ctrl2…**, choisissez un dossier, puis ouvrez **Controllers > Hardware Controllers Setup > Load from file** dans LiveProfessor. Le menu **Aide > Comment importer Ec4.ctrl2…** reprend la procédure complète.
+
 Ce fichier contient déjà la définition Companion nécessaire au bridge et évite de créer les Rotary un par un.
 
 Après chargement, vérifiez simplement que le contrôleur contient au minimum :
@@ -633,6 +635,8 @@ EC4 LiveProfessor Bridge uses **16 Rotary controls per bank** and can address up
 ### Recommended method — load the supplied `.ctrl2` file
 
 The easiest method is to **load/import the `.ctrl2` file supplied with this project directly into LiveProfessor**.
+
+The controller is also embedded in the application: click **Copy Ec4.ctrl2…** or use **Tools > Copy Ec4.ctrl2…**, choose a folder, then open **Controllers > Hardware Controllers Setup > Load from file** in LiveProfessor. The **Help > How to import Ec4.ctrl2…** menu shows the complete procedure.
 
 It already contains the Companion definition required by the bridge and avoids creating each Rotary manually.
 
