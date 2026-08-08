@@ -10,7 +10,7 @@
 - fenêtre principale compacte et menus français/anglais ;
 - fenêtres dédiées pour les réglages, les connexions et le journal ;
 - nouveau titre et bandeau `EC4 Bridge 0.5.0 | SiLeMI/O | By Mamat` ;
-- tray Windows restaurable par clic, menu contextuel et sortie idempotente ;
+- tray Windows restaurable par clic, y compris avec les notifications empaquetées de Windows 11, menu contextuel et sortie idempotente ;
 - vérification automatique ou manuelle des GitHub Releases stables ;
 - validation structurelle du fichier `Ec4.ctrl2` (16 boutons + 16 rotatifs) ;
 - tests supplémentaires pour les boutons, View Sets, tray, updater et réseau indisponible.

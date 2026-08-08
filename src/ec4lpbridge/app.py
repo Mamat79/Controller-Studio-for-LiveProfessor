@@ -90,9 +90,15 @@ from .update_service import ReleaseInfo, fetch_latest_release, is_newer_version
 
 
 def tray_action_for_event(l_param: int) -> str | None:
-    if int(l_param) in (0x0202, 0x0203):
+    # Windows can provide the notification either as a plain mouse message
+    # (legacy NOTIFYICONDATA behavior) or packed in the low word of lParam
+    # (NOTIFYICON_VERSION_4 / recent Windows shells).  Comparing the complete
+    # pointer-sized value made real clicks look unknown while synthetic tests
+    # using a plain 0x0202 succeeded.
+    event_code = int(l_param) & 0xFFFF
+    if event_code in (0x0202, 0x0203):
         return "open"
-    if int(l_param) in (0x0205, 0x007B):
+    if event_code in (0x0205, 0x007B):
         return "menu"
     return None
 

@@ -32,7 +32,7 @@ Le README bilingue publié sur la branche GitHub principale a été repris comme
 - changement français/anglais immédiat ;
 - nouveau titre et bandeau : `EC4 Bridge 0.5.0 | SiLeMI/O | By Mamat` ;
 - réduction dans la zone de notification sans fermeture ;
-- clic gauche ou double-clic : restauration ;
+- clic gauche ou double-clic : restauration, avec décodage des événements simples et empaquetés utilisés par les versions récentes de Windows ;
 - clic droit : menu Ouvrir, Démarrer, Arrêter, Redémarrer, Journal, Mise à jour et Quitter ;
 - fermeture par la croix et vraie sortie par Quitter séparées ;
 - journal copiable, effaçable et accessible depuis le menu.
@@ -54,13 +54,13 @@ $env:PYTHONPATH = "src"
 git diff --check
 ```
 
-Résultat : **39 tests réussis**, aucune erreur de compilation Python et aucun défaut d'espace détecté par Git.
+Résultat : **40 tests réussis**, aucune erreur de compilation Python et aucun défaut d'espace détecté par Git.
 
 Contrôles supplémentaires :
 
 - ouverture réelle de l'exécutable installé sous Windows ;
 - changement visuel français → anglais sans redémarrage ;
-- réduction puis restauration du tray par le callback Windows : `TRAY_RESTORE_SMOKE_OK` ;
+- réduction puis restauration du tray avec un événement Windows empaqueté réel : `PACKED_TRAY_RESTORE_OK` ;
 - contrôle structurel de `Ec4.ctrl2` : 32 contrôles uniques, 16 boutons et 16 rotatifs ;
 - vérification de l'absence des notes internes dans les paquets publics.
 
@@ -79,18 +79,11 @@ L'EC4 était débranché et LiveProfessor n'était pas lancé pendant la validat
 
 - `EC4-LiveProfessor-Bridge.exe`
 - `EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe`
-- `EC4-LiveProfessor-Bridge-v0.5.0-windows.zip`
+- `EC4-LiveProfessor-Bridge-v0.5.0-win64.zip`
 - `Ec4.ctrl2`
 - `SHA256SUMS.txt`
 
-Empreintes SHA-256 finales :
-
-```text
-609A1FA117F21FCB3932A28B6D6CE3663C51ADD5C561A8971F3AA996A40DBC70  EC4-LiveProfessor-Bridge.exe
-CF6FF324A8D0031AC3E8BF82BD83B72D50962B0DC63B9E24DC5EF08AF2A2D7E9  EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe
-AFF5BE5590864E16FB81E19256CA178E02193726D779DDED37EFF64B6F8259C0  EC4-LiveProfessor-Bridge-v0.5.0-win64.zip
-CA47042D5878A8AC000CA2855418F0568F17708B5C7569CED7C4DD310EF1793F  Ec4.ctrl2
-```
+Les empreintes finales sont fournies dans `SHA256SUMS.txt` à côté des fichiers de la release.
 
 ## Suite recommandée
 
