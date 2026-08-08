@@ -1,5 +1,7 @@
 # EC4 LiveProfessor Bridge
 
+🇬🇧 **English reader? [Jump directly to the English version.](#english-version)**
+
 **Une passerelle intelligente entre le Faderfox EC4 et LiveProfessor.**
 
 Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, 16 encodeurs avec poussoir et un écran OLED capable d’afficher beaucoup d’informations.
@@ -165,13 +167,49 @@ Python n’est pas nécessaire et aucun droit administrateur n’est requis.
 
 ## Configuration LiveProfessor
 
-Dans **Hardware Controllers**, ajouter un :
+### Important : le Companion Controller standard ne contient que 4 Rotary
+
+Quand on ajoute simplement un **Companion Controller** dans **Hardware Controllers**, LiveProfessor ne fournit par défaut que :
 
 ```text
-Companion Controller
+Rotary1
+Rotary2
+Rotary3
+Rotary4
 ```
 
-Configuration recommandée :
+Or EC4 LiveProfessor Bridge utilise **16 Rotary par banque**, et peut adresser jusqu’à **99 contrôles**.
+
+Il faut donc compléter le contrôleur avant de pouvoir exploiter correctement les 16 encodeurs de l’EC4.
+
+### Méthode recommandée — charger le fichier `.ctrl2` fourni
+
+Le plus simple est de **charger/importer directement dans LiveProfessor le fichier `.ctrl2` fourni avec le projet**.
+
+Ce fichier contient déjà la définition Companion nécessaire au bridge et évite de créer les Rotary un par un.
+
+Après chargement, vérifiez simplement que le contrôleur contient au minimum :
+
+```text
+Rotary1 → Rotary16
+```
+
+et davantage si vous souhaitez utiliser plusieurs banques jusqu’à `Rotary99`.
+
+C’est la méthode recommandée.
+
+### Méthode manuelle
+
+Si vous préférez créer le contrôleur vous-même :
+
+1. ouvrir **Hardware Controllers** dans LiveProfessor ;
+2. ajouter un **Companion Controller** ;
+3. conserver les 4 Rotary créés par défaut ;
+4. ajouter au minimum `Rotary5` à `Rotary16` ;
+5. ajouter éventuellement `Rotary17` à `Rotary99` si vous souhaitez exploiter toutes les banques ;
+6. enregistrer le contrôleur ainsi complété pour pouvoir le réutiliser.
+
+Configuration réseau recommandée :
 
 ```text
 Adresse : 127.0.0.1
@@ -183,6 +221,8 @@ Port feedback : 8011
 Le bridge utilise par défaut ces mêmes valeurs.
 
 ## Création d’une Controller Map
+
+Le fait d’avoir `Rotary1` à `Rotary16` dans le Companion Controller ne suffit pas encore à contrôler un plugin : les Rotary doivent ensuite être reliés aux paramètres du plugin dans une **Controller Map**.
 
 Pour chaque type de plugin :
 
@@ -363,6 +403,8 @@ Aucun logiciel propriétaire tiers n’est redistribué dans ce dépôt.
 
 ---
 
+<a id="english-version"></a>
+
 # 🇬🇧 English
 
 ## Why does this project exist?
@@ -520,13 +562,49 @@ Python is not required and administrator privileges are not needed.
 
 ## LiveProfessor configuration
 
-In **Hardware Controllers**, add a:
+### Important: the standard Companion Controller only contains 4 Rotary controls
+
+When you simply add a **Companion Controller** in **Hardware Controllers**, LiveProfessor provides only these controls by default:
 
 ```text
-Companion Controller
+Rotary1
+Rotary2
+Rotary3
+Rotary4
 ```
 
-Recommended settings:
+EC4 LiveProfessor Bridge uses **16 Rotary controls per bank** and can address up to **99 controls**.
+
+The Companion Controller therefore needs to be extended before all 16 EC4 encoders can be used.
+
+### Recommended method — load the supplied `.ctrl2` file
+
+The easiest method is to **load/import the `.ctrl2` file supplied with this project directly into LiveProfessor**.
+
+This file already contains the Companion definition required by the bridge, avoiding the need to create each Rotary manually.
+
+After loading it, simply check that the controller contains at least:
+
+```text
+Rotary1 → Rotary16
+```
+
+and more controls if you intend to use additional banks up to `Rotary99`.
+
+This is the recommended method.
+
+### Manual method
+
+If you prefer to build the controller yourself:
+
+1. open **Hardware Controllers** in LiveProfessor;
+2. add a **Companion Controller**;
+3. keep the 4 Rotary controls created by default;
+4. add at least `Rotary5` through `Rotary16`;
+5. optionally add `Rotary17` through `Rotary99` if you want to use all available banks;
+6. save the completed controller so it can be reused later.
+
+Recommended network settings:
 
 ```text
 Address: 127.0.0.1
@@ -538,6 +616,8 @@ Feedback port: 8011
 These are also the bridge default values.
 
 ## Creating a Controller Map
+
+Having `Rotary1` through `Rotary16` in the Companion Controller is not enough by itself: those Rotary controls must then be assigned to actual plugin parameters in a **Controller Map**.
 
 For each plugin type:
 
