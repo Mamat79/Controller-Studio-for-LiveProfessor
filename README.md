@@ -262,7 +262,8 @@ Si le projet ne contient encore aucun contrôleur Companion/OSC, le bridge utili
 3. sélectionnez un plugin ou **Tous les plugins détectés** ;
 4. conservez **UniBank — 16 paramètres**, sélectionné par défaut, ou choisissez FullBank si le plugin a réellement besoin de plusieurs banques ;
 5. enregistrez la copie sous un nouveau nom ;
-6. ouvrez cette copie dans LiveProfessor et sélectionnez le plugin à contrôler.
+6. le bridge propose de l'ouvrir directement dans LiveProfessor et avertit que le projet actuellement ouvert sera remplacé ;
+7. après avoir enregistré le projet en cours, acceptez l'ouverture puis sélectionnez le plugin à contrôler.
 
 Chaque affectation générée utilise **Only If Selected**. Une même map dynamique peut donc contenir plusieurs plugins et plusieurs instances : seuls les paramètres du plugin sélectionné doivent réagir. Les affectations sont fusionnées dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : il n'est plus nécessaire de charger manuellement un preset pour chaque plugin dans LiveProfessor. Les affectations de poussoirs déjà présentes sont conservées.
 
@@ -705,7 +706,8 @@ If the project does not contain a Companion/OSC controller yet, the bridge autom
 3. select one plugin or **All detected plugins**;
 4. keep **UniBank — 16 parameters**, selected by default, or choose FullBank when the plugin genuinely needs several banks;
 5. save the copy under a new name;
-6. open the copy in LiveProfessor and select the plugin to control.
+6. the bridge offers to open it directly in LiveProfessor and warns that the currently open project will be replaced;
+7. after saving the current project, confirm the prompt and select the plugin to control.
 
 Every generated assignment uses **Only If Selected**. One dynamic map can therefore contain several plugins and instances while only the selected plugin should react. Assignments are merged into the `HardwareCtrlMaps` actually recalled by the project and its snapshots, so a preset no longer needs to be loaded manually for each plugin in LiveProfessor. Existing push-button assignments are preserved.
 

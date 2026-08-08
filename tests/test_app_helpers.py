@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 from ec4lpbridge.app import (
     controller_template_path,
     copy_controller_template,
+    open_liveprofessor_project,
     tray_action_for_event,
 )
 
@@ -47,6 +48,27 @@ class AppHelperTests(unittest.TestCase):
     def test_unknown_controller_template_is_rejected(self):
         with self.assertRaises(ValueError):
             controller_template_path("Unknown.ctrl2", candidates=[])
+
+    def test_generated_project_uses_registered_windows_launcher(self):
+        with TemporaryDirectory() as temporary:
+            project = Path(temporary) / "mapped.rack2"
+            project.write_bytes(b"project")
+            opened: list[str] = []
+
+            result = open_liveprofessor_project(project, launcher=opened.append)
+
+            self.assertEqual(result, project.resolve())
+            self.assertEqual(opened, [str(project.resolve())])
+
+    def test_missing_generated_project_is_not_launched(self):
+        with TemporaryDirectory() as temporary:
+            opened: list[str] = []
+            with self.assertRaises(FileNotFoundError):
+                open_liveprofessor_project(
+                    Path(temporary) / "missing.rack2",
+                    launcher=opened.append,
+                )
+            self.assertEqual(opened, [])
 
 
 if __name__ == "__main__":
