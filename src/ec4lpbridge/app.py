@@ -248,11 +248,13 @@ UI_TEXT = {
         "diagnostic": "Diagnostic",
         "shortcuts": "Raccourcis EC4",
         "automap": "Auto-mapping…",
+        "automap_primary": "⚡ Auto-mapping",
         "automap_title": "Auto-mapping des plugins",
         "automap_intro": (
             "Le bridge crée une copie du projet LiveProfessor avec une Controller Map dynamique. "
             "Chaque rotatif agit uniquement sur le plugin sélectionné. Le projet original n'est "
-            "jamais modifié."
+            "jamais modifié. Si aucun contrôleur Companion/OSC n'est présent, le modèle EC4 "
+            "intégré est ajouté automatiquement à la copie."
         ),
         "automap_warning": (
             "Première version assistée : les paramètres suivent l'ordre technique exposé par le "
@@ -265,6 +267,7 @@ UI_TEXT = {
         "automap_plugin": "Plugin à mapper",
         "automap_all_plugins": "Tous les plugins détectés",
         "automap_controller": "Contrôleur",
+        "automap_controller_embedded": "{name} — modèle EC4 intégré ({rotaries} rotatifs)",
         "automap_bank_mode": "Mode de banques créé dans la copie",
         "automap_unibank": "UniBank — 16 paramètres (recommandé)",
         "automap_fullbank": "FullBank — 99 paramètres",
@@ -431,11 +434,13 @@ UI_TEXT = {
         "diagnostic": "Diagnostics",
         "shortcuts": "EC4 shortcuts",
         "automap": "Auto-mapping…",
+        "automap_primary": "⚡ Auto-mapping",
         "automap_title": "Plugin auto-mapping",
         "automap_intro": (
             "The bridge creates a copy of the LiveProfessor project with one dynamic Controller "
             "Map. Each rotary acts only on the selected plugin. The original project is never "
-            "modified."
+            "modified. If no Companion/OSC controller is present, the embedded EC4 template is "
+            "automatically added to the copy."
         ),
         "automap_warning": (
             "First assisted version: parameters follow the technical order exposed by the plugin "
@@ -447,6 +452,7 @@ UI_TEXT = {
         "automap_plugin": "Plugin to map",
         "automap_all_plugins": "All detected plugins",
         "automap_controller": "Controller",
+        "automap_controller_embedded": "{name} — embedded EC4 template ({rotaries} rotaries)",
         "automap_bank_mode": "Bank mode created in the copy",
         "automap_unibank": "UniBank — 16 parameters (recommended)",
         "automap_fullbank": "FullBank — 99 parameters",
@@ -1315,8 +1321,21 @@ class BridgeGUI:
             action_frame, text=self._t("settings"), command=self.show_settings
         )
         self.settings_button.pack(side="right")
-        self.automap_button = ttk.Button(
-            action_frame, text=self._t("automap"), command=self.show_automap_window
+        self.automap_button = tk.Button(
+            action_frame,
+            text=self._t("automap_primary"),
+            command=self.show_automap_window,
+            bg="#087d9d",
+            fg="#ffffff",
+            activebackground="#0aa1c9",
+            activeforeground="#ffffff",
+            disabledforeground="#d2edf4",
+            relief="flat",
+            borderwidth=0,
+            padx=14,
+            pady=5,
+            font=("Segoe UI Semibold", 10),
+            cursor="hand2",
         )
         self.automap_button.pack(side="right", padx=6)
         for widget, key in (
@@ -1325,7 +1344,7 @@ class BridgeGUI:
             (self.minimize_button, "minimize"),
             (self.quit_button, "quit"),
             (self.settings_button, "settings"),
-            (self.automap_button, "automap"),
+            (self.automap_button, "automap_primary"),
         ):
             self._register_text_widget(widget, "text", key)
 
@@ -2024,7 +2043,10 @@ class BridgeGUI:
 
     def _analyze_automap_project(self) -> None:
         try:
-            inventory = inspect_project(Path(self.automap_project_var.get()))
+            inventory = inspect_project(
+                Path(self.automap_project_var.get()),
+                controller_template=controller_template_path("Ec4-UniBank.ctrl2"),
+            )
         except (AutoMapError, OSError, ValueError) as exc:
             self._automap_inventory = None
             if hasattr(self, "automap_create_button"):
@@ -2039,7 +2061,14 @@ class BridgeGUI:
             self._automap_plugins_by_label[label] = plugin.plugin_uid
         self._automap_controllers_by_label = {}
         for controller in inventory.controllers:
-            label = f"{controller.display_name} [#{controller.controller_uid}]"
+            if controller.is_embedded:
+                label = self._t(
+                    "automap_controller_embedded",
+                    name=controller.name,
+                    rotaries=controller.rotary_count,
+                )
+            else:
+                label = f"{controller.display_name} [#{controller.controller_uid}]"
             self._automap_controllers_by_label[label] = controller.controller_uid
 
         plugin_labels = tuple(self._automap_plugins_by_label)
@@ -2111,12 +2140,18 @@ class BridgeGUI:
         if not destination:
             return
         try:
+            template_name = (
+                "Ec4-FullBank.ctrl2"
+                if self.automap_bank_mode_var.get() == "fullbank"
+                else "Ec4-UniBank.ctrl2"
+            )
             result = create_automapped_project(
                 inventory.path,
                 Path(destination),
                 plugin_uid=plugin_uid,
                 controller_uid=controller_uid,
                 expand_to_fullbank=self.automap_bank_mode_var.get() == "fullbank",
+                controller_template=controller_template_path(template_name),
             )
         except (AutoMapError, OSError, ValueError) as exc:
             self.messagebox.showerror(self._t("automap_error_title"), str(exc))

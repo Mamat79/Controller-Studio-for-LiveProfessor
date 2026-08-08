@@ -2,6 +2,10 @@
 
 ## 2026.1
 
+- l'auto-mapping injecte désormais automatiquement le modèle EC4 intégré quand le projet
+  LiveProfessor ne contient encore aucun contrôleur Companion/OSC, au lieu de refuser l'analyse ;
+- le bouton principal d'auto-mapping est maintenant mis en évidence par une couleur et une icône ;
+
 - premier auto-mapping assisté des paramètres exposés par les plugins d'un projet LiveProfessor ;
 - création obligatoire d'une nouvelle copie `.rack2`, sans modification du projet source ;
 - map `EC4 AutoMap - Dynamic` combinant les plugins présents avec `Only If Selected` ;

@@ -97,6 +97,18 @@ def controller_project(parameter_count: int = 30) -> ValueTree:
     return project
 
 
+def controller_template(project: ValueTree) -> ValueTree:
+    hardware_root = next(
+        child for child in project.children if child.type_name == "HardwareControllers"
+    )
+    controllers = next(
+        child for child in hardware_root.children if child.type_name == "HardwareControllers"
+    )
+    template = parse_tree(write_tree(controllers.children[0]))
+    template.type_name = "LPController"
+    return template
+
+
 class AutoMapTests(unittest.TestCase):
     def test_plugin_uid_conversion_matches_liveprofessor_serialization(self):
         self.assertEqual(
@@ -119,6 +131,60 @@ class AutoMapTests(unittest.TestCase):
             self.assertEqual(len(inventory.controllers), 1)
             self.assertEqual(inventory.controllers[0].rotary_count, 16)
             self.assertEqual(inventory.controllers[0].button_count, 16)
+
+    def test_controllerless_project_uses_embedded_template(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "controllerless.rack2"
+            template_path = root / "Ec4-UniBank.ctrl2"
+            destination = root / "mapped.rack2"
+            project = controller_project(parameter_count=30)
+            template_path.write_bytes(write_tree(controller_template(project)))
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            controllers.children.clear()
+            source.write_bytes(write_tree(project))
+            source_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+
+            inventory = inspect_project(source, controller_template=template_path)
+
+            self.assertEqual(len(inventory.controllers), 1)
+            self.assertTrue(inventory.controllers[0].is_embedded)
+            self.assertEqual(inventory.controllers[0].rotary_count, 16)
+
+            result = create_automapped_project(
+                source,
+                destination,
+                plugin_uid=None,
+                controller_uid=inventory.controllers[0].controller_uid,
+                expand_to_fullbank=False,
+                controller_template=template_path,
+            )
+
+            self.assertEqual(hashlib.sha256(source.read_bytes()).hexdigest(), source_hash)
+            self.assertEqual(result.controller_rotaries, 16)
+            generated = parse_tree(destination.read_bytes())
+            hardware_root = next(
+                child for child in generated.children if child.type_name == "HardwareControllers"
+            )
+            controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            self.assertEqual(len(controllers.children), 1)
+            self.assertEqual(controllers.children[0].type_name, "HardwareController")
+            self.assertEqual(controllers.children[0].get("ControllerType"), "Companion")
+            active_map_id = hardware_root.get("ActiveMap")
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            active_map = next(
+                child for child in hardware_maps.children if child.get("mapId") == active_map_id
+            )
+            self.assertEqual(len(active_map.children[0].children), 16)
 
     def test_automap_creates_valid_fullbank_copy_and_preserves_source(self):
         with TemporaryDirectory() as temporary:

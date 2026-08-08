@@ -40,6 +40,7 @@ class ProjectController:
     controller_uid: int
     rotary_count: int
     button_count: int
+    is_embedded: bool = False
 
     @property
     def display_name(self) -> str:
@@ -195,6 +196,55 @@ def _project_controllers(tree: ValueTree) -> list[tuple[ProjectController, Value
     return result
 
 
+def _controller_from_template(
+    project_tree: ValueTree,
+    template_path: Path,
+) -> tuple[ProjectController, ValueTree]:
+    """Load the neutral bundled CTRL2 as an embeddable project controller."""
+
+    path = Path(template_path).expanduser().resolve()
+    if not path.is_file():
+        raise AutoMapError(f"modèle de contrôleur EC4 introuvable : {path}")
+    try:
+        template = parse_tree(path.read_bytes())
+    except (OSError, ValueTreeFormatError) as exc:
+        raise AutoMapError(f"modèle de contrôleur EC4 illisible : {exc}") from exc
+    if template.type_name != "LPController":
+        raise AutoMapError("le modèle EC4 intégré n'est pas un contrôleur LiveProfessor .ctrl2")
+    if str(template.get("ControllerType", "")).lower() not in {"companion", "osc"}:
+        raise AutoMapError("le modèle EC4 intégré n'est pas un contrôleur Companion/OSC")
+
+    controller_node = copy.deepcopy(template)
+    controller_node.type_name = "HardwareController"
+    uid = controller_node.get("uID")
+    if uid is None:
+        raise AutoMapError("le modèle EC4 intégré ne contient pas d'identifiant de contrôleur")
+
+    # A project may contain a non-Companion controller with the same saved UID.
+    # In that case, use a deterministic free UID so analysis and generation agree.
+    used_controller_uids = {
+        int(node.get("uID"))
+        for node in _walk(project_tree)
+        if node.type_name == "HardwareController" and node.get("uID") is not None
+    }
+    controller_uid = int(uid)
+    if controller_uid in used_controller_uids:
+        controller_uid = max(used_controller_uids | {controller_uid}) + 1
+        controller_node.set("uID", controller_uid)
+
+    rotaries = _rotary_controls(controller_node)
+    if not rotaries:
+        raise AutoMapError("le modèle EC4 intégré ne contient aucun rotatif")
+    controller = ProjectController(
+        name=str(controller_node.get("ControllerName", "EC4")),
+        controller_uid=controller_uid,
+        rotary_count=len(rotaries),
+        button_count=_button_count(controller_node),
+        is_embedded=True,
+    )
+    return controller, controller_node
+
+
 def _load_project(path: Path) -> ValueTree:
     project_path = Path(path).expanduser().resolve()
     if not project_path.is_file():
@@ -208,11 +258,18 @@ def _load_project(path: Path) -> ValueTree:
     return tree
 
 
-def inspect_project(path: Path) -> ProjectInventory:
+def inspect_project(
+    path: Path,
+    *,
+    controller_template: Path | None = None,
+) -> ProjectInventory:
     project_path = Path(path).expanduser().resolve()
     tree = _load_project(project_path)
     plugins = tuple(item[0] for item in _project_plugins(tree))
-    controllers = tuple(item[0] for item in _project_controllers(tree))
+    controller_pairs = _project_controllers(tree)
+    if not controller_pairs and controller_template is not None:
+        controller_pairs = [_controller_from_template(tree, controller_template)]
+    controllers = tuple(item[0] for item in controller_pairs)
     if not plugins:
         raise AutoMapError("aucun plugin avec paramètres automatisables n'a été trouvé")
     if not controllers:
@@ -477,6 +534,7 @@ def create_automapped_project(
     plugin_uid: int | None,
     controller_uid: int,
     expand_to_fullbank: bool = True,
+    controller_template: Path | None = None,
 ) -> AutoMapResult:
     source_path = Path(source).expanduser().resolve()
     destination_path = Path(destination).expanduser().resolve()
@@ -498,6 +556,13 @@ def create_automapped_project(
         (item for item in controllers if item[0].controller_uid == controller_uid),
         None,
     )
+    if controller_pair is None and controller_template is not None:
+        embedded_pair = _controller_from_template(tree, controller_template)
+        if embedded_pair[0].controller_uid == controller_uid:
+            hardware_root = _child(tree, "HardwareControllers")
+            controllers_root = _child(hardware_root, "HardwareControllers")
+            controllers_root.children.append(embedded_pair[1])
+            controller_pair = embedded_pair
     if controller_pair is None:
         raise AutoMapError("le contrôleur choisi n'existe plus dans ce projet")
     controller, controller_node = controller_pair

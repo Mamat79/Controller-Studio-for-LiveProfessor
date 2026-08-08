@@ -100,13 +100,15 @@ Si le type Companion Controller n’existe pas, la version installée de LivePro
 ### Créer automatiquement une copie mappée — version 2026.1
 
 1. Enregistrez le projet ouvert dans LiveProfessor.
-2. Dans le bridge, ouvrez **Outils > Auto-mapping…**.
+2. Dans le bridge, cliquez sur le bouton turquoise **⚡ Auto-mapping** ou ouvrez **Outils > Auto-mapping…**.
 3. Choisissez le fichier `.rack2`, puis cliquez sur **Analyser le projet**.
 4. Sélectionnez un plugin précis ou **Tous les plugins détectés**.
-5. Choisissez le Companion Controller EC4. **UniBank — 16 paramètres** est recommandé et sélectionné par défaut. Choisissez FullBank uniquement pour accéder à 99 paramètres par banques.
+5. Choisissez le Companion Controller EC4. Si le projet n'en contient pas, **EC4 — modèle EC4 intégré** est proposé automatiquement. **UniBank — 16 paramètres** est recommandé et sélectionné par défaut. Choisissez FullBank uniquement pour accéder à 99 paramètres par banques.
 6. Cliquez sur **Créer la copie auto-mappée…** et utilisez un nouveau nom de fichier.
 7. Dans LiveProfessor, enregistrez le travail en cours puis ouvrez la copie générée.
 8. Sélectionnez un plugin mappé et vérifiez les noms, les valeurs et le contrôle des paramètres sur l'EC4.
+
+L'auto-mapping fonctionne donc même si aucun CTRL2 n'avait encore été importé dans le projet source : le contrôleur intégré est ajouté à la copie seulement, jamais au fichier original.
 
 La map `EC4 AutoMap - Dynamic` contient plusieurs affectations par rotatif, toutes en mode **Only If Selected**. Elles peuvent donc cohabiter : seule l'instance de plugin sélectionnée doit répondre. Si plusieurs instances identiques étaient présentes lors de la génération, elles sont toutes incluses. Le générateur peuple aussi les `HardwareCtrlMaps` référencés par le projet et ses snapshots, car LiveProfessor peut rappeler l'une de ces maps après le chargement. Il n'est donc plus nécessaire de charger manuellement un preset plugin par plugin. Les affectations existantes des poussoirs sont conservées.
 
