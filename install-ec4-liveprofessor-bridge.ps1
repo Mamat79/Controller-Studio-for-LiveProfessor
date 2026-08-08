@@ -134,18 +134,23 @@ if (Test-Path -LiteralPath $sourceProfiles -PathType Container) {
     }
 }
 
-if ($ControllerFile) {
-    $resolvedCtrl2 = Resolve-Path -LiteralPath $ControllerFile -ErrorAction SilentlyContinue
-    if (-not $resolvedCtrl2) {
-        throw "Fichier Ec4.ctrl2 introuvable: $ControllerFile"
+foreach ($controllerName in @("Ec4-UniBank.ctrl2", "Ec4-FullBank.ctrl2")) {
+    $sourceCtrl2 = Join-Path $sourceRoot $controllerName
+    if (-not (Test-Path -LiteralPath $sourceCtrl2 -PathType Leaf)) {
+        throw "Fichier contrôleur introuvable : $sourceCtrl2"
     }
-    Copy-Item -LiteralPath $resolvedCtrl2.Path -Destination $installDir -Force
+    Copy-Item -LiteralPath $sourceCtrl2 -Destination $installDir -Force
 }
-else {
-    $sourceCtrl2 = Join-Path $sourceRoot "Ec4.ctrl2"
-    if (Test-Path -LiteralPath $sourceCtrl2) {
-        Copy-Item -LiteralPath $sourceCtrl2 -Destination $installDir -Force
+$legacyCtrl2 = Join-Path $installDir "Ec4.ctrl2"
+if (Test-Path -LiteralPath $legacyCtrl2 -PathType Leaf) {
+    Remove-Item -LiteralPath $legacyCtrl2 -Force
+}
+if ($ControllerFile) {
+    $customCtrl2 = Resolve-Path -LiteralPath $ControllerFile -ErrorAction SilentlyContinue
+    if (-not $customCtrl2) {
+        throw "Fichier contrôleur personnalisé introuvable : $ControllerFile"
     }
+    Copy-Item -LiteralPath $customCtrl2.Path -Destination $installDir -Force
 }
 
 $shortcutCount = 0

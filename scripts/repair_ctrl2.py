@@ -10,6 +10,7 @@ template by removing plugin-specific map presets from the exported file.
 from __future__ import annotations
 
 import argparse
+import copy
 from dataclasses import dataclass
 from pathlib import Path
 import re
@@ -239,10 +240,86 @@ def _walk(tree: ValueTree):
         yield from _walk(child)
 
 
+def normalize_rotary_controls(tree: ValueTree, rotary_count: int) -> dict[str, int]:
+    """Resize the Companion rotary list while preserving the controller structure."""
+
+    if not 16 <= rotary_count <= 99:
+        raise ValueTreeFormatError("le nombre de rotatifs doit etre compris entre 16 et 99")
+    controls_node = _child(tree, "Controls")
+    controls = [child for child in controls_node.children if child.type_name == "HardwareControl"]
+    rotary_pattern = re.compile(r"^/Companion/Rotary(\d+)$", re.IGNORECASE)
+    rotaries: dict[int, ValueTree] = {}
+    for control in controls:
+        match = rotary_pattern.match(str(control.get("OSCAddressPatern", "")))
+        if not match or control.get("ControlStyle") != 0:
+            continue
+        number = int(match.group(1))
+        if number in rotaries:
+            raise ValueTreeFormatError(f"rotatif {number} defini plusieurs fois")
+        rotaries[number] = control
+
+    missing_base = sorted(set(range(1, 17)) - set(rotaries))
+    if missing_base:
+        raise ValueTreeFormatError(f"rotatifs de base absents: {missing_base}")
+
+    removed_ids: set[int] = set()
+    kept_children = []
+    removed = 0
+    for child in controls_node.children:
+        match = rotary_pattern.match(str(child.get("OSCAddressPatern", "")))
+        if (
+            child.type_name == "HardwareControl"
+            and child.get("ControlStyle") == 0
+            and match
+            and int(match.group(1)) > rotary_count
+        ):
+            removed += 1
+            removed_ids.add(int(child.get("id")))
+            continue
+        kept_children.append(child)
+    controls_node.children = kept_children
+
+    if removed_ids:
+        for node in _walk(tree):
+            if node.type_name != "Assignments":
+                continue
+            node.children = [
+                assignment
+                for assignment in node.children
+                if assignment.get("ControllerId") not in removed_ids
+            ]
+
+    used_ids = {
+        int(control.get("id"))
+        for control in controls_node.children
+        if control.type_name == "HardwareControl" and control.get("id") is not None
+    }
+    next_id = max(used_ids, default=22_000_000) + 1
+    template = rotaries[16]
+    added = 0
+    for number in range(17, rotary_count + 1):
+        if number in rotaries and number <= rotary_count:
+            continue
+        while next_id in used_ids:
+            next_id += 1
+        control = copy.deepcopy(template)
+        control.set("id", next_id)
+        control.set("Name", f"Rotary {number}")
+        control.set("tag", f"Rotary{number}")
+        control.set("OSCAddressPatern", f"/Companion/Rotary{number}")
+        controls_node.children.append(control)
+        used_ids.add(next_id)
+        next_id += 1
+        added += 1
+
+    return {"rotaries_added": added, "rotaries_removed": removed}
+
+
 def repair_controller(
     tree: ValueTree,
     *,
     clean_map_presets: bool = False,
+    expected_rotaries: int = 16,
 ) -> dict[str, int]:
     if tree.type_name != "LPController":
         raise ValueTreeFormatError("le fichier n'est pas un controleur LiveProfessor")
@@ -275,9 +352,10 @@ def repair_controller(
                 raise ValueTreeFormatError(f"rotatif {number} defini plusieurs fois")
             rotaries[number] = control
 
-    if set(rotaries) != set(range(1, 17)):
-        missing = sorted(set(range(1, 17)) - set(rotaries))
-        extra = sorted(set(rotaries) - set(range(1, 17)))
+    expected_rotary_numbers = set(range(1, expected_rotaries + 1))
+    if set(rotaries) != expected_rotary_numbers:
+        missing = sorted(expected_rotary_numbers - set(rotaries))
+        extra = sorted(set(rotaries) - expected_rotary_numbers)
         raise ValueTreeFormatError(f"rotatifs invalides; absents={missing}, en trop={extra}")
 
     for number, control in rotaries.items():
@@ -325,7 +403,7 @@ def repair_controller(
     return {
         "controls": len(controls),
         "buttons": 16,
-        "rotaries": 16,
+        "rotaries": expected_rotaries,
         "assignments_removed": assignments_removed,
         "map_presets_removed": map_presets_removed,
     }
@@ -340,6 +418,13 @@ def main() -> int:
         action="store_true",
         help="supprime les presets de mapping lies a des plugins ou projets",
     )
+    parser.add_argument(
+        "--rotaries",
+        type=int,
+        choices=(16, 99),
+        default=16,
+        help="cree un controleur UniBank (16) ou FullBank (99)",
+    )
     args = parser.parse_args()
 
     original = args.source.read_bytes()
@@ -347,10 +432,13 @@ def main() -> int:
     if write_tree(original_tree) != original:
         raise ValueTreeFormatError("le test de reecriture identique a echoue")
 
+    resize_stats = normalize_rotary_controls(original_tree, args.rotaries)
     stats = repair_controller(
         original_tree,
         clean_map_presets=args.clean_map_presets,
+        expected_rotaries=args.rotaries,
     )
+    stats.update(resize_stats)
     repaired = write_tree(original_tree)
     reparsed = parse_tree(repaired)
     if write_tree(reparsed) != repaired:
@@ -362,7 +450,8 @@ def main() -> int:
         f"Controleur repare: {args.destination} | "
         f"{stats['rotaries']} rotatifs uniques | "
         f"{stats['assignments_removed']} assignation(s) parasite(s) supprimee(s) | "
-        f"{stats['map_presets_removed']} preset(s) de mapping supprime(s)"
+        f"{stats['map_presets_removed']} preset(s) de mapping supprime(s) | "
+        f"{stats['rotaries_added']} ajoute(s), {stats['rotaries_removed']} retire(s)"
     )
     return 0
 

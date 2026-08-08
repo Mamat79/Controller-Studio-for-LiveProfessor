@@ -55,16 +55,19 @@ Le bridge utilise 16 Rotary par banque et peut adresser jusqu’à 99 contrôles
 
 Le fichier est également intégré dans l’application. Pour le placer dans un dossier facile à retrouver :
 
-La copie fournie est volontairement neutre : elle contient les 16 rotatifs et les 16 boutons, sans ancien mapping lié à un plugin particulier.
+Deux copies neutres sont fournies, sans ancien mapping lié à un plugin particulier :
+
+- `Ec4-UniBank.ctrl2` : 16 rotatifs et 16 boutons, pour une seule banque ;
+- `Ec4-FullBank.ctrl2` : 99 rotatifs et 16 boutons, pour toutes les banques du bridge.
 
 1. ouvrez le bridge ;
-2. cliquez sur **Copier Ec4.ctrl2…** dans la page principale, ou utilisez **Outils > Copier Ec4.ctrl2…** ;
+2. cliquez sur **CTRL2 UniBank…** ou **CTRL2 FullBank…** dans la page principale, selon votre besoin ;
 3. choisissez par exemple le Bureau ou le dossier Documents ;
 4. dans LiveProfessor, ouvrez **Controllers > Hardware Controllers Setup** ;
-5. cliquez sur **Load from file / Charger depuis un fichier**, puis sélectionnez `Ec4.ctrl2` ;
+5. cliquez sur **Load from file / Charger depuis un fichier**, puis sélectionnez le CTRL2 copié ;
 6. sélectionnez le contrôleur EC4 importé et vérifiez `127.0.0.1`, le port d’entrée `8010` et le port de retour `8011`.
 
-Le menu **Aide > Comment importer Ec4.ctrl2…** affiche aussi ces instructions directement dans le bridge.
+Le menu **Aide > Comment importer les CTRL2…** affiche aussi ces instructions directement dans le bridge.
 
 Après l’import, vérifiez que le contrôleur contient au minimum :
 
@@ -72,7 +75,7 @@ Après l’import, vérifiez que le contrôleur contient au minimum :
 Rotary1 → Rotary16
 ```
 
-Conservez ou ajoutez `Rotary17` à `Rotary99` pour utiliser les banques supplémentaires.
+Le modèle FullBank contient déjà `Rotary17` à `Rotary99` pour les banques supplémentaires.
 
 #### Méthode manuelle
 
@@ -108,7 +111,7 @@ Cette opération remplace les MIDI Learn répétés par une définition unique e
 
 Une map appartient à un **type de plugin**. Ne supposez pas qu’une map VST2 puisse être réutilisée sans adaptation avec la version VST3 du même produit.
 
-Pour les poussoirs, l’apprentissage **Rotatifs + push** du bridge sert à reconnaître les Notes MIDI du groupe EC4. Dans LiveProfessor, utilisez ensuite directement `GenericButton1` à `GenericButton15`, déjà fournis par `Ec4.ctrl2`, dans l’éditeur **Controller Maps**. Activez la transformation **Toggle** pour une fonction marche/arrêt. Le Quick Assign peut échouer sur les boutons ; si le paramètre recherché n’apparaît pas dans la liste de la Controller Map, le plugin ne l’expose probablement pas à LiveProfessor.
+Pour les poussoirs, l’apprentissage **Rotatifs + push** du bridge sert à reconnaître les Notes MIDI du groupe EC4. Dans LiveProfessor, utilisez ensuite directement `GenericButton1` à `GenericButton15`, déjà fournis par les deux CTRL2, dans l’éditeur **Controller Maps**. Activez la transformation **Toggle** pour une fonction marche/arrêt. Le Quick Assign peut échouer sur les boutons ; si le paramètre recherché n’apparaît pas dans la liste de la Controller Map, le plugin ne l’expose probablement pas à LiveProfessor.
 
 ### Configurer et démarrer le bridge
 

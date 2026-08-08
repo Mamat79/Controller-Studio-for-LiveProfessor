@@ -5,6 +5,7 @@ from scripts.repair_ctrl2 import (
     Variant,
     MARKER_INT,
     MARKER_STRING,
+    normalize_rotary_controls,
     parse_tree,
     repair_controller,
     write_tree,
@@ -114,6 +115,37 @@ class RepairControllerTests(unittest.TestCase):
         )
         self.assertEqual(map_presets.children, [])
         self.assertEqual(stats["map_presets_removed"], 1)
+
+    def test_expand_controller_to_full_bank_99_rotaries(self):
+        controller = self.make_controller()
+
+        resize = normalize_rotary_controls(controller, 99)
+        stats = repair_controller(
+            controller,
+            clean_map_presets=True,
+            expected_rotaries=99,
+        )
+
+        controls = controller.children[0].children
+        rotaries = [control for control in controls if control.get("ControlStyle") == 0]
+        self.assertEqual(resize, {"rotaries_added": 83, "rotaries_removed": 0})
+        self.assertEqual((stats["buttons"], stats["rotaries"]), (16, 99))
+        self.assertEqual(len(rotaries), 99)
+        self.assertEqual(rotaries[-1].get("tag"), "Rotary99")
+        self.assertEqual(rotaries[-1].get("OSCAddressPatern"), "/Companion/Rotary99")
+        self.assertEqual(len({control.get("id") for control in controls}), 115)
+        encoded = write_tree(controller)
+        self.assertEqual(write_tree(parse_tree(encoded)), encoded)
+
+    def test_full_bank_can_be_reduced_back_to_unibank(self):
+        controller = self.make_controller()
+        normalize_rotary_controls(controller, 99)
+
+        resize = normalize_rotary_controls(controller, 16)
+        stats = repair_controller(controller, expected_rotaries=16)
+
+        self.assertEqual(resize, {"rotaries_added": 0, "rotaries_removed": 83})
+        self.assertEqual(stats["rotaries"], 16)
 
 
 if __name__ == "__main__":

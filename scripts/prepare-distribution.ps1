@@ -62,11 +62,15 @@ if (Test-Path -LiteralPath $englishDocsSource -PathType Container) {
 }
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "profiles") -Destination (Join-Path $staging "profiles") -Recurse -Force
 
-if ($ControllerFile) {
-    if (-not (Test-Path -LiteralPath $ControllerFile)) {
-        throw "Fichier Ec4.ctrl2 introuvable : $ControllerFile"
+foreach ($controllerName in @("Ec4-UniBank.ctrl2", "Ec4-FullBank.ctrl2")) {
+    $controllerPath = Join-Path $ProjectRoot $controllerName
+    if (-not (Test-Path -LiteralPath $controllerPath -PathType Leaf)) {
+        throw "Fichier contrôleur introuvable : $controllerPath"
     }
-    Copy-Item -LiteralPath (Resolve-Path -LiteralPath $ControllerFile).Path -Destination (Join-Path $staging "Ec4.ctrl2") -Force
+    Copy-Item -LiteralPath $controllerPath -Destination $staging -Force
+}
+if ($ControllerFile) {
+    Write-Warning "-ControllerFile n'est plus nécessaire : les modèles UniBank et FullBank officiels sont inclus automatiquement."
 }
 
 if (Test-Path -LiteralPath $zipPath) {

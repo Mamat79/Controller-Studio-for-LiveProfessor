@@ -11,9 +11,14 @@ $IconPath = Join-Path $ProjectRoot "src\ec4lpbridge\assets\ec4lp.ico"
 if (-not (Test-Path -LiteralPath $IconPath)) {
     throw "Icon file missing: $IconPath"
 }
-$ControllerPath = Join-Path $ProjectRoot "Ec4.ctrl2"
-if (-not (Test-Path -LiteralPath $ControllerPath)) {
-    throw "LiveProfessor controller file missing: $ControllerPath"
+$ControllerPaths = @(
+    (Join-Path $ProjectRoot "Ec4-UniBank.ctrl2"),
+    (Join-Path $ProjectRoot "Ec4-FullBank.ctrl2")
+)
+foreach ($controllerPath in $ControllerPaths) {
+    if (-not (Test-Path -LiteralPath $controllerPath)) {
+        throw "LiveProfessor controller file missing: $controllerPath"
+    }
 }
 
 Push-Location $ProjectRoot
@@ -29,7 +34,8 @@ try {
         --windowed `
         --icon "$IconPath" `
         --add-data "$IconPath;ec4lpbridge\\assets" `
-        --add-data "$ControllerPath;." `
+        --add-data "$($ControllerPaths[0]);." `
+        --add-data "$($ControllerPaths[1]);." `
         --name "EC4-LiveProfessor-Bridge" `
         --paths "src" `
         --collect-submodules "mido.backends" `

@@ -83,7 +83,7 @@ Les deux approches sont valables. Si vous souhaitez simplement piloter quelques 
 - apprentissage des 16 Notes correspondant aux poussoirs ;
 - transmission des push simples 1 à 15 vers les boutons Companion apprenables ;
 - affichage des raccourcis directement sur l’EC4 pendant le maintien de Shift ;
-- contrôleur `Ec4.ctrl2` neutre intégré et copiable depuis l’application ;
+- contrôleurs neutres `Ec4-UniBank.ctrl2` (16 rotatifs) et `Ec4-FullBank.ctrl2` (99 rotatifs), copiables depuis l’application ;
 - choix d’un setup/groupe EC4 réservé à LiveProfessor ;
 - navigation entre plugins ;
 - navigation entre chaînes ;
@@ -178,10 +178,11 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 
 - [Télécharger l’installateur Windows 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommandé ;
 - [Télécharger l’archive portable 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip) ;
-- [Télécharger le contrôleur LiveProfessor `Ec4.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2) ;
+- [Télécharger `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — une seule banque de 16 rotatifs ;
+- [Télécharger `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotatifs pour toutes les banques ;
 - [Consulter la release et ses notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
 
-L’installateur contient l’application, la documentation et le contrôleur `Ec4.ctrl2`.
+L’installateur contient l’application, la documentation et les deux contrôleurs CTRL2.
 
 L’exécutable est autonome :
 
@@ -210,19 +211,20 @@ Il faut donc compléter le contrôleur avant de pouvoir exploiter correctement l
 
 ### Méthode recommandée — charger le fichier `.ctrl2` fourni
 
-Le plus simple est de **charger/importer directement dans LiveProfessor le fichier `.ctrl2` fourni avec le projet**.
+Le plus simple est de **charger/importer directement dans LiveProfessor l’un des deux fichiers `.ctrl2` fournis** :
 
-Le fichier est aussi intégré dans l’application : cliquez sur **Copier Ec4.ctrl2…** ou utilisez **Outils > Copier Ec4.ctrl2…**, choisissez un dossier, puis ouvrez **Controllers > Hardware Controllers Setup > Load from file** dans LiveProfessor. Le menu **Aide > Comment importer Ec4.ctrl2…** reprend la procédure complète.
+- `Ec4-UniBank.ctrl2` contient `Rotary1` à `Rotary16` pour une configuration simple à une banque ;
+- `Ec4-FullBank.ctrl2` contient `Rotary1` à `Rotary99` pour exploiter toutes les banques du bridge.
 
-Ce fichier contient déjà la définition Companion nécessaire au bridge et évite de créer les Rotary un par un.
+Les deux fichiers contiennent aussi `GenericButton1` à `GenericButton16`. Ils sont intégrés dans l’application : cliquez sur **CTRL2 UniBank…** ou **CTRL2 FullBank…**, choisissez un dossier, puis ouvrez **Controllers > Hardware Controllers Setup > Load from file** dans LiveProfessor. Le menu **Aide > Comment importer les CTRL2…** reprend la procédure complète.
 
-Après chargement, vérifiez simplement que le contrôleur contient au minimum :
+Après chargement, vérifiez que le contrôleur contient :
 
 ```text
 Rotary1 → Rotary16
 ```
 
-et davantage si vous souhaitez utiliser plusieurs banques jusqu’à `Rotary99`.
+Avec FullBank, la liste continue jusqu’à `Rotary99` sans ajout manuel.
 
 **C’est la méthode recommandée.**
 
@@ -267,7 +269,7 @@ Une map VST2 et une map VST3 peuvent être considérées comme deux types de plu
 
 ### Mapper les poussoirs des encodeurs
 
-L’apprentissage **Rotatifs + push** du bridge sert uniquement à reconnaître les messages MIDI envoyés par le groupe EC4 choisi. Dans LiveProfessor, le fichier `Ec4.ctrl2` définit déjà `GenericButton1` à `GenericButton15` : il ne faut donc pas refaire leur Learn comme des boutons MIDI bruts.
+L’apprentissage **Rotatifs + push** du bridge sert uniquement à reconnaître les messages MIDI envoyés par le groupe EC4 choisi. Dans LiveProfessor, les deux fichiers CTRL2 définissent déjà `GenericButton1` à `GenericButton15` : il ne faut donc pas refaire leur Learn comme des boutons MIDI bruts.
 
 Pour affecter un poussoir à une fonction de plugin :
 
@@ -424,7 +426,7 @@ Le menu **Aide** ouvre le [dépôt](https://github.com/Mamat79/EC4-LiveProfessor
 
 ## Feuille de route
 
-- **0.5.1** : version stable actuelle avec aide Shift sur l’EC4, poussoirs 1 à 15 assignables et contrôleur `Ec4.ctrl2` neutre intégré ;
+- **0.5.1** : version stable actuelle avec aide Shift sur l’EC4, poussoirs 1 à 15 assignables et choix entre CTRL2 UniBank et FullBank ;
 - **1.0** : auto-mapping assisté et automatique, d'abord validé sur le Faderfox EC4 ;
 - version ultérieure : ouverture à d'autres surfaces MIDI/OSC au moyen de profils matériels, en conservant l'EC4 comme surface de référence.
 
@@ -519,7 +521,7 @@ Both approaches are valid. For a small fixed control setup, connecting the EC4 d
 - MIDI Learn for the 16 encoder push buttons;
 - simple push buttons 1 through 15 forwarded to learnable Companion buttons;
 - on-device shortcut guide while Shift is held;
-- embedded neutral `Ec4.ctrl2` controller exportable from the application;
+- embedded neutral `Ec4-UniBank.ctrl2` (16 rotaries) and `Ec4-FullBank.ctrl2` (99 rotaries), exportable from the application;
 - dedicated EC4 setup/group selection;
 - plugin navigation;
 - chain navigation;
@@ -608,10 +610,11 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 
 - [Download the Windows 0.5.1 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommended;
 - [Download the portable 0.5.1 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip);
-- [Download the LiveProfessor `Ec4.ctrl2` controller](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2);
+- [Download `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — one bank with 16 rotaries;
+- [Download `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotaries for every bank;
 - [View the latest release and release notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
 
-The installer includes the application, documentation and the `Ec4.ctrl2` controller file.
+The installer includes the application, documentation and both CTRL2 controller files.
 
 The Windows executable is standalone:
 
@@ -638,11 +641,12 @@ EC4 LiveProfessor Bridge uses **16 Rotary controls per bank** and can address up
 
 ### Recommended method — load the supplied `.ctrl2` file
 
-The easiest method is to **load/import the `.ctrl2` file supplied with this project directly into LiveProfessor**.
+The easiest method is to **load/import one of the two supplied `.ctrl2` files directly into LiveProfessor**:
 
-The controller is also embedded in the application: click **Copy Ec4.ctrl2…** or use **Tools > Copy Ec4.ctrl2…**, choose a folder, then open **Controllers > Hardware Controllers Setup > Load from file** in LiveProfessor. The **Help > How to import Ec4.ctrl2…** menu shows the complete procedure.
+- `Ec4-UniBank.ctrl2` contains `Rotary1` through `Rotary16` for a simple single-bank setup;
+- `Ec4-FullBank.ctrl2` contains `Rotary1` through `Rotary99` for every bridge bank.
 
-It already contains the Companion definition required by the bridge and avoids creating each Rotary manually.
+Both files also contain `GenericButton1` through `GenericButton16`. They are embedded in the application: click **UniBank CTRL2…** or **FullBank CTRL2…**, choose a folder, then open **Controllers > Hardware Controllers Setup > Load from file** in LiveProfessor. The **Help > How to import the CTRL2 files…** menu shows the complete procedure.
 
 Check that the controller contains at least:
 
@@ -650,7 +654,7 @@ Check that the controller contains at least:
 Rotary1 → Rotary16
 ```
 
-and additional controls if you intend to use more banks up to `Rotary99`.
+With FullBank, the list continues through `Rotary99` without manual additions.
 
 **This is the recommended method.**
 
@@ -689,7 +693,7 @@ For each plugin type:
 
 ### Mapping encoder push buttons
 
-The bridge’s **Learn encoders + push** operation only identifies the MIDI messages sent by the selected EC4 group. In LiveProfessor, `Ec4.ctrl2` already defines `GenericButton1` through `GenericButton15`, so they should not be learned again as raw MIDI buttons.
+The bridge’s **Learn encoders + push** operation only identifies the MIDI messages sent by the selected EC4 group. In LiveProfessor, both CTRL2 files already define `GenericButton1` through `GenericButton15`, so they should not be learned again as raw MIDI buttons.
 
 To assign a push button to a plugin function:
 
@@ -814,7 +818,7 @@ The **Help** menu opens the [repository](https://github.com/Mamat79/EC4-LiveProf
 
 ## Roadmap
 
-- **0.5.1**: current stable release with the on-device Shift guide, assignable pushes 1 through 15, and an embedded neutral `Ec4.ctrl2` controller;
+- **0.5.1**: current stable release with the on-device Shift guide, assignable pushes 1 through 15, and a choice of UniBank or FullBank CTRL2;
 - **1.0**: assisted and automatic mapping, first validated on the Faderfox EC4;
 - later: support additional MIDI/OSC control surfaces through hardware profiles while keeping the EC4 as the reference surface.
 
