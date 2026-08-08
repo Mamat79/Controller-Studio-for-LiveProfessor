@@ -43,6 +43,28 @@ Le bridge ne remplace pas le système de **Controller Maps** de LiveProfessor : 
 
 L’EC4 devient ainsi une télécommande dynamique des plugins de la session, avec retour de valeurs et affichage sur son OLED.
 
+## EC4 direct en MIDI ou avec le bridge ?
+
+Les deux approches sont valables. Si vous souhaitez simplement piloter quelques paramètres fixes, connecter l’EC4 directement en MIDI à LiveProfessor reste la solution la plus simple. Le bridge devient intéressant lorsqu’on veut exploiter l’EC4 comme une véritable surface de contrôle dynamique.
+
+| Fonction | EC4 direct en MIDI | Avec EC4 LiveProfessor Bridge |
+|---|---:|---:|
+| Contrôler les paramètres d’un plugin | ✅ | ✅ |
+| Utiliser les Controller Maps | ✅ | ✅ |
+| Feedback des valeurs | possible selon configuration | ✅ intégré |
+| Gestion de banques | à configurer manuellement | ✅ intégrée jusqu’à 99 contrôles |
+| Affichage des noms de paramètres sur l’EC4 | ❌ pas automatiquement | ✅ |
+| Affichage des valeurs sur l’OLED | ❌ pas automatiquement | ✅ |
+| Suivi du plugin sélectionné | possible selon configuration | ✅ intégré au fonctionnement du bridge |
+| Exploitation du SysEx de l’EC4 | à développer/configurer séparément | ✅ intégré |
+| Navigation plugins / chaînes / snapshots | à mapper manuellement | ✅ intégrée |
+| Anti-écho / synchronisation | à gérer selon configuration | ✅ intégrée |
+| Reconnexion automatique de l’EC4 | dépend de la configuration | ✅ |
+| Diagnostic MIDI / OSC | limité | ✅ intégré |
+| Simplicité de mise en œuvre | ✅ maximale | nécessite le bridge |
+
+**Pour un contrôle fixe de quelques paramètres, le MIDI direct suffit souvent. Le bridge prend tout son intérêt lorsqu’on veut transformer l’EC4 en véritable surface de contrôle dynamique de LiveProfessor, avec affichage, feedback, banques, navigation et synchronisation.**
+
 ## Fonctionnalités principales
 
 - connexion MIDI avec le **Faderfox EC4** ;
@@ -403,6 +425,28 @@ and back:
 ```text
 LiveProfessor → OSC feedback → Bridge → MIDI / SysEx → EC4
 ```
+
+## Direct MIDI or the bridge?
+
+Both approaches are valid. For a small fixed control setup, connecting the EC4 directly to LiveProfessor over MIDI is usually the simplest option. The bridge becomes useful when you want the EC4 to behave as a dynamic, context-aware control surface.
+
+| Feature | EC4 direct over MIDI | With EC4 LiveProfessor Bridge |
+|---|---:|---:|
+| Control plugin parameters | ✅ | ✅ |
+| Use Controller Maps | ✅ | ✅ |
+| Parameter feedback | possible depending on configuration | ✅ integrated |
+| Bank management | manual configuration | ✅ integrated up to 99 controls |
+| Parameter names on the EC4 | ❌ not automatic | ✅ |
+| Parameter values on the OLED | ❌ not automatic | ✅ |
+| Follow the selected plugin | possible depending on configuration | ✅ integrated into the bridge workflow |
+| EC4 SysEx integration | separate development/configuration required | ✅ integrated |
+| Plugin / chain / snapshot navigation | manual mapping | ✅ integrated |
+| Echo protection / synchronization | configuration dependent | ✅ integrated |
+| Automatic EC4 reconnection | configuration dependent | ✅ |
+| MIDI / OSC diagnostics | limited | ✅ integrated |
+| Setup simplicity | ✅ maximum | requires the bridge |
+
+**For a fixed set of controls, direct MIDI is often enough. The bridge becomes valuable when you want to turn the EC4 into a true dynamic LiveProfessor control surface with display feedback, parameter synchronization, banks and navigation.**
 
 ## Main features
 
