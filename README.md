@@ -4,24 +4,22 @@
 
 **Une passerelle intelligente entre le Faderfox EC4 et LiveProfessor.**
 
-Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, 16 encodeurs avec poussoir et un écran OLED capable d’afficher beaucoup d’informations.
+Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, équipé de 16 encodeurs avec poussoir et d’un écran OLED très utile pour le retour d’information.
 
-Le problème, lorsqu’on veut l’utiliser avec **LiveProfessor**, est que l’on perd rapidement une grande partie de cette intelligence : mappings à refaire, paramètres difficiles à identifier, valeurs qui ne suivent pas toujours le logiciel, changements de plugins peu pratiques…
+Avec une connexion MIDI classique, on peut bien sûr piloter LiveProfessor directement. Mais on se retrouve vite avec des affectations fixes, peu de contexte sur ce que contrôle chaque encodeur, et une intégration limitée lorsque l’on change de plugin, de banque ou de paramètre.
 
-**EC4 LiveProfessor Bridge a été créé pour résoudre ce problème.**
+**EC4 LiveProfessor Bridge a été créé pour transformer l’EC4 en véritable surface de contrôle dynamique pour LiveProfessor.**
 
-L’application transforme l’EC4 en véritable surface de contrôle dynamique pour LiveProfessor :
+Il ajoute une couche de communication entre les deux :
 
 - les 16 encodeurs pilotent les paramètres du plugin sélectionné ;
-- les noms des paramètres et leurs valeurs reviennent depuis LiveProfessor ;
+- les noms et valeurs des paramètres reviennent depuis LiveProfessor ;
 - l’écran OLED de l’EC4 affiche directement ce que l’on contrôle ;
 - les valeurs sont synchronisées dans les deux sens pour éviter les sauts ;
 - jusqu’à **99 paramètres** peuvent être accessibles par banques ;
-- le même EC4 peut continuer à être utilisé pour d’autres logiciels ou fonctions sur ses autres setups/groupes.
+- les autres setups/groupes de l’EC4 restent libres pour d’autres usages.
 
 Le bridge fonctionne **entièrement en dehors du chemin audio** : il ne charge aucun plugin, ne traite aucun son, n’installe aucun pilote audio et ne modifie pas les projets LiveProfessor.
-
-En pratique :
 
 ```text
 EC4 → MIDI / SysEx → Bridge → OSC → LiveProfessor
@@ -39,48 +37,42 @@ LiveProfessor → OSC feedback → Bridge → MIDI / SysEx → EC4
 
 ## À quoi sert le bridge ?
 
-Sans passerelle, utiliser un contrôleur MIDI générique avec LiveProfessor peut rapidement devenir fastidieux : il faut gérer les affectations, savoir quel encodeur contrôle quoi, éviter les sauts de valeurs et retrouver ses repères lorsqu’on change de plugin.
+EC4 LiveProfessor Bridge permet d’utiliser le Faderfox EC4 comme une surface de contrôle réellement intégrée à LiveProfessor.
 
-EC4 LiveProfessor Bridge ajoute une couche de communication entre le **Faderfox EC4** et le système de contrôle de **LiveProfessor**.
+Le bridge ne remplace pas le système de **Controller Maps** de LiveProfessor : il s’appuie dessus. Une fois une map créée pour un type de plugin, les mêmes contrôles peuvent suivre l’instance actuellement sélectionnée grâce à l’option **Only If Selected**.
 
-Le but n’est pas de remplacer LiveProfessor ni son système de Controller Maps. Au contraire, le bridge utilise les fonctions prévues par LiveProfessor pour permettre à l’EC4 de devenir une surface de contrôle beaucoup plus lisible et agréable à utiliser.
-
-Une fois une **Controller Map** créée pour un type de plugin, les mêmes contrôles peuvent suivre l’instance actuellement sélectionnée grâce à l’option **Only If Selected**.
-
-L’EC4 devient alors une sorte de télécommande universelle des plugins de la session.
+L’EC4 devient ainsi une télécommande dynamique des plugins de la session, avec retour de valeurs et affichage sur son OLED.
 
 ## Fonctionnalités principales
 
-- Connexion MIDI avec le **Faderfox EC4**
-- Détection et reconnexion automatique de l’EC4
-- Communication OSC avec **LiveProfessor Companion Controller**
-- Jusqu’à **99 contrôles**
-- Banques de **16 paramètres**
-- Feedback bidirectionnel des valeurs
-- Protection anti-écho MIDI / OSC
-- Affichage des noms de paramètres sur l’écran OLED de l’EC4
-- Affichage temporaire de la valeur du paramètre manipulé
-- Grille permanente des 16 paramètres de la banque active
-- Apprentissage des 16 CC rotatifs
-- Apprentissage des 16 Notes correspondant aux poussoirs
-- Choix d’un setup/groupe EC4 réservé à LiveProfessor
-- Navigation entre plugins
-- Navigation entre chaînes
-- Navigation entre banques
-- Rappel des snapshots globaux
-- Tap Tempo
-- Mode Companion recommandé
-- Mode OSC générique de secours
-- Profils JSON pour les noms de paramètres en mode générique
-- Configuration portable
-- Journal tournant
-- Outils de diagnostic intégrés
+- connexion MIDI avec le **Faderfox EC4** ;
+- détection et reconnexion automatique de l’EC4 ;
+- communication OSC avec **LiveProfessor Companion Controller** ;
+- jusqu’à **99 contrôles** ;
+- banques de **16 paramètres** ;
+- feedback bidirectionnel des valeurs ;
+- protection anti-écho MIDI / OSC ;
+- affichage des noms de paramètres sur l’écran OLED de l’EC4 ;
+- affichage temporaire de la valeur du paramètre manipulé ;
+- grille permanente des 16 paramètres de la banque active ;
+- apprentissage des 16 CC rotatifs ;
+- apprentissage des 16 Notes correspondant aux poussoirs ;
+- choix d’un setup/groupe EC4 réservé à LiveProfessor ;
+- navigation entre plugins ;
+- navigation entre chaînes ;
+- navigation entre banques ;
+- rappel des snapshots globaux ;
+- Tap Tempo ;
+- mode Companion recommandé ;
+- mode OSC générique de secours ;
+- profils JSON pour les noms de paramètres en mode générique ;
+- configuration portable ;
+- journal tournant ;
+- outils de diagnostic intégrés.
 
 ## Principe de fonctionnement
 
-Le bridge ne contrôle pas directement les paramètres internes d’un plugin.
-
-Il utilise les contrôles virtuels exposés par le **Companion Controller** de LiveProfessor :
+Le bridge utilise les contrôles virtuels exposés par le **Companion Controller** de LiveProfessor :
 
 ```text
 Rotary1
@@ -90,7 +82,7 @@ Rotary3
 Rotary99
 ```
 
-Dans LiveProfessor, ces contrôles sont ensuite associés aux paramètres du plugin via les **Controller Maps**.
+Dans LiveProfessor, ces contrôles sont ensuite associés aux paramètres des plugins via les **Controller Maps**.
 
 Exemple :
 
@@ -103,13 +95,13 @@ Bridge
         ↓
 LiveProfessor Controller Map
         ↓
-Gain du plugin
+Paramètre du plugin
 ```
 
 Le feedback effectue le trajet inverse :
 
 ```text
-Gain du plugin
+Paramètre du plugin
         ↓
 LiveProfessor
         ↓
@@ -138,16 +130,16 @@ Rotary4 → Threshold
 
 Cette map peut ensuite être réutilisée sur les autres instances du même plugin.
 
-Avec **Only If Selected**, les 16 encodeurs suivent automatiquement le plugin actuellement sélectionné.
+Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actuellement sélectionné.
 
 ## Prérequis
 
-- Windows 10 ou Windows 11 x64
-- Faderfox EC4
-- LiveProfessor 2023.0.8 ou supérieur
-- licence ou période d’essai officielle LiveProfessor
-- Companion Controller configuré dans LiveProfessor
-- Controller Maps pour les plugins à contrôler
+- Windows 10 ou Windows 11 x64 ;
+- Faderfox EC4 ;
+- LiveProfessor 2023.0.8 ou supérieur ;
+- licence ou période d’essai officielle LiveProfessor ;
+- Companion Controller configuré dans LiveProfessor ;
+- Controller Maps pour les plugins à contrôler.
 
 ## Télécharger
 
@@ -155,13 +147,11 @@ La dernière version Windows est disponible dans les **Releases GitHub** :
 
 [Releases — EC4 LiveProfessor Bridge](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
 
-L’exécutable est autonome. Il suffit de copier :
+L’exécutable est autonome :
 
 ```text
 EC4-LiveProfessor-Bridge.exe
 ```
-
-sur le PC et de le lancer.
 
 Python n’est pas nécessaire et aucun droit administrateur n’est requis.
 
@@ -178,7 +168,7 @@ Rotary3
 Rotary4
 ```
 
-Or EC4 LiveProfessor Bridge utilise **16 Rotary par banque**, et peut adresser jusqu’à **99 contrôles**.
+Or EC4 LiveProfessor Bridge utilise **16 Rotary par banque** et peut adresser jusqu’à **99 contrôles**.
 
 Il faut donc compléter le contrôleur avant de pouvoir exploiter correctement les 16 encodeurs de l’EC4.
 
@@ -196,7 +186,7 @@ Rotary1 → Rotary16
 
 et davantage si vous souhaitez utiliser plusieurs banques jusqu’à `Rotary99`.
 
-C’est la méthode recommandée.
+**C’est la méthode recommandée.**
 
 ### Méthode manuelle
 
@@ -206,7 +196,7 @@ Si vous préférez créer le contrôleur vous-même :
 2. ajouter un **Companion Controller** ;
 3. conserver les 4 Rotary créés par défaut ;
 4. ajouter au minimum `Rotary5` à `Rotary16` ;
-5. ajouter éventuellement `Rotary17` à `Rotary99` si vous souhaitez exploiter toutes les banques ;
+5. ajouter éventuellement `Rotary17` à `Rotary99` pour exploiter toutes les banques ;
 6. enregistrer le contrôleur ainsi complété pour pouvoir le réutiliser.
 
 Configuration réseau recommandée :
@@ -239,10 +229,7 @@ Une map VST2 et une map VST3 peuvent être considérées comme deux types de plu
 
 ## Configuration de l’EC4
 
-Le bridge peut utiliser :
-
-- le mapping historique prévu pour le script Ableton ;
-- ou n’importe quel setup/groupe EC4 appris directement par l’application.
+Le bridge peut apprendre directement n’importe quel setup/groupe EC4 adapté.
 
 Pour utiliser une zone personnalisée :
 
@@ -271,8 +258,6 @@ Certaines fonctions peuvent évoluer entre les versions du bridge.
 ## Banques de paramètres
 
 L’EC4 possède 16 encodeurs physiques, mais le Companion Controller de LiveProfessor permet au bridge de gérer jusqu’à **99 contrôles**.
-
-Les paramètres sont donc organisés en banques :
 
 ```text
 Banque 1 : Rotary1  → Rotary16
@@ -325,11 +310,7 @@ config.json
 
 à côté de l’exécutable.
 
-Il suffit alors de copier l’exécutable et ce fichier sur un autre PC pour retrouver la configuration.
-
 ## Documentation
-
-Documentation détaillée disponible dans le dossier `docs` :
 
 - [Guide d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
 - [Configuration EC4](docs/CONFIGURATION_EC4.md)
@@ -338,16 +319,11 @@ Documentation détaillée disponible dans le dossier `docs` :
 
 ## Développement
 
-Le projet est écrit en Python.
-
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\pip.exe install -r requirements-build.txt
-
 $env:PYTHONPATH = "src"
-
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
-
 .\scripts\build.ps1
 ```
 
@@ -375,14 +351,6 @@ Plugins
 
 Le bridge ne transporte **aucun signal audio**.
 
-## Statut du projet
-
-Le projet est actuellement en développement actif.
-
-La version stable publiée est basée sur la branche `main`.
-
-Certaines nouvelles fonctions et améliorations peuvent être testées dans des branches de développement avant leur intégration à la version stable.
-
 ## Auteur
 
 **SiLeMI/O — By Mamat ------[]---**
@@ -395,7 +363,7 @@ Ce dépôt est public, mais aucune licence open source n’est actuellement acco
 
 **Tous droits réservés à Mamat / SiLeMI/O.**
 
-Faderfox, LiveProfessor, Audioström, Ableton, VST ainsi que les autres marques citées appartiennent à leurs propriétaires respectifs.
+Faderfox, LiveProfessor, Audioström, VST ainsi que les autres marques citées appartiennent à leurs propriétaires respectifs.
 
 Ce projet est indépendant et n’est ni affilié, ni approuvé, ni sponsorisé par Faderfox, Audioström ou les éditeurs des logiciels et plugins mentionnés.
 
@@ -411,26 +379,20 @@ Aucun logiciel propriétaire tiers n’est redistribué dans ce dépôt.
 
 The **Faderfox EC4** is an excellent MIDI controller: compact, rugged, equipped with 16 push encoders and a powerful OLED display.
 
-When using it with **LiveProfessor**, however, much of that potential can easily be lost.
+It can of course control LiveProfessor directly over MIDI. But a conventional MIDI setup quickly becomes limited: fixed assignments, little context about what each encoder currently controls, and a less fluid workflow when switching plugins, banks or parameters.
 
-A generic MIDI controller normally requires a lot of manual mapping, makes it difficult to know which encoder controls which parameter, and can cause value jumps when switching between plugins or presets.
+**EC4 LiveProfessor Bridge was created to turn the EC4 into a dynamic control surface for LiveProfessor.**
 
-**EC4 LiveProfessor Bridge was created to solve that problem.**
-
-It turns the EC4 into a dynamic control surface for LiveProfessor:
+It adds a communication layer between both devices:
 
 - the 16 encoders control parameters of the currently selected plugin;
 - parameter names and values are received from LiveProfessor;
 - the EC4 OLED displays what is currently being controlled;
 - parameter values are synchronized in both directions;
 - up to **99 parameters** can be accessed through banks;
-- other EC4 setups and groups can remain available for Ableton or any other application.
+- other EC4 setups/groups remain available for other uses.
 
-The bridge operates **completely outside the audio path**.
-
-It does not load plugins, process audio, install audio drivers or modify LiveProfessor projects.
-
-In practice:
+The bridge operates **completely outside the audio path**. It does not load plugins, process audio, install audio drivers or modify LiveProfessor projects.
 
 ```text
 EC4 → MIDI / SysEx → Bridge → OSC → LiveProfessor
@@ -444,36 +406,34 @@ LiveProfessor → OSC feedback → Bridge → MIDI / SysEx → EC4
 
 ## Main features
 
-- Faderfox EC4 MIDI connection
-- Automatic EC4 detection and reconnection
-- LiveProfessor Companion Controller support
-- Up to **99 controls**
-- Banks of **16 parameters**
-- Bidirectional parameter feedback
-- MIDI / OSC echo protection
-- Dynamic parameter names on the EC4 OLED
-- Temporary parameter value display
-- Persistent 16-parameter bank grid
-- MIDI Learn for the 16 encoders
-- MIDI Learn for the 16 encoder push buttons
-- Dedicated EC4 setup/group selection
-- Plugin navigation
-- Chain navigation
-- Bank navigation
-- Global snapshot recall
-- Tap Tempo
-- Recommended Companion mode
-- Generic OSC fallback mode
-- JSON parameter profiles
-- Portable configuration
-- Rotating log files
-- Built-in diagnostics
+- Faderfox EC4 MIDI connection;
+- automatic EC4 detection and reconnection;
+- LiveProfessor Companion Controller support;
+- up to **99 controls**;
+- banks of **16 parameters**;
+- bidirectional parameter feedback;
+- MIDI / OSC echo protection;
+- dynamic parameter names on the EC4 OLED;
+- temporary parameter value display;
+- persistent 16-parameter bank grid;
+- MIDI Learn for the 16 encoders;
+- MIDI Learn for the 16 encoder push buttons;
+- dedicated EC4 setup/group selection;
+- plugin navigation;
+- chain navigation;
+- bank navigation;
+- global snapshot recall;
+- Tap Tempo;
+- recommended Companion mode;
+- generic OSC fallback mode;
+- JSON parameter profiles;
+- portable configuration;
+- rotating log files;
+- built-in diagnostics.
 
 ## How it works
 
-The bridge does not access plugin parameters directly.
-
-Instead, it uses the virtual controls exposed by the LiveProfessor **Companion Controller**:
+The bridge uses the virtual controls exposed by LiveProfessor's **Companion Controller**:
 
 ```text
 Rotary1
@@ -483,9 +443,7 @@ Rotary3
 Rotary99
 ```
 
-LiveProfessor **Controller Maps** associate those controls with plugin parameters.
-
-Example:
+LiveProfessor **Controller Maps** then associate those controls with plugin parameters.
 
 ```text
 EC4 Encoder 1
@@ -496,13 +454,13 @@ Bridge
         ↓
 LiveProfessor Controller Map
         ↓
-Plugin Gain
+Plugin parameter
 ```
 
 Feedback follows the reverse path:
 
 ```text
-Plugin Gain
+Plugin parameter
         ↓
 LiveProfessor
         ↓
@@ -513,13 +471,9 @@ Bridge
 EC4
 ```
 
-This keeps the physical encoder value synchronized with the actual plugin value.
-
 ## Why use Controller Maps?
 
-The goal is to avoid performing MIDI Learn again for every plugin instance.
-
-A map can be created once for a plugin type. For example:
+A Controller Map only needs to be created once for a plugin type.
 
 ```text
 Rotary1 → Gain
@@ -529,42 +483,36 @@ Rotary4 → Threshold
 ...
 ```
 
-The same map can then be reused for other instances of the same plugin.
+The same map can then be reused on other instances of the same plugin.
 
-With **Only If Selected**, the 16 EC4 encoders automatically follow the currently selected plugin.
+With **Only If Selected**, the EC4 controls automatically follow the currently selected plugin.
 
 ## Requirements
 
-- Windows 10 or Windows 11 x64
-- Faderfox EC4
-- LiveProfessor 2023.0.8 or later
-- official LiveProfessor licence or trial
-- LiveProfessor Companion Controller
-- Controller Maps for the plugins you want to control
+- Windows 10 or Windows 11 x64;
+- Faderfox EC4;
+- LiveProfessor 2023.0.8 or later;
+- official LiveProfessor licence or trial;
+- LiveProfessor Companion Controller;
+- Controller Maps for the plugins you want to control.
 
 ## Download
 
-The latest Windows version is available from the GitHub Releases page:
+[Latest GitHub Release](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
 
-[Releases — EC4 LiveProfessor Bridge](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
-
-The executable is standalone.
-
-Simply copy:
+The Windows executable is standalone:
 
 ```text
 EC4-LiveProfessor-Bridge.exe
 ```
 
-to the computer and run it.
-
-Python is not required and administrator privileges are not needed.
+Python and administrator privileges are not required.
 
 ## LiveProfessor configuration
 
 ### Important: the standard Companion Controller only contains 4 Rotary controls
 
-When you simply add a **Companion Controller** in **Hardware Controllers**, LiveProfessor provides only these controls by default:
+When you simply add a **Companion Controller** in **Hardware Controllers**, LiveProfessor provides only:
 
 ```text
 Rotary1
@@ -575,34 +523,30 @@ Rotary4
 
 EC4 LiveProfessor Bridge uses **16 Rotary controls per bank** and can address up to **99 controls**.
 
-The Companion Controller therefore needs to be extended before all 16 EC4 encoders can be used.
-
 ### Recommended method — load the supplied `.ctrl2` file
 
 The easiest method is to **load/import the `.ctrl2` file supplied with this project directly into LiveProfessor**.
 
-This file already contains the Companion definition required by the bridge, avoiding the need to create each Rotary manually.
+It already contains the Companion definition required by the bridge and avoids creating each Rotary manually.
 
-After loading it, simply check that the controller contains at least:
+Check that the controller contains at least:
 
 ```text
 Rotary1 → Rotary16
 ```
 
-and more controls if you intend to use additional banks up to `Rotary99`.
+and additional controls if you intend to use more banks up to `Rotary99`.
 
-This is the recommended method.
+**This is the recommended method.**
 
 ### Manual method
-
-If you prefer to build the controller yourself:
 
 1. open **Hardware Controllers** in LiveProfessor;
 2. add a **Companion Controller**;
 3. keep the 4 Rotary controls created by default;
 4. add at least `Rotary5` through `Rotary16`;
-5. optionally add `Rotary17` through `Rotary99` if you want to use all available banks;
-6. save the completed controller so it can be reused later.
+5. optionally add `Rotary17` through `Rotary99`;
+6. save the completed controller for later reuse.
 
 Recommended network settings:
 
@@ -613,15 +557,13 @@ Feedback address: 127.0.0.1
 Feedback port: 8011
 ```
 
-These are also the bridge default values.
-
 ## Creating a Controller Map
 
 Having `Rotary1` through `Rotary16` in the Companion Controller is not enough by itself: those Rotary controls must then be assigned to actual plugin parameters in a **Controller Map**.
 
 For each plugin type:
 
-1. load a test instance of the plugin;
+1. load an instance of the plugin;
 2. open **Controller Maps**;
 3. create a new map;
 4. assign `Rotary1`, `Rotary2`, etc. to the required parameters;
@@ -630,25 +572,16 @@ For each plugin type:
 7. save the map using **Save Map Preset**;
 8. apply the preset to the other instances of the same plugin.
 
-LiveProfessor may consider VST2 and VST3 versions of the same product to be different plugin types.
-
 ## EC4 configuration
 
-The bridge can use either:
+The bridge can learn any suitable EC4 setup/group directly.
 
-- the historical MIDI mapping used by the Ableton script;
-- or any EC4 setup/group learned directly by the application.
-
-To use a custom EC4 area:
-
-1. select the EC4 setup and group you want to dedicate to LiveProfessor;
+1. select the setup and group you want to dedicate to LiveProfessor;
 2. start the bridge;
 3. click **Use current setup/group**;
 4. start **Learn encoders + push**;
 5. turn the 16 encoders in order;
 6. press the 16 encoder buttons in order.
-
-The mapping is then stored by the bridge.
 
 Encoders should use **absolute CC values from 0 to 127** so feedback can correctly synchronize them.
 
@@ -661,13 +594,7 @@ Encoders should use **absolute CC values from 0 to 127** so feedback can correct
 | Push 16 | Tap Tempo |
 | Shift + Push | Navigation and additional commands |
 
-Some shortcuts may evolve between bridge versions.
-
 ## Parameter banks
-
-The EC4 has 16 physical encoders, while the LiveProfessor Companion Controller allows the bridge to address up to **99 controls**.
-
-Parameters are therefore organized into banks:
 
 ```text
 Bank 1: Rotary1  → Rotary16
@@ -676,55 +603,27 @@ Bank 3: Rotary33 → Rotary48
 ...
 ```
 
-The active bank is displayed in the application and the EC4 display is refreshed automatically.
-
 ## OLED display
 
 The bridge uses the EC4 **SysEx protocol** to control the display.
 
-### Persistent grid
-
-The 16 parameters of the current bank are displayed as a grid.
-
-### Temporary parameter display
-
-When an encoder is moved, the bridge can display:
-
-- parameter name;
-- parameter value;
-- current plugin.
-
-After a short delay, the display automatically returns to the main grid.
+The current bank can be shown as a permanent 16-parameter grid. When an encoder is moved, a temporary overlay can display the parameter name, value and current plugin before returning to the grid.
 
 ## Value jump protection
 
 When a plugin changes or a parameter value is modified inside LiveProfessor, the bridge sends the new value back to the EC4.
 
-The physical encoder is therefore synchronized with the current plugin value before it is moved again.
-
 An echo guard prevents that feedback message from immediately being sent back to LiveProfessor.
 
 ## Configuration
-
-By default, user configuration is stored in:
 
 ```text
 %LOCALAPPDATA%\EC4LiveProfessorBridge\config.json
 ```
 
-For fully portable operation, place:
-
-```text
-config.json
-```
-
-next to the executable.
-
-The executable and configuration file can then be copied together to another computer.
+For portable operation, place `config.json` next to the executable.
 
 ## Documentation
-
-More detailed documentation is available in the `docs` directory:
 
 - [Installation and user guide](docs/GUIDE_INSTALLATION_UTILISATION.md)
 - [EC4 configuration](docs/CONFIGURATION_EC4.md)
@@ -733,20 +632,13 @@ More detailed documentation is available in the `docs` directory:
 
 ## Development
 
-The project is written in Python.
-
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\pip.exe install -r requirements-build.txt
-
 $env:PYTHONPATH = "src"
-
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
-
 .\scripts\build.ps1
 ```
-
-The standalone Windows executable is built using **PyInstaller**.
 
 ## Architecture
 
@@ -770,14 +662,6 @@ Plugins
 
 The bridge carries **no audio signal**.
 
-## Project status
-
-The project is under active development.
-
-The stable public version is maintained on the `main` branch.
-
-New features and diagnostics may first appear in development branches before being merged into the stable version.
-
 ## Author
 
 **SiLeMI/O — By Mamat ------[]---**
@@ -790,7 +674,7 @@ This repository is public, but no open-source licence is currently granted.
 
 **All rights reserved by Mamat / SiLeMI/O.**
 
-Faderfox, LiveProfessor, Audioström, Ableton, VST and all other trademarks mentioned belong to their respective owners.
+Faderfox, LiveProfessor, Audioström, VST and all other trademarks mentioned belong to their respective owners.
 
 This is an independent project and is not affiliated with, endorsed by or sponsored by Faderfox, Audioström or any of the software or plugin manufacturers mentioned.
 
