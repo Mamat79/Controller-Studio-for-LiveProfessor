@@ -31,7 +31,7 @@ Le README bilingue publié sur la branche GitHub principale a été repris comme
 - réglages avancés, connexions et journal déplacés dans des fenêtres secondaires ;
 - changement français/anglais immédiat ;
 - nouveau titre et bandeau : `EC4 Bridge 0.5.0 | SiLeMI/O | By Mamat` ;
-- réduction dans la zone de notification sans fermeture ;
+- réduction dans la zone de notification sans fermeture, avec une fenêtre de messages Windows dédiée et une file d'actions empêchant tout appel Tkinter depuis le callback natif ;
 - clic gauche ou double-clic : restauration, avec décodage des événements simples et empaquetés utilisés par les versions récentes de Windows ;
 - clic droit : menu Ouvrir, Démarrer, Arrêter, Redémarrer, Journal, Mise à jour et Quitter ;
 - fermeture par la croix et vraie sortie par Quitter séparées ;
@@ -60,7 +60,7 @@ Contrôles supplémentaires :
 
 - ouverture réelle de l'exécutable installé sous Windows ;
 - changement visuel français → anglais sans redémarrage ;
-- réduction puis restauration du tray avec un événement Windows empaqueté réel : `PACKED_TRAY_RESTORE_OK` ;
+- réduction puis restauration asynchrone du tray avec un événement Windows empaqueté réel : `ASYNC_DEDICATED_TRAY_RESTORE_OK` ;
 - contrôle structurel de `Ec4.ctrl2` : 32 contrôles uniques, 16 boutons et 16 rotatifs ;
 - vérification de l'absence des notes internes dans les paquets publics.
 

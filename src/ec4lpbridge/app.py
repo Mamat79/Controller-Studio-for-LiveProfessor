@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import queue
 import sys
 import threading
 import time
@@ -33,26 +34,41 @@ if sys.platform == "win32":
 
     LRESULT = ctypes.c_longlong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_long
     WNDPROC = ctypes.WINFUNCTYPE(LRESULT, wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM)
+
+    class WNDCLASSEXW(ctypes.Structure):
+        _fields_ = [
+            ("cbSize", wintypes.UINT),
+            ("style", wintypes.UINT),
+            ("lpfnWndProc", WNDPROC),
+            ("cbClsExtra", ctypes.c_int),
+            ("cbWndExtra", ctypes.c_int),
+            ("hInstance", wintypes.HINSTANCE),
+            ("hIcon", wintypes.HANDLE),
+            ("hCursor", wintypes.HANDLE),
+            ("hbrBackground", wintypes.HANDLE),
+            ("lpszMenuName", wintypes.LPCWSTR),
+            ("lpszClassName", wintypes.LPCWSTR),
+            ("hIconSm", wintypes.HANDLE),
+        ]
+
     class POINT(ctypes.Structure):
         _fields_ = [("x", wintypes.LONG), ("y", wintypes.LONG)]
 
     _WIN_USER = 0x0400
     _WM_TASKBARICON = _WIN_USER + 1
-    _WM_DESTROY = 0x0002
     _WM_LBUTTONUP = 0x0202
     _WM_LBUTTONDOWN = 0x0201
     _WM_LBUTTONDBLCLK = 0x0203
     _WM_RBUTTONUP = 0x0205
     _WM_RBUTTONDOWN = 0x0204
     _WM_CONTEXTMENU = 0x007B
-    _GWL_WNDPROC = -4
+    _HWND_MESSAGE = -3
     _NIM_ADD = 0x0
     _NIM_MODIFY = 0x1
     _NIM_DELETE = 0x2
     _NIF_MESSAGE = 0x1
     _NIF_ICON = 0x2
     _NIF_TIP = 0x4
-    _SW_RESTORE = 9
     _IDI_APPLICATION = 32512
     _IMAGE_ICON = 1
     _LR_LOADFROMFILE = 0x10
@@ -403,10 +419,10 @@ class BridgeGUI:
         self.root.bind("<Unmap>", self._on_root_unmap)
         self._tray_ready = False
         self._tray_icon_created = False
+        self._tray_action_queue: queue.SimpleQueue[str] = queue.SimpleQueue()
+        self._tray_poll_after_id = None
         self._tray_data: NOTIFYICONDATA | None = None
         self._tray_window_proc_handle = None
-        self._tray_previous_proc = None
-        self._tray_previous_proc_fn = None
         self._tray_loaded_icon = None
         self._tray_uses_file_icon = False
         self._tray_icon_path = str((Path(__file__).resolve().parent / "assets" / "ec4lp.ico").resolve())
@@ -469,6 +485,7 @@ class BridgeGUI:
         self._tray_icon_path = str((Path(__file__).resolve().parent / "assets" / "ec4lp.ico").resolve())
 
         self._build()
+        self._tray_poll_after_id = self.root.after(50, self._poll_tray_actions)
         self._update_mapping_status()
         self.refresh_ports()
         self._append_log(f"Configuration: {self.config_path}")
@@ -571,7 +588,7 @@ class BridgeGUI:
         self._setup_tray_infrastructure()
 
     def _setup_tray_infrastructure(self) -> None:
-        if not sys.platform == "win32":
+        if sys.platform != "win32":
             return
         self._set_window_icons()
         if Path(self._tray_icon_path).exists():
@@ -584,37 +601,20 @@ class BridgeGUI:
         self._tray_icon_created = False
         self._tray_data = None
         self._tray_window_proc_handle = None
-        self._tray_previous_proc = None
-        self._tray_previous_proc_fn = None
+        self._tray_loaded_icon = None
         self._tray_uses_file_icon = False
         self._track_popup_menu = None
+        self._tray_hwnd = 0
+        self._tray_class_name = ""
+        self._tray_class_atom = 0
+        self._tray_hinstance = None
 
         self.root.update_idletasks()
-        self._tray_hwnd = int(self.root.winfo_id())
-        if not self._tray_hwnd:
-            return
         self._tray_msg = _WM_TASKBARICON
         self._user32 = ctypes.WinDLL("user32", use_last_error=True)
         self._shell32 = ctypes.WinDLL("shell32", use_last_error=True)
         self._kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-        self._user32.GetWindowLongPtrW.argtypes = [wintypes.HWND, ctypes.c_int]
-        self._user32.GetWindowLongPtrW.restype = ctypes.c_void_p
-        self._user32.SetWindowLongPtrW.argtypes = [wintypes.HWND, ctypes.c_int, ctypes.c_void_p]
-        self._user32.SetWindowLongPtrW.restype = ctypes.c_void_p
-        self._user32.ShowWindow.argtypes = [wintypes.HWND, ctypes.c_int]
-        self._user32.ShowWindow.restype = ctypes.c_bool
-        self._user32.SetForegroundWindow.argtypes = [wintypes.HWND]
-        self._user32.SetForegroundWindow.restype = ctypes.c_bool
-        self._user32.GetCursorPos.argtypes = [ctypes.POINTER(POINT)]
-        self._user32.GetCursorPos.restype = ctypes.c_int
-        self._user32.CallWindowProcW.argtypes = [
-            ctypes.c_void_p,
-            wintypes.HWND,
-            wintypes.UINT,
-            wintypes.WPARAM,
-            wintypes.LPARAM,
-        ]
-        self._user32.CallWindowProcW.restype = LRESULT
+
         self._user32.DefWindowProcW.argtypes = [
             wintypes.HWND,
             wintypes.UINT,
@@ -622,6 +622,31 @@ class BridgeGUI:
             wintypes.LPARAM,
         ]
         self._user32.DefWindowProcW.restype = LRESULT
+        self._user32.RegisterClassExW.argtypes = [ctypes.POINTER(WNDCLASSEXW)]
+        self._user32.RegisterClassExW.restype = wintypes.WORD
+        self._user32.CreateWindowExW.argtypes = [
+            wintypes.DWORD,
+            wintypes.LPCWSTR,
+            wintypes.LPCWSTR,
+            wintypes.DWORD,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            ctypes.c_int,
+            wintypes.HWND,
+            wintypes.HMENU,
+            wintypes.HINSTANCE,
+            ctypes.c_void_p,
+        ]
+        self._user32.CreateWindowExW.restype = wintypes.HWND
+        self._user32.DestroyWindow.argtypes = [wintypes.HWND]
+        self._user32.DestroyWindow.restype = ctypes.c_bool
+        self._user32.UnregisterClassW.argtypes = [wintypes.LPCWSTR, wintypes.HINSTANCE]
+        self._user32.UnregisterClassW.restype = ctypes.c_bool
+        self._user32.SetForegroundWindow.argtypes = [wintypes.HWND]
+        self._user32.SetForegroundWindow.restype = ctypes.c_bool
+        self._user32.GetCursorPos.argtypes = [ctypes.POINTER(POINT)]
+        self._user32.GetCursorPos.restype = ctypes.c_int
         self._user32.CreatePopupMenu.argtypes = []
         self._user32.CreatePopupMenu.restype = wintypes.HMENU
         self._user32.AppendMenuW.argtypes = [
@@ -657,8 +682,14 @@ class BridgeGUI:
             self._track_popup_menu.restype = ctypes.c_int
         self._user32.DestroyMenu.argtypes = [wintypes.HMENU]
         self._user32.DestroyMenu.restype = ctypes.c_bool
-        self._user32.BringWindowToTop.argtypes = [wintypes.HWND]
-        self._user32.BringWindowToTop.restype = ctypes.c_bool
+        self._kernel32.GetModuleHandleW.argtypes = [wintypes.LPCWSTR]
+        self._kernel32.GetModuleHandleW.restype = wintypes.HINSTANCE
+        self._shell32.Shell_NotifyIconW.argtypes = [
+            wintypes.DWORD,
+            ctypes.POINTER(NOTIFYICONDATA),
+        ]
+        self._shell32.Shell_NotifyIconW.restype = ctypes.c_bool
+
         icon = None
         if Path(self._tray_icon_path).exists():
             icon = self._user32.LoadImageW(
@@ -678,6 +709,54 @@ class BridgeGUI:
         if not icon:
             return
 
+        try:
+            self._tray_window_proc_handle = WNDPROC(self._on_tray_window_proc)
+        except Exception:
+            self._tray_window_proc_handle = None
+        if self._tray_window_proc_handle is None:
+            return
+
+        self._tray_hinstance = self._kernel32.GetModuleHandleW(None)
+        self._tray_class_name = (
+            f"EC4LiveProfessorTray_{os.getpid()}_{id(self):x}"
+        )
+        window_class = WNDCLASSEXW()
+        window_class.cbSize = ctypes.sizeof(WNDCLASSEXW)
+        window_class.lpfnWndProc = self._tray_window_proc_handle
+        window_class.hInstance = self._tray_hinstance
+        window_class.lpszClassName = self._tray_class_name
+        self._tray_class_atom = int(
+            self._user32.RegisterClassExW(ctypes.byref(window_class))
+        )
+        if not self._tray_class_atom:
+            self._tray_window_proc_handle = None
+            return
+
+        self._tray_hwnd = int(
+            self._user32.CreateWindowExW(
+                0,
+                self._tray_class_name,
+                self._tray_class_name,
+                0,
+                0,
+                0,
+                0,
+                0,
+                ctypes.c_void_p(_HWND_MESSAGE),
+                None,
+                self._tray_hinstance,
+                None,
+            )
+            or 0
+        )
+        if not self._tray_hwnd:
+            self._user32.UnregisterClassW(
+                self._tray_class_name, self._tray_hinstance
+            )
+            self._tray_class_atom = 0
+            self._tray_window_proc_handle = None
+            return
+
         nid = NOTIFYICONDATA()
         nid.cbSize = ctypes.sizeof(NOTIFYICONDATA)
         self._tray_loaded_icon = icon
@@ -686,55 +765,11 @@ class BridgeGUI:
         nid.uFlags = _NIF_MESSAGE | _NIF_ICON | _NIF_TIP
         nid.uCallbackMessage = self._tray_msg
         nid.hIcon = ctypes.c_void_p(icon)
-        nid.szTip = "EC4 × LiveProfessor"
+        nid.szTip = "EC4 Bridge"
         self._tray_data = nid
         self._tray_tip = nid.szTip
-        self._tray_has_callback = False
-
-        WndProcType = WNDPROC
-        callback = self._on_tray_window_proc
-        try:
-            self._tray_window_proc_handle = WndProcType(callback)
-        except Exception:
-            self._tray_window_proc_handle = None
-        if self._tray_window_proc_handle is None:
-            if self._tray_loaded_icon is not None and self._tray_uses_file_icon:
-                try:
-                    self._user32.DestroyIcon(self._tray_loaded_icon)
-                except Exception:
-                    pass
-            self._tray_loaded_icon = None
-            return
-
-        self._tray_previous_proc = self._user32.GetWindowLongPtrW(self._tray_hwnd, _GWL_WNDPROC)
-        if self._tray_previous_proc == 0:
-            self._tray_window_proc_handle = None
-            if self._tray_loaded_icon is not None and self._tray_uses_file_icon:
-                try:
-                    self._user32.DestroyIcon(self._tray_loaded_icon)
-                except Exception:
-                    pass
-            self._tray_loaded_icon = None
-            return
-        try:
-            self._tray_previous_proc_fn = WndProcType(int(self._tray_previous_proc))
-        except Exception:
-            # Not all Windows shells provide a compatible address we can wrap in ctypes.
-            self._tray_previous_proc_fn = None
-        try:
-            self._user32.SetWindowLongPtrW(
-                self._tray_hwnd,
-                _GWL_WNDPROC,
-                ctypes.cast(self._tray_window_proc_handle, ctypes.c_void_p),
-            )
-            self._tray_has_callback = True
-        except Exception:
-            self._tray_previous_proc_fn = None
-            self._tray_has_callback = False
-        # If the message hook fails, keep tray icon availability for restore by taskbar
-        # and log/restore fallback remains possible after relaunch.
+        self._tray_has_callback = True
         self._tray_ready = True
-
     def _resolve_user32_function(
         self,
         names: tuple[str, ...] | list[str],
@@ -773,22 +808,26 @@ class BridgeGUI:
     def _on_tray_window_proc(self, hwnd: int, msg: int, w_param: int, l_param: int) -> int:
         if msg == self._tray_msg:
             action = tray_action_for_event(l_param)
-            if action == "open":
-                self.root.after(0, self._restore_from_tray)
-                return 0
-            if action == "menu":
-                self.root.after(0, self._show_tray_menu)
-                return 0
+            if action is not None:
+                self._tray_action_queue.put(action)
             return 0
-        if self._tray_previous_proc is not None:
-            return self._user32.CallWindowProcW(
-                ctypes.c_void_p(self._tray_previous_proc),
-                hwnd,
-                msg,
-                w_param,
-                l_param,
-            )
         return self._user32.DefWindowProcW(hwnd, msg, w_param, l_param)
+
+    def _poll_tray_actions(self) -> None:
+        self._tray_poll_after_id = None
+        if self._closing:
+            return
+        while True:
+            try:
+                action = self._tray_action_queue.get_nowait()
+            except queue.Empty:
+                break
+            if action == "open":
+                self._restore_from_tray()
+            elif action == "menu":
+                self._show_tray_menu()
+        if not self._closing:
+            self._tray_poll_after_id = self.root.after(50, self._poll_tray_actions)
 
     def _show_tray_context_fallback(self, x: int, y: int) -> None:
         menu = self.tk.Menu(self.root, tearoff=0)
@@ -919,14 +958,6 @@ class BridgeGUI:
             self.root.deiconify()
             self.root.lift()
             self.root.focus_force()
-            try:
-                self._user32.ShowWindow(self._tray_hwnd, _SW_RESTORE)
-            except Exception:
-                pass
-            try:
-                self._user32.BringWindowToTop(self._tray_hwnd)
-            except Exception:
-                pass
         except Exception:
             try:
                 self.root.deiconify()
@@ -2052,6 +2083,30 @@ class BridgeGUI:
             self._tray_loaded_icon = None
         self._tray_icon_created = False
 
+    def _destroy_tray_infrastructure(self) -> None:
+        if sys.platform != "win32":
+            return
+        self._remove_tray_icon()
+        tray_hwnd = int(getattr(self, "_tray_hwnd", 0) or 0)
+        if tray_hwnd and hasattr(self, "_user32"):
+            try:
+                self._user32.DestroyWindow(tray_hwnd)
+            except Exception:
+                pass
+        self._tray_hwnd = 0
+        class_name = str(getattr(self, "_tray_class_name", "") or "")
+        class_atom = int(getattr(self, "_tray_class_atom", 0) or 0)
+        if class_atom and class_name and hasattr(self, "_user32"):
+            try:
+                self._user32.UnregisterClassW(
+                    class_name, getattr(self, "_tray_hinstance", None)
+                )
+            except Exception:
+                pass
+        self._tray_class_atom = 0
+        self._tray_window_proc_handle = None
+        self._tray_ready = False
+
     def minimize_to_taskbar(self) -> None:
         if sys.platform != "win32":
             self.root.iconify()
@@ -2066,12 +2121,14 @@ class BridgeGUI:
         if self._closing:
             return
         self._closing = True
-        self._remove_tray_icon()
-        if sys.platform == "win32" and self._tray_previous_proc and self._tray_hwnd:
+        tray_poll_after_id = getattr(self, "_tray_poll_after_id", None)
+        if tray_poll_after_id is not None:
             try:
-                self._user32.SetWindowLongPtrW(self._tray_hwnd, _GWL_WNDPROC, self._tray_previous_proc)
+                self.root.after_cancel(tray_poll_after_id)
             except Exception:
                 pass
+            self._tray_poll_after_id = None
+        self._destroy_tray_infrastructure()
         try:
             self.stop()
         finally:
