@@ -24,7 +24,7 @@ Links checked on 8 August 2026.
 
 This source demonstrates a protocol used in practice, but it does not turn undocumented LiveProfessor functions into an official API.
 
-Version 0.5.0 sends one official address for each global action. Legacy command variants stored in older configurations are migrated to the published address when loaded.
+Version 0.5.0 sends one address for each global action. For Shift+push 9, the tested LiveProfessor installation does not react to the documented `EnableProcessingOnSelectedPlugin` casing but accepts `EnableProcessingonselectedplugin`. The bridge preserves this observed compatibility and migrates the other variant when loading an older configuration.
 
 ## Unofficial field report
 

@@ -97,6 +97,8 @@ This replaces repeated MIDI Learn operations with one reusable definition inside
 
 A map belongs to a specific **plugin type**. Do not assume that a VST2 map can be reused unchanged with the VST3 edition of the same product.
 
+For push buttons, the bridge’s **Learn encoders + push** operation identifies the MIDI Notes sent by the EC4 group. In LiveProfessor, then use `GenericButton1` through `GenericButton15`, already provided by `Ec4.ctrl2`, directly in the **Controller Maps** editor. Enable the **Toggle** transformation for an on/off function. Quick Assign may fail for buttons; if the required parameter is absent from the Controller Map list, the plugin probably does not expose it to LiveProfessor.
+
 ### Configure and start the bridge
 
 Recommended bridge settings:

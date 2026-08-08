@@ -1,62 +1,70 @@
-# Cartographie MIDI et SysEx du script Faderfox Universal 2
+# Cartographie MIDI et SysEx du Faderfox EC4
 
-Les nombres de canaux affichés ci-dessous sont ceux vus par l'utilisateur. Le code Python emploie une numérotation à partir de zéro : canal 13 = `12`, canal 14 = `13`.
+🇬🇧 [English version](en/MIDI_SYSEX_MAPPING.md)
 
-## Contrôle des paramètres — utilisé par le prototype
+Les numéros de canaux ci-dessous sont ceux affichés à l’utilisateur sur l’EC4. Le code Python emploie une numérotation à partir de zéro : le canal utilisateur 13 correspond à `12`, et le canal utilisateur 14 à `13`.
 
-| Fonction | Canal utilisateur | Message | Plage | Mode dans Ableton |
+## Contrôle des paramètres — mapping de repli par défaut
+
+| Fonction | Canal utilisateur | Message | Plage | Mode de contrôle |
 |---|---:|---|---:|---|
-| Paramètres 1 à 8 | 13 | CC | 48–55 | Absolu, retour de valeur, takeover désactivé |
-| Paramètres 9 à 16 | 14 | CC | 73–80 | Absolu, retour de valeur, takeover désactivé |
-| Afficher le détail des paramètres 1 à 16 | 13 | Notes | 40–55 | Appui momentané |
+| Paramètres 1–8 | 13 | CC | 48–55 | Absolu, feedback de valeur, takeover désactivé |
+| Paramètres 9–16 | 14 | CC | 73–80 | Absolu, feedback de valeur, takeover désactivé |
+| Afficher le détail des paramètres 1–16 | 13 | Notes | 40–55 | Appui momentané |
 | Banque précédente | 14 | Note | 112 | Appui momentané |
 | Banque suivante | 14 | Note | 113 | Appui momentané |
 
-Cette table est le mapping de repli hérité d'Ableton. En version 0.3.0, l'interface peut apprendre les 16 CC rotatifs et les 16 Notes de push de n'importe quel setup/groupe. Le mode des rotatifs reste absolu. Un retour OSC reçu de LiveProfessor est converti en CC 0–127 et renvoyé à l'encodeur appris correspondant. Cette synchronisation est la stratégie anti-saut ; une garde de 100 ms bloque un éventuel écho identique.
+Ce mapping est utilisé lorsqu’aucun mapping personnalisé n’a été appris pour le setup/groupe sélectionné. Depuis la version 0.3.0, l’interface peut apprendre les 16 CC des encodeurs et les 16 Notes des push de n’importe quel setup/groupe.
 
-## Navigation device/plugin et piste/chaîne — utilisée par le prototype
+Les encodeurs restent en mode absolu. Le feedback OSC reçu de LiveProfessor est converti en valeur CC de 0 à 127 et renvoyé à l’encodeur appris correspondant. Cette synchronisation constitue la stratégie anti-saut. Une garde de 100 ms empêche qu’un feedback identique soit interprété comme un nouveau mouvement de l’utilisateur.
 
-| Fonction Ableton | Adaptation LiveProfessor | Canal | Note |
-|---|---|---:|---:|
-| Afficher/masquer la vue rack | Afficher/masquer le plugin sélectionné | 13 | 112 |
-| Device actif/inactif | Activer/désactiver le traitement du plugin sélectionné | 13 | 113 |
-| Device précédent | Plugin précédent | 13 | 114 |
-| Device suivant | Plugin suivant | 13 | 115 |
-| Afficher/masquer le device | Afficher/masquer le plugin sélectionné | 13 | 116 |
-| Verrouiller le device | Non exposé par la commande OSC publique étudiée | 13 | 117 |
-| Piste précédente | Chaîne précédente | 13 | 118 |
-| Piste suivante | Chaîne suivante | 13 | 119 |
+## Navigation plugin et chaîne
 
-## Gestes Shift + push en SysEx
+| Action LiveProfessor | Canal | Note |
+|---|---:|---:|
+| Afficher/masquer le plugin sélectionné | 13 | 112 |
+| Activer/désactiver le traitement du plugin sélectionné | 13 | 113 |
+| Plugin précédent | 13 | 114 |
+| Plugin suivant | 13 | 115 |
+| Afficher/masquer le plugin sélectionné | 13 | 116 |
+| Verrouillage du plugin | 13 | 117 — aucune commande OSC publique correspondante trouvée |
+| Chaîne précédente | 13 | 118 |
+| Chaîne suivante | 13 | 119 |
 
-Le script crée 16 boutons SysEx correspondant aux poussoirs d'encodeurs utilisés avec Shift.
+## Gestes Shift+push en SysEx
 
-| Index interne | Encodeur | Fonction Ableton | Adaptation du prototype |
-|---:|---:|---|---|
-| 0 | 1 | Banque précédente | Banque précédente |
-| 1 | 2 | Banque suivante | Banque suivante |
-| 2 | 3 | ViewSet précédent | ViewSet précédent |
-| 3 | 4 | ViewSet suivant | ViewSet suivant |
-| 4 | 5 | Afficher/masquer le plugin sélectionné | Afficher/masquer le plugin |
-| 5 | 6 | Chaîne précédente | Chaîne précédente |
-| 6 | 7 | Plugin précédent | Plugin précédent |
-| 7 | 8 | Plugin suivant | Plugin suivant |
-| 8 | 9 | Traitement plugin actif/inactif | Activer/désactiver le traitement du plugin |
-| 9 | 10 | Chaîne suivante | Chaîne suivante |
-| 10 | 11 | Plugin précédent | Plugin précédent |
-| 11 | 12 | Plugin suivant | Plugin suivant |
-| 12 | 13 | Cue précédent | Cue précédent |
-| 13 | 14 | Cue suivant | Cue suivant |
-| 14 | 15 | Snapshot global précédent | Snapshot global précédent |
-| 15 | 16 | Snapshot global suivant | Snapshot global suivant |
+L’EC4 fournit 16 messages de boutons SysEx correspondant aux poussoirs d’encodeurs utilisés avec Shift.
 
-Le **push simple de l'encodeur 16** déclenche le Tap Tempo et reste réservé à cette fonction. Les push simples 1 à 15 transmettent désormais un appui puis un relâchement vers `/Companion/GenericButtons/Button1` à `/Companion/GenericButtons/Button15`, tout en gardant l'affichage du détail du paramètre. Les actions de banque, cue et snapshot ci-dessus exigent bien Shift+push.
+| Index interne | Encodeur | Action du bridge |
+|---:|---:|---|
+| 0 | 1 | Banque de paramètres précédente |
+| 1 | 2 | Banque de paramètres suivante |
+| 2 | 3 | View Set précédent |
+| 3 | 4 | View Set suivant |
+| 4 | 5 | Afficher/masquer le plugin sélectionné |
+| 5 | 6 | Chaîne précédente |
+| 6 | 7 | Plugin précédent |
+| 7 | 8 | Plugin suivant |
+| 8 | 9 | Activer/désactiver le traitement du plugin sélectionné |
+| 9 | 10 | Chaîne suivante |
+| 10 | 11 | Plugin précédent |
+| 11 | 12 | Plugin suivant |
+| 12 | 13 | Cue précédente |
+| 13 | 14 | Cue suivante |
+| 14 | 15 | Snapshot global précédent |
+| 15 | 16 | Snapshot global suivant |
 
-## Contrôle de 16 pistes — cartographié dans Ableton, non transmis par le prototype
+Un **push simple sur l’encodeur 16** déclenche le Tap Tempo et reste réservé à cette fonction. Les push simples sur les encodeurs 1 à 15 envoient les états pression et relâchement vers `/Companion/GenericButtons/Button1` à `/Companion/GenericButtons/Button15`, tout en conservant l’overlay du paramètre. Toutes les actions du tableau exigent Shift+push.
 
-Les pistes 1–8 utilisent le canal 13 et les pistes 9–16 le canal 14. Pour la seconde moitié, les mêmes numéros 0–7 sont réutilisés sur l'autre canal.
+## Contrôles supplémentaires présents dans le preset EC4 historique mais non transmis par le bridge
 
-| Fonction par piste | Type | Base pour piste 1/9 | Plage sur chaque canal |
+Les contrôles suivants restent documentés à titre de référence. Le bridge actuel ne les redirige volontairement pas vers LiveProfessor.
+
+### Seize tranches de contrôle
+
+Les tranches 1–8 utilisent le canal utilisateur 13, tandis que les tranches 9–16 utilisent le canal utilisateur 14. Pour le second groupe, les numéros de contrôleurs 0–7 sont réutilisés sur l’autre canal MIDI.
+
+| Fonction par tranche | Type | Base pour tranche 1/9 | Plage sur chaque canal MIDI |
 |---|---|---:|---:|
 | Sélection | Note | 56 | 56–63 |
 | Volume | CC | 40 | 40–47 |
@@ -65,35 +73,35 @@ Les pistes 1–8 utilisent le canal 13 et les pistes 9–16 le canal 14. Pour la
 | Send 2 | CC | 8 | 8–15 |
 | Send 3 | CC | 16 | 16–23 |
 | Send 4 | CC | 24 | 24–31 |
-| Lancer clip | Note | 64 | 64–71 |
-| Arrêter piste/clip | Note | 72 | 72–79 |
+| Lancer une action | Note | 64 | 64–71 |
+| Arrêter une action | Note | 72 | 72–79 |
 | Arm | Note | 80 | 80–87 |
 | Monitor | Note | 88 | 88–95 |
 | Solo | Note | 96 | 96–103 |
 | Mute | Note | 104 | 104–111 |
 
-## Piste sélectionnée — cartographié dans Ableton, non transmis par le prototype
+### Contrôles de la tranche sélectionnée
 
-Tous ces contrôles sont sur le canal utilisateur 14.
+Ces contrôles utilisent le canal utilisateur 14.
 
 | Fonction | Message |
 |---|---|
-| Sends 1 à 3 | CC 56–58 |
-| Sends 4 à 12 | CC 64–72 |
+| Sends 1–3 | CC 56–58 |
+| Sends 4–12 | CC 64–72 |
 | Panoramique | CC 62 |
 | Volume | CC 63 |
-| Vue piste | Note 120 |
-| Vue clip | Note 121 |
-| Arrêter clip | Note 122 |
-| Lancer clip | Note 123 |
+| Vue de tranche | Note 120 |
+| Vue secondaire | Note 121 |
+| Arrêter l’action | Note 122 |
+| Lancer l’action | Note 123 |
 | Arm | Note 124 |
 | Monitor | Note 125 |
 | Solo | Note 126 |
 | Mute | Note 127 |
 
-Les sélecteurs de scène et de piste sont dupliqués sur les canaux 13 et 14 : CC 59 et CC 60, en mode `relative_smooth_two_compliment` dans Ableton.
+Les sélecteurs de scène et de tranche sont dupliqués sur les canaux utilisateur 13 et 14 sous forme de CC 59 et CC 60. Ils utilisent le mode `relative_smooth_two_compliment` dans le preset historique.
 
-## Transport et master — cartographié dans Ableton, non transmis par le prototype
+### Transport et master
 
 Canal utilisateur 13 :
 
@@ -102,26 +110,26 @@ Canal utilisateur 13 :
 | Tempo grossier | CC 56 | Relatif lissé, complément à deux |
 | Tempo fin | CC 57 | Relatif lissé, complément à deux |
 | Quantification | CC 58 | Absolu |
-| Sélection scène | CC 59 | Relatif lissé |
-| Sélection piste | CC 60 | Relatif lissé |
+| Sélection de scène | CC 59 | Relatif lissé |
+| Sélection de tranche | CC 60 | Relatif lissé |
 | Volume cue | CC 61 | Absolu |
-| Pan master | CC 62 | Absolu |
+| Panoramique master | CC 62 | Absolu |
 | Volume master | CC 63 | Absolu |
-| Nudge bas / haut | Notes 120 / 121 | Boutons |
-| Arrêt / lancement scène | Notes 122 / 123 | Boutons |
-| Lecture / stop / enregistrement | Notes 124 / 125 / 126 | Boutons |
-| Vue Arrangement | Note 127 | Bouton |
-| Affichage du tempo | Pitch bend | Retour Ableton vers EC4 |
+| Nudge bas/haut | Notes 120/121 | Boutons |
+| Arrêt/lancement de scène | Notes 122/123 | Boutons |
+| Lecture/stop/enregistrement | Notes 124/125/126 | Boutons |
+| Vue arrangement | Note 127 | Bouton |
+| Affichage du tempo | Pitch bend | Feedback vers l’EC4 |
 
-Canal utilisateur 14 : crossfader en CC 48 et affectation crossfader en CC 61.
+Le canal utilisateur 14 contient également un crossfader en CC 48 et l’affectation du crossfader en CC 61.
 
 ## Protocole SysEx EC4
 
 ### Préfixes
 
-- Requête du setup et groupe actifs : `F0 00 00 00 4E 20 10 F7`.
+- Requête du setup et du groupe actifs : `F0 00 00 00 4E 20 10 F7`.
 - Préfixe des réponses EC4 : `F0 00 00 00 4E 2C 1B`.
-- Préfixe des boutons : `F0 00 00 00 4E 2C 1B 4E`.
+- Préfixe des messages de boutons : `F0 00 00 00 4E 2C 1B 4E`.
 
 ### Réponse setup/groupe
 
@@ -131,27 +139,29 @@ Format exact de 14 octets :
 F0 00 00 00 4E 2C 1B 4E 28 Ss 4E 24 Gg F7
 ```
 
-Le setup vaut `Ss & 0F` et le groupe `Gg & 0F`. Le script autorise l'affichage device dans les setups internes 12–15, soit 13–16 sur l'appareil, et les groupes internes 2–3, soit 3–4 affichés.
+La valeur interne du setup est `Ss & 0F`, et celle du groupe `Gg & 0F`.
 
-Le prototype demande cet état à chaque connexion. Le setup et le groupe dédiés se choisissent explicitement dans l'interface. Les CC/Notes, le feedback et l'écran sont ignorés hors de cette zone. La version 0.3.0 y ajoute un mapping MIDI appris par zone. Les valeurs 13/3 restent la configuration initiale proposée, issue de la zone device du script.
+Le bridge demande cet état à chaque connexion. Le setup et le groupe dédiés sont sélectionnés explicitement dans l’interface. Les commandes CC/Note, le feedback et les mises à jour de l’écran sont ignorés hors de cette zone cible. Depuis la version 0.3.0, un mapping MIDI appris peut être mémorisé pour chaque couple setup/groupe.
+
+La configuration de repli initiale utilise le setup affiché 13 et le groupe 3, mais la sélection cible actuelle accepte n’importe quel couple setup/groupe valide.
 
 ### Shift, User et Shift+push
 
-Après le préfixe bouton :
+Après le préfixe des boutons :
 
 - Shift : `26 11 4E 2E` ;
 - User 1 à 4 : `26 12 4E 2E` à `26 15 4E 2E` ;
-- Shift+push encodeur `i` : `2A (10+i) 4E 2E`, avec `i` de 0 à 15.
+- Shift+push de l’encodeur `i` : `2A (10+i) 4E 2E`, avec `i` compris entre 0 et 15.
 
-Un octet d'état suit l'identifiant : `11` signifie pressé ; une autre valeur signifie relâché ; le message se termine par `F7`.
+Un octet d’état suit l’identifiant : `11` signifie pressé ; une autre valeur signifie relâché. Le message se termine par `F7`.
 
-Exemple, Shift+push sur l'encodeur 10 pressé :
+Exemple : Shift+push sur l’encodeur 10, pressé :
 
 ```text
 F0 00 00 00 4E 2C 1B 4E 2A 19 4E 2E 11 F7
 ```
 
-### Écran principal, 16 cellules de 4 caractères
+### Écran principal — 16 cellules de 4 caractères
 
 ```text
 F0 00 00 00 4E 2C 1B 4E 22 10 4A 20 10
@@ -165,9 +175,9 @@ Chaque caractère 8 bits `c` devient trois octets :
 4D (20 | c>>4) (10 | c&0F)
 ```
 
-Le message complet fait 206 octets. Les 16 libellés sont tronqués ou complétés à quatre caractères.
+Le message complet fait 206 octets. Chacun des 16 libellés est tronqué ou complété à quatre caractères.
 
-### Affichage temporaire total, 4 lignes de 20 caractères
+### Affichage temporaire total — 4 lignes de 20 caractères
 
 ```text
 F0 00 00 00 4E 2C 1B 4E 22 13 4A (20|offset_hi) (10|offset_lo)
@@ -175,22 +185,22 @@ F0 00 00 00 4E 2C 1B 4E 22 13 4A (20|offset_hi) (10|offset_lo)
 4E 22 14 F7
 ```
 
-Un écran complet de 80 caractères fait 257 octets. Pour effacer et masquer l'overlay, le dernier bloc `4E 22 14` est remplacé par `4E 22 15` après l'envoi de 80 espaces.
+Un écran complet de 80 caractères fait 257 octets. Pour effacer et masquer l’overlay, le dernier bloc `4E 22 14` est remplacé par `4E 22 15` après l’envoi de 80 espaces.
 
-Depuis la version 0.4.0, cet écran total est également réutilisé sous forme de grille persistante 4 × 4. Chaque cellule contient le nom court d'un paramètre. Après l'overlay temporaire d'une valeur, la grille de la banque active est renvoyée au lieu de revenir aux libellés enregistrés dans le groupe EC4.
+La version 0.4.0 réutilise également cette zone plein écran sous forme de grille persistante 4 × 4. Chaque cellule contient le nom court d’un paramètre. Après l’overlay temporaire d’une valeur, la grille de la banque active est restaurée au lieu de revenir aux libellés mémorisés dans le groupe EC4.
 
-La table de caractères issue du script prend en charge les caractères ASCII usuels, `Ä`, `Ö`, `Ü`, `ä`, `ö`, `ü`, `à`, `²`, `³`, `§`, crochets, barre oblique inverse et signes de comparaison. Un caractère inconnu est remplacé par le code `1F`.
+La table de caractères prend en charge les caractères ASCII courants ainsi que `Ä`, `Ö`, `Ü`, `ä`, `ö`, `ü`, `à`, `²`, `³`, `§`, les crochets, la barre oblique inverse et les signes de comparaison. Un caractère non pris en charge est remplacé par le code `1F`.
 
-## Ce que le prototype écoute réellement
+## Ce que le bridge écoute réellement
 
-Pour minimiser les conflits, la version 0.3.0 n'intercepte que :
+Afin de limiter les conflits, le bridge n’intercepte que :
 
-- les 16 CC de paramètres appris, ou le mapping Ableton de repli ;
-- les 16 Notes de push apprises, ou le mapping Ableton de repli ;
+- les 16 CC de paramètres appris, ou le mapping de repli intégré ;
+- les 16 Notes de push apprises, ou le mapping de repli intégré ;
 - les deux Notes de banque ;
-- les Notes de navigation device/chaîne ;
+- les Notes de navigation plugin et chaîne ;
 - les gestes Shift+push utiles ;
 - les réponses SysEx de setup/groupe ;
-- les retours OSC nécessaires aux valeurs et à l'affichage.
+- le feedback OSC nécessaire aux valeurs et à l’affichage.
 
-Les contrôles de mixage, transport, clips et sends restent documentés mais ne sont pas détournés vers LiveProfessor.
+Les contrôles supplémentaires de tranches, transport, actions et sends restent documentés mais ne sont pas redirigés vers LiveProfessor.
