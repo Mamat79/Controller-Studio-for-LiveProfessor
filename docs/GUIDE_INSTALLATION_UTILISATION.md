@@ -15,7 +15,7 @@ Utilisez une licence, une période d’essai ou une licence de test fournie offi
 
 ## Installation du bridge
 
-1. Téléchargez et lancez `EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe`. L’archive portable reste disponible pour une utilisation sans installation.
+1. Téléchargez et lancez `EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe`. L’archive portable reste disponible pour une utilisation sans installation.
 2. Branchez le Faderfox EC4.
 3. Dans l’application, ouvrez **Outils > Connexions**, actualisez les ports MIDI et choisissez l’entrée et la sortie contenant `Faderfox EC4`.
 4. Configurez le contrôleur LiveProfessor décrit ci-dessous avant de cliquer sur **Démarrer**.

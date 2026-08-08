@@ -4,7 +4,7 @@
 
 **Une passerelle intelligente entre le Faderfox EC4 et LiveProfessor.**
 
-**Version stable actuelle : 0.5.0**
+**Version stable actuelle : 0.5.1**
 
 Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, équipé de 16 encodeurs avec poussoir et d’un écran OLED très utile pour le retour d’information.
 
@@ -82,6 +82,8 @@ Les deux approches sont valables. Si vous souhaitez simplement piloter quelques 
 - apprentissage des 16 CC rotatifs ;
 - apprentissage des 16 Notes correspondant aux poussoirs ;
 - transmission des push simples 1 à 15 vers les boutons Companion apprenables ;
+- affichage des raccourcis directement sur l’EC4 pendant le maintien de Shift ;
+- contrôleur `Ec4.ctrl2` neutre intégré et copiable depuis l’application ;
 - choix d’un setup/groupe EC4 réservé à LiveProfessor ;
 - navigation entre plugins ;
 - navigation entre chaînes ;
@@ -172,10 +174,10 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 - Companion Controller configuré dans LiveProfessor ;
 - Controller Maps pour les plugins à contrôler.
 
-## Télécharger la version stable 0.5.0
+## Télécharger la version stable 0.5.1
 
-- [Télécharger l’installateur Windows 0.5.0](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe) — recommandé ;
-- [Télécharger l’archive portable 0.5.0](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.0-win64.zip) ;
+- [Télécharger l’installateur Windows 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommandé ;
+- [Télécharger l’archive portable 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip) ;
 - [Télécharger le contrôleur LiveProfessor `Ec4.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2) ;
 - [Consulter la release et ses notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
 
@@ -422,7 +424,7 @@ Le menu **Aide** ouvre le [dépôt](https://github.com/Mamat79/EC4-LiveProfessor
 
 ## Feuille de route
 
-- **0.5.0** : version stable actuelle de l’intégration EC4 ↔ LiveProfessor ;
+- **0.5.1** : version stable actuelle avec aide Shift sur l’EC4, poussoirs 1 à 15 assignables et contrôleur `Ec4.ctrl2` neutre intégré ;
 - **1.0** : auto-mapping assisté et automatique, d'abord validé sur le Faderfox EC4 ;
 - version ultérieure : ouverture à d'autres surfaces MIDI/OSC au moyen de profils matériels, en conservant l'EC4 comme surface de référence.
 
@@ -516,6 +518,8 @@ Both approaches are valid. For a small fixed control setup, connecting the EC4 d
 - MIDI Learn for the 16 encoders;
 - MIDI Learn for the 16 encoder push buttons;
 - simple push buttons 1 through 15 forwarded to learnable Companion buttons;
+- on-device shortcut guide while Shift is held;
+- embedded neutral `Ec4.ctrl2` controller exportable from the application;
 - dedicated EC4 setup/group selection;
 - plugin navigation;
 - chain navigation;
@@ -600,10 +604,10 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 - LiveProfessor Companion Controller;
 - Controller Maps for the plugins you want to control.
 
-## Download stable version 0.5.0
+## Download stable version 0.5.1
 
-- [Download the Windows 0.5.0 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe) — recommended;
-- [Download the portable 0.5.0 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.0-win64.zip);
+- [Download the Windows 0.5.1 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommended;
+- [Download the portable 0.5.1 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip);
 - [Download the LiveProfessor `Ec4.ctrl2` controller](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2);
 - [View the latest release and release notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
 
@@ -810,7 +814,7 @@ The **Help** menu opens the [repository](https://github.com/Mamat79/EC4-LiveProf
 
 ## Roadmap
 
-- **0.5.0**: current stable EC4 ↔ LiveProfessor integration;
+- **0.5.1**: current stable release with the on-device Shift guide, assignable pushes 1 through 15, and an embedded neutral `Ec4.ctrl2` controller;
 - **1.0**: assisted and automatic mapping, first validated on the Faderfox EC4;
 - later: support additional MIDI/OSC control surfaces through hardware profiles while keeping the EC4 as the reference surface.
 
