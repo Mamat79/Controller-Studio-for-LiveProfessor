@@ -105,8 +105,9 @@ Si le type Companion Controller n’existe pas, la version installée de LivePro
 4. Sélectionnez un plugin précis ou **Tous les plugins détectés**.
 5. Choisissez le Companion Controller EC4. Si le projet n'en contient pas, **EC4 — modèle EC4 intégré** est proposé automatiquement. **UniBank — 16 paramètres** est recommandé et sélectionné par défaut. Choisissez FullBank uniquement pour accéder à 99 paramètres par banques.
 6. Cliquez sur **Créer la copie auto-mappée…** et utilisez un nouveau nom de fichier.
-7. Dans LiveProfessor, enregistrez le travail en cours puis ouvrez la copie générée.
-8. Sélectionnez un plugin mappé et vérifiez les noms, les valeurs et le contrôle des paramètres sur l'EC4.
+7. Le bridge vous propose de l'ouvrir directement et rappelle que LiveProfessor va remplacer le projet actuellement ouvert.
+8. Enregistrez le travail en cours, puis acceptez l'ouverture ou choisissez **Non** pour ouvrir la copie manuellement plus tard.
+9. Sélectionnez un plugin mappé et vérifiez les noms, les valeurs et le contrôle des paramètres sur l'EC4.
 
 L'auto-mapping fonctionne donc même si aucun CTRL2 n'avait encore été importé dans le projet source : le contrôleur intégré est ajouté à la copie seulement, jamais au fichier original.
 

@@ -154,6 +154,19 @@ def copy_controller_template(destination: Path, source: Path | None = None) -> P
     return destination_path
 
 
+def open_liveprofessor_project(project_path: Path, launcher=None) -> Path:
+    """Open a generated rack2 file through the registered LiveProfessor association."""
+
+    path = Path(project_path).expanduser().resolve()
+    if not path.is_file():
+        raise FileNotFoundError(f"projet LiveProfessor introuvable : {path}")
+    selected_launcher = launcher or getattr(os, "startfile", None)
+    if selected_launcher is None:
+        raise OSError("aucune application Windows n'est associée aux fichiers .rack2")
+    selected_launcher(str(path))
+    return path
+
+
 def tray_action_for_event(l_param: int) -> str | None:
     # Windows can provide the notification either as a plain mouse message
     # (legacy NOTIFYICONDATA behavior) or packed in the low word of lParam
@@ -284,9 +297,17 @@ UI_TEXT = {
         "automap_success": (
             "Fichier créé :\n{path}\n\n"
             "{plugins} plugin(s) mappé(s), {mappings} affectation(s), "
-            "{rotaries} rotatifs disponibles.\n\n"
-            "Dans LiveProfessor : enregistrez votre projet actuel, fermez-le, puis ouvrez cette "
-            "copie. Sélectionnez un plugin mappé : ses noms et valeurs doivent remonter sur l'EC4."
+            "{rotaries} rotatifs disponibles."
+        ),
+        "automap_open_title": "Ouvrir la copie dans LiveProfessor ?",
+        "automap_open_question": (
+            "Attention : LiveProfessor va remplacer le projet actuellement ouvert. "
+            "Enregistrez-le avant de continuer.\n\nOuvrir maintenant la copie auto-mappée ?"
+        ),
+        "automap_open_error_title": "Ouverture impossible",
+        "automap_open_error": (
+            "La copie a bien été créée, mais LiveProfessor n'a pas pu l'ouvrir :\n{error}\n\n"
+            "Vous pouvez l'ouvrir manuellement ici :\n{path}"
         ),
         "copy_controller_unibank": "CTRL2 UniBank…",
         "copy_controller_fullbank": "CTRL2 FullBank…",
@@ -469,9 +490,17 @@ UI_TEXT = {
         "automap_success": (
             "File created:\n{path}\n\n"
             "{plugins} plugin(s) mapped, {mappings} assignment(s), "
-            "{rotaries} rotaries available.\n\n"
-            "In LiveProfessor: save and close the current project, then open this copy. Select a "
-            "mapped plugin: its names and values should appear on the EC4."
+            "{rotaries} rotaries available."
+        ),
+        "automap_open_title": "Open the copy in LiveProfessor?",
+        "automap_open_question": (
+            "Warning: LiveProfessor will replace the project that is currently open. Save it "
+            "before continuing.\n\nOpen the auto-mapped copy now?"
+        ),
+        "automap_open_error_title": "Could not open project",
+        "automap_open_error": (
+            "The copy was created successfully, but LiveProfessor could not open it:\n{error}\n\n"
+            "You can open it manually here:\n{path}"
         ),
         "copy_controller_unibank": "UniBank CTRL2…",
         "copy_controller_fullbank": "FullBank CTRL2…",
@@ -2160,16 +2189,27 @@ class BridgeGUI:
             f"AutoMap: {len(result.mapped_plugins)} plugin(s), "
             f"{result.mapped_rotaries} affectation(s) -> {result.output_path}"
         )
-        self.messagebox.showinfo(
-            self._t("automap_success_title"),
-            self._t(
-                "automap_success",
-                path=result.output_path,
-                plugins=len(result.mapped_plugins),
-                mappings=result.mapped_rotaries,
-                rotaries=result.controller_rotaries,
-            ),
+        success_message = self._t(
+            "automap_success",
+            path=result.output_path,
+            plugins=len(result.mapped_plugins),
+            mappings=result.mapped_rotaries,
+            rotaries=result.controller_rotaries,
         )
+        open_now = self.messagebox.askyesno(
+            self._t("automap_open_title"),
+            f"{success_message}\n\n{self._t('automap_open_question')}",
+            parent=self.automap_window or self.root,
+        )
+        if open_now:
+            try:
+                open_liveprofessor_project(result.output_path)
+            except (OSError, ValueError) as exc:
+                self.messagebox.showerror(
+                    self._t("automap_open_error_title"),
+                    self._t("automap_open_error", error=exc, path=result.output_path),
+                    parent=self.automap_window or self.root,
+                )
 
     def show_connections_window(self) -> None:
         if self.connections_window is not None and self.connections_window.winfo_exists():

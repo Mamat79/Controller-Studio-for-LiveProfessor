@@ -106,8 +106,9 @@ If the Companion Controller type is not available, the installed LiveProfessor v
 4. Select one plugin or **All detected plugins**.
 5. Choose the EC4 Companion Controller. If the project does not contain one, **EC4 — embedded EC4 template** is offered automatically. **UniBank — 16 parameters** is recommended and selected by default. Choose FullBank only when you need access to 99 parameters through banks.
 6. Click **Create auto-mapped copy…** and use a new file name.
-7. Save the current work in LiveProfessor, then open the generated copy.
-8. Select a mapped plugin and verify parameter names, values and control on the EC4.
+7. The bridge offers to open it directly and reminds you that LiveProfessor will replace the currently open project.
+8. Save the current work, then confirm the prompt or choose **No** to open the copy manually later.
+9. Select a mapped plugin and verify parameter names, values and control on the EC4.
 
 Auto-mapping therefore works even when no CTRL2 was imported into the source project: the embedded controller is added to the copy only, never to the original file.
 
