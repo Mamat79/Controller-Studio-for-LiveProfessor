@@ -101,13 +101,15 @@ If the Companion Controller type is not available, the installed LiveProfessor v
 ### Automatically create a mapped copy — version 2026.1
 
 1. Save the project currently open in LiveProfessor.
-2. In the bridge, open **Tools > Auto-mapping…**.
+2. In the bridge, click the turquoise **⚡ Auto-mapping** button or open **Tools > Auto-mapping…**.
 3. Choose the `.rack2` file, then click **Analyze project**.
 4. Select one plugin or **All detected plugins**.
-5. Choose the EC4 Companion Controller. **UniBank — 16 parameters** is recommended and selected by default. Choose FullBank only when you need access to 99 parameters through banks.
+5. Choose the EC4 Companion Controller. If the project does not contain one, **EC4 — embedded EC4 template** is offered automatically. **UniBank — 16 parameters** is recommended and selected by default. Choose FullBank only when you need access to 99 parameters through banks.
 6. Click **Create auto-mapped copy…** and use a new file name.
 7. Save the current work in LiveProfessor, then open the generated copy.
 8. Select a mapped plugin and verify parameter names, values and control on the EC4.
+
+Auto-mapping therefore works even when no CTRL2 was imported into the source project: the embedded controller is added to the copy only, never to the original file.
 
 The `EC4 AutoMap - Dynamic` map contains several assignments per rotary, all using **Only If Selected**. They can therefore coexist while only the selected plugin instance should respond. When several identical instances existed during generation, every instance is included. The generator also populates the `HardwareCtrlMaps` referenced by the project and its snapshots because LiveProfessor can recall one of those maps after loading. Presets therefore no longer have to be loaded manually plugin by plugin. Existing push-button assignments are preserved.
 

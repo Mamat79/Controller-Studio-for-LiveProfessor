@@ -253,7 +253,9 @@ Le bridge utilise par défaut ces mêmes valeurs.
 
 ## Auto-mapping automatique — version 2026.1
 
-Le menu **Outils > Auto-mapping…** analyse un projet LiveProfessor `.rack2` et crée une **nouvelle copie** contenant une map `EC4 AutoMap - Dynamic` :
+Le bouton turquoise **⚡ Auto-mapping** (également disponible dans **Outils > Auto-mapping…**) analyse un projet LiveProfessor `.rack2` et crée une **nouvelle copie** contenant une map `EC4 AutoMap - Dynamic` :
+
+Si le projet ne contient encore aucun contrôleur Companion/OSC, le bridge utilise automatiquement son modèle EC4 intégré et l'ajoute uniquement à la copie. Il n'est donc plus nécessaire d'importer manuellement un CTRL2 avant de lancer l'auto-mapping.
 
 1. enregistrez d'abord le projet dans LiveProfessor ;
 2. choisissez ce fichier `.rack2` dans l'outil d'auto-mapping ;
@@ -694,7 +696,9 @@ Feedback port: 8011
 
 ## Automatic mapping — version 2026.1
 
-**Tools > Auto-mapping…** analyzes a saved LiveProfessor `.rack2` project and creates a **new copy** containing an `EC4 AutoMap - Dynamic` map:
+The turquoise **⚡ Auto-mapping** button (also available under **Tools > Auto-mapping…**) analyzes a saved LiveProfessor `.rack2` project and creates a **new copy** containing an `EC4 AutoMap - Dynamic` map:
+
+If the project does not contain a Companion/OSC controller yet, the bridge automatically uses its embedded EC4 template and adds it to the copy only. You no longer need to import a CTRL2 manually before starting auto-mapping.
 
 1. save the project in LiveProfessor first;
 2. choose that `.rack2` file in the auto-mapping tool;
