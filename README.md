@@ -6,6 +6,42 @@
 
 **Version stable actuelle : 2026.1**
 
+## ⬇️ Télécharger immédiatement la dernière version
+
+### [Télécharger l’installateur Windows EC4 LiveProfessor Bridge 2026.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe)
+
+**C’est le téléchargement recommandé.** L’installateur contient l’application, les deux contrôleurs `CTRL2` UniBank/FullBank et la documentation française/anglaise.
+
+[Archive portable ZIP](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Notes et fichiers de la dernière version](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+
+## ⭐ Fonction phare : l’auto-mapping des plugins
+
+Le bridge peut préparer automatiquement un projet LiveProfessor qui n’a encore jamais été configuré pour l’EC4. Il analyse le fichier `.rack2`, détecte les plugins et leurs paramètres, ajoute le contrôleur EC4 intégré si nécessaire et construit une Controller Map dynamique.
+
+```text
+Projet .rack2 enregistré
+        ↓
+Analyse des plugins et paramètres
+        ↓
+Ajout automatique du contrôleur EC4 si nécessaire
+        ↓
+Création de la Controller Map dynamique
+        ↓
+Nouvelle copie sécurisée prête à ouvrir dans LiveProfessor
+```
+
+- le projet original n’est **jamais modifié** ;
+- **UniBank** mappe les 16 premiers paramètres et reste le mode recommandé ;
+- **FullBank** permet d’accéder à un maximum de 99 paramètres par banques ;
+- un plugin précis ou tous les plugins détectés peuvent être préparés en une opération ;
+- les affectations utilisent **Only If Selected** : seul le plugin sélectionné répond ;
+- si aucun contrôleur Companion/OSC n’est présent, le modèle EC4 fourni est injecté automatiquement dans la copie ;
+- après la création, le bridge propose d’ouvrir directement la copie et avertit avant de remplacer le projet actuellement ouvert dans LiveProfessor.
+
+Le fonctionnement a notamment été validé sur un projet réel dépourvu de contrôleur préconfiguré : **14 plugins détectés et 208 affectations générées**, sans aucune modification du fichier source.
+
+[Voir la procédure complète d’auto-mapping](#auto-mapping-automatique--version-20261)
+
 Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, équipé de 16 encodeurs avec poussoir et d’un écran OLED très utile pour le retour d’information.
 
 Avec une connexion MIDI classique, on peut bien sûr piloter LiveProfessor directement. Mais on se retrouve vite avec des affectations fixes, peu de contexte sur ce que contrôle chaque encodeur, et une intégration limitée lorsque l’on change de plugin, de banque ou de paramètre.
@@ -172,8 +208,10 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 - Faderfox EC4 ;
 - LiveProfessor 2023.0.8 ou supérieur ;
 - licence ou période d’essai officielle LiveProfessor ;
-- Companion Controller configuré dans LiveProfessor ;
-- Controller Maps pour les plugins à contrôler.
+- prise en charge du Companion Controller dans LiveProfessor ;
+- un projet `.rack2` enregistré pour utiliser l’auto-mapping.
+
+Le contrôleur et les Controller Maps n’ont pas besoin d’être préparés manuellement avant l’auto-mapping. Leur configuration manuelle reste disponible pour personnaliser précisément l’ordre ou le choix des paramètres.
 
 ## Télécharger la version stable 2026.1
 
@@ -473,6 +511,42 @@ Aucun logiciel propriétaire tiers n’est redistribué dans ce dépôt.
 
 # 🇬🇧 English
 
+## ⬇️ Download the latest version now
+
+### [Download the EC4 LiveProfessor Bridge 2026.1 Windows installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe)
+
+**This is the recommended download.** The installer includes the application, both UniBank/FullBank `CTRL2` controllers, and the English/French documentation.
+
+[Portable ZIP archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Latest release notes and files](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+
+## ⭐ Main feature: automatic plugin mapping
+
+The bridge can automatically prepare a LiveProfessor project that has never been configured for the EC4. It analyzes the saved `.rack2` file, detects plugins and their parameters, adds the embedded EC4 controller when required, and builds a dynamic Controller Map.
+
+```text
+Saved .rack2 project
+        ↓
+Plugin and parameter analysis
+        ↓
+Automatic EC4 controller injection when required
+        ↓
+Dynamic Controller Map generation
+        ↓
+New safe copy ready to open in LiveProfessor
+```
+
+- the original project is **never modified**;
+- **UniBank** maps the first 16 parameters and remains the recommended mode;
+- **FullBank** provides access to up to 99 parameters through banks;
+- one plugin or every detected plugin can be prepared in a single operation;
+- assignments use **Only If Selected**, so only the selected plugin responds;
+- when no Companion/OSC controller exists, the supplied EC4 template is injected automatically into the copy;
+- after generation, the bridge offers to open the copy directly and warns before replacing the project currently open in LiveProfessor.
+
+The workflow was validated on a real project with no preconfigured controller: **14 plugins detected and 208 assignments generated**, without changing the source file.
+
+[Read the complete automatic mapping procedure](#automatic-mapping--version-20261)
+
 ## Why does this project exist?
 
 The **Faderfox EC4** is an excellent MIDI controller: compact, rugged, equipped with 16 push encoders and a powerful OLED display.
@@ -541,6 +615,7 @@ Both approaches are valid. For a small fixed control setup, connecting the EC4 d
 - simple push buttons 1 through 15 forwarded to learnable Companion buttons;
 - on-device shortcut guide while Shift is held;
 - embedded neutral `Ec4-UniBank.ctrl2` (16 rotaries) and `Ec4-FullBank.ctrl2` (99 rotaries), exportable from the application;
+- automatic plugin mapping into a safe copy of the LiveProfessor project;
 - dedicated EC4 setup/group selection;
 - plugin navigation;
 - chain navigation;
@@ -622,8 +697,10 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 - Faderfox EC4;
 - LiveProfessor 2023.0.8 or later;
 - official LiveProfessor licence or trial;
-- LiveProfessor Companion Controller;
-- Controller Maps for the plugins you want to control.
+- LiveProfessor Companion Controller support;
+- a saved `.rack2` project for automatic mapping.
+
+The controller and Controller Maps do not have to be configured manually before automatic mapping. Manual configuration remains available when you want to customize the parameter order or selection precisely.
 
 ## Download stable version 2026.1
 
