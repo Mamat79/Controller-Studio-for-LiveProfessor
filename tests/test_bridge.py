@@ -3,7 +3,11 @@ from types import SimpleNamespace
 
 from ec4lpbridge.bridge import EC4LiveProfessorBridge
 from ec4lpbridge.config import BridgeConfig
-from ec4lpbridge.ec4_protocol import EC4SetupState
+from ec4lpbridge.ec4_protocol import (
+    EC4SetupState,
+    main_display_message,
+    parameter_grid_message,
+)
 
 
 class FakeMidi:
@@ -268,6 +272,69 @@ class BridgeTests(unittest.TestCase):
             bridge._osc_client.messages[-1][0],
             "/Command/PluginWindows/SelectNextPlugin",
         )
+
+    def test_holding_shift_displays_shortcuts_then_restores_parameters(self):
+        bridge = self.make_bridge(
+            display_enabled=True,
+            persistent_parameter_display=True,
+            restrict_to_target=False,
+            display_only_supported_setups=False,
+        )
+        labels = list(EC4LiveProfessorBridge._SHIFT_SHORTCUT_LABELS)
+        bridge._midi.sysex.clear()
+
+        bridge._handle_sysex_button("shift", None, pressed=True)
+
+        self.assertTrue(bridge._shift_held)
+        self.assertEqual(
+            bridge._midi.sysex[-2:],
+            [main_display_message(labels), parameter_grid_message(labels)],
+        )
+        self.assertFalse(bridge._osc_client.messages)
+
+        bridge._handle_sysex_button("shift", None, pressed=False)
+
+        self.assertFalse(bridge._shift_held)
+        self.assertEqual([len(message) for message in bridge._midi.sysex[-2:]], [206, 257])
+        self.assertNotEqual(bridge._midi.sysex[-1], parameter_grid_message(labels))
+
+    def test_shift_sysex_press_and_release_drive_the_shortcut_display(self):
+        bridge = self.make_bridge(
+            display_enabled=True,
+            persistent_parameter_display=True,
+            restrict_to_target=False,
+            display_only_supported_setups=False,
+        )
+        press = bytes.fromhex("f0 00 00 00 4e 2c 1b 4e 26 11 4e 2e 11 f7")
+        release = bytes.fromhex("f0 00 00 00 4e 2c 1b 4e 26 11 4e 2e 10 f7")
+
+        bridge._on_midi(SimpleNamespace(type="sysex", data=tuple(press[1:-1])))
+        self.assertTrue(bridge._shift_held)
+
+        bridge._on_midi(SimpleNamespace(type="sysex", data=tuple(release[1:-1])))
+        self.assertFalse(bridge._shift_held)
+
+    def test_shift_release_after_shortcut_cancels_overlay_and_restores_grid(self):
+        bridge = self.make_bridge(
+            display_enabled=True,
+            persistent_parameter_display=True,
+            restrict_to_target=False,
+            display_only_supported_setups=False,
+        )
+        bridge._handle_sysex_button("shift", None, pressed=True)
+        bridge._handle_sysex_button("shift_push", 6)
+        self.assertIsNotNone(bridge._overlay_timer)
+
+        bridge._handle_sysex_button("shift", None, pressed=False)
+
+        self.assertIsNone(bridge._overlay_timer)
+        self.assertFalse(bridge._shift_held)
+        self.assertEqual(len(bridge._midi.sysex[-1]), 257)
+
+    def test_released_shift_push_does_not_repeat_command(self):
+        bridge = self.make_bridge()
+        bridge._handle_sysex_button("shift_push", 6, pressed=False)
+        self.assertFalse(bridge._osc_client.messages)
         bridge._handle_sysex_button("shift_push", 10)
         self.assertEqual(
             bridge._osc_client.messages[-1][0],
@@ -306,16 +373,31 @@ class BridgeTests(unittest.TestCase):
         bridge._handle_sysex_button("shift_push", 3)
         self.assertEqual(bridge._osc_client.messages[-1], ("/ViewSets/Recall", (3,)))
 
-    def test_simple_pushes_send_companion_button_press_and_release(self):
+    def test_all_fifteen_plugin_pushes_send_press_and_release(self):
         bridge = self.make_bridge()
-        bridge._on_midi(SimpleNamespace(type="note_on", channel=12, note=40, velocity=127))
-        bridge._on_midi(SimpleNamespace(type="note_off", channel=12, note=40, velocity=0))
+        for index in range(15):
+            note = 40 + index
+            bridge._on_midi(
+                SimpleNamespace(type="note_on", channel=12, note=note, velocity=127)
+            )
+            bridge._on_midi(
+                SimpleNamespace(type="note_off", channel=12, note=note, velocity=0)
+            )
+        self.assertEqual(len(bridge._osc_client.messages), 30)
+        for index in range(15):
+            address = f"/Companion/GenericButtons/Button{index + 1}"
+            self.assertEqual(
+                bridge._osc_client.messages[index * 2 : index * 2 + 2],
+                [(address, (1.0,)), (address, (0.0,))],
+            )
+
+    def test_sixteenth_simple_push_remains_reserved_for_tap_tempo(self):
+        bridge = self.make_bridge()
+        bridge._on_midi(SimpleNamespace(type="note_on", channel=12, note=55, velocity=127))
+        bridge._on_midi(SimpleNamespace(type="note_off", channel=12, note=55, velocity=0))
         self.assertEqual(
-            bridge._osc_client.messages[-2:],
-            [
-                ("/Companion/GenericButtons/Button1", (1.0,)),
-                ("/Companion/GenericButtons/Button1", (0.0,)),
-            ],
+            bridge._osc_client.messages,
+            [("/Command/Transport&Tempo/TempoTap", ())],
         )
 
     def test_parameter_motion_is_confirmed_by_liveprofessor_feedback(self):

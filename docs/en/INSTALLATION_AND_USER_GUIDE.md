@@ -16,11 +16,10 @@ Use an official LiveProfessor licence, trial period or test licence supplied by 
 
 ## Installing the bridge
 
-1. Copy the release folder wherever you want.
-2. Run `EC4-LiveProfessor-Bridge.exe`. No installer or administrator privileges are required.
-3. Connect the Faderfox EC4.
-4. In the application, click **Refresh MIDI ports** and select the input and output containing `Faderfox EC4`.
-5. Configure the LiveProfessor controller described below before clicking **Start**.
+1. Download and run `EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe`. The portable archive remains available for use without installation.
+2. Connect the Faderfox EC4.
+3. In the application, open **Tools > Connections**, refresh the MIDI ports, and select the input and output containing `Faderfox EC4`.
+4. Configure the LiveProfessor controller described below before clicking **Start**.
 
 The normal configuration file is stored at:
 
@@ -54,6 +53,19 @@ Rotary4
 ```
 
 The bridge uses 16 Rotary controls per bank and can address up to 99 controls. The simplest method is therefore to load/import the `.ctrl2` file supplied with the project or release package.
+
+The controller file is also embedded in the application. To save it somewhere easy to find:
+
+The supplied copy is intentionally neutral: it contains the 16 rotaries and 16 buttons, without any legacy map tied to a specific plugin.
+
+1. open the bridge;
+2. click **Copy Ec4.ctrl2…** on the main page, or use **Tools > Copy Ec4.ctrl2…**;
+3. choose the Desktop or Documents folder, for example;
+4. in LiveProfessor, open **Controllers > Hardware Controllers Setup**;
+5. click **Load from file**, then select `Ec4.ctrl2`;
+6. select the imported EC4 controller and verify `127.0.0.1`, input port `8010`, and feedback port `8011`.
+
+The **Help > How to import Ec4.ctrl2…** menu also displays these instructions directly in the bridge.
 
 After importing it, check that the controller contains at least:
 

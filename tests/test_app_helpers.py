@@ -1,6 +1,12 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
-from ec4lpbridge.app import tray_action_for_event
+from ec4lpbridge.app import (
+    controller_template_path,
+    copy_controller_template,
+    tray_action_for_event,
+)
 
 
 class AppHelperTests(unittest.TestCase):
@@ -18,6 +24,20 @@ class AppHelperTests(unittest.TestCase):
         self.assertEqual(tray_action_for_event(icon_id | 0x007B), "menu")
         self.assertIsNone(tray_action_for_event(icon_id | 0x0201))
         self.assertIsNone(tray_action_for_event(3007))
+
+    def test_controller_template_can_be_located_and_copied(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "bundled" / "Ec4.ctrl2"
+            source.parent.mkdir()
+            source.write_bytes(b"neutral-controller")
+            located = controller_template_path([root / "missing.ctrl2", source])
+            destination = root / "export" / "Ec4.ctrl2"
+
+            copied = copy_controller_template(destination, source=located)
+
+            self.assertEqual(copied, destination.resolve())
+            self.assertEqual(destination.read_bytes(), b"neutral-controller")
 
 
 if __name__ == "__main__":

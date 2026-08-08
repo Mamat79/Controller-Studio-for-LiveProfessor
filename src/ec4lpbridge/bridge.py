@@ -53,6 +53,25 @@ MidiLearnCallback = Callable[[str, int, int, int], bool]
 
 
 class EC4LiveProfessorBridge:
+    _SHIFT_SHORTCUT_LABELS = (
+        "Bk-",
+        "Bk+",
+        "VS-",
+        "VS+",
+        "Show",
+        "ChUp",
+        "<Plg",
+        "Plg>",
+        "OnOf",
+        "ChDn",
+        "<Plg",
+        "Plg>",
+        "Cue-",
+        "Cue+",
+        "Sn-",
+        "Sn+",
+    )
+
     def __init__(
         self,
         config: BridgeConfig,
@@ -85,6 +104,7 @@ class EC4LiveProfessorBridge:
         )
         self._reconnect_thread: threading.Thread | None = None
         self._overlay_timer: threading.Timer | None = None
+        self._shift_held: bool = False
         self._last_feedback: dict[int, tuple[int, float]] = {}
         self._motion_log_times: dict[int, float] = {}
         self._feedback_timers: dict[int, threading.Timer] = {}
@@ -174,6 +194,7 @@ class EC4LiveProfessorBridge:
     def stop(self) -> None:
         self._running = False
         self._stop.set()
+        self._shift_held = False
         if self._overlay_timer:
             self._overlay_timer.cancel()
             self._overlay_timer = None
@@ -553,12 +574,23 @@ class EC4LiveProfessorBridge:
                     self._notify()
                     return
                 button = parse_button_sysex(raw)
-                if (
-                    button
-                    and button.pressed
-                    and (not self.config.restrict_to_target or self._target_active())
-                ):
-                    self._handle_sysex_button(button.kind, button.index)
+                if button:
+                    target_allowed = not self.config.restrict_to_target or self._target_active()
+                    if button.kind == "shift":
+                        # Toujours accepter le relachement d'un Shift deja pris en compte,
+                        # meme si l'utilisateur change de groupe entre-temps.
+                        if target_allowed or self._shift_held:
+                            self._handle_sysex_button(
+                                button.kind,
+                                button.index,
+                                pressed=button.pressed,
+                            )
+                    elif button.pressed and target_allowed:
+                        self._handle_sysex_button(
+                            button.kind,
+                            button.index,
+                            pressed=True,
+                        )
         except Exception as exc:
             self._log(f"Erreur de traitement MIDI: {exc}", logging.ERROR)
 
@@ -648,8 +680,20 @@ class EC4LiveProfessorBridge:
         )
         self._schedule_companion_refresh()
 
-    def _handle_sysex_button(self, kind: str, index: int | None) -> None:
-        if kind != "shift_push" or index is None:
+    def _handle_sysex_button(
+        self,
+        kind: str,
+        index: int | None,
+        *,
+        pressed: bool = True,
+    ) -> None:
+        if kind == "shift":
+            if pressed:
+                self._show_shift_shortcuts()
+            else:
+                self._hide_shift_shortcuts()
+            return
+        if kind != "shift_push" or index is None or not pressed:
             return
         if index == 0:
             self.change_bank(-1)
@@ -894,6 +938,8 @@ class EC4LiveProfessorBridge:
     def _refresh_main_display(self) -> None:
         if not self._display_allowed():
             return
+        if self._shift_held:
+            return
         start = self.active_bank * self.config.bank_size
         labels = self.short_names[start : start + self.config.bank_size]
         labels = [
@@ -906,6 +952,38 @@ class EC4LiveProfessorBridge:
                 self._midi.send_sysex(parameter_grid_message(labels))
         except MidiBackendError as exc:
             self._log(str(exc), logging.WARNING)
+
+    def _cancel_display_timers(self) -> None:
+        if self._overlay_timer:
+            self._overlay_timer.cancel()
+            self._overlay_timer = None
+        if self._parameter_overlay_timer:
+            self._parameter_overlay_timer.cancel()
+            self._parameter_overlay_timer = None
+        self._pending_overlay_index = None
+        self._overlay_parameter_index = None
+
+    def _send_shift_shortcuts(self) -> None:
+        labels = list(self._SHIFT_SHORTCUT_LABELS)
+        try:
+            self._midi.send_sysex(main_display_message(labels))
+            self._midi.send_sysex(parameter_grid_message(labels))
+        except MidiBackendError as exc:
+            self._log(str(exc), logging.WARNING)
+
+    def _show_shift_shortcuts(self) -> None:
+        if not self._display_allowed():
+            return
+        self._shift_held = True
+        self._cancel_display_timers()
+        self._send_shift_shortcuts()
+
+    def _hide_shift_shortcuts(self) -> None:
+        if not self._shift_held:
+            return
+        self._shift_held = False
+        self._cancel_display_timers()
+        self._refresh_main_display()
 
     def _show_parameter(self, global_index: int) -> None:
         self._overlay_parameter_index = global_index
@@ -1022,6 +1100,9 @@ class EC4LiveProfessorBridge:
         self._overlay_timer = None
         self._overlay_parameter_index = None
         if not force and not self._display_allowed():
+            return
+        if self._shift_held:
+            self._send_shift_shortcuts()
             return
         try:
             if self.config.persistent_parameter_display:
