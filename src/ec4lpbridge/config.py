@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+import tempfile
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -41,12 +42,14 @@ class BridgeConfig:
     target_setup: int = 13
     target_group: int = 3
     ui_language: str = "fr"
+    minimize_to_tray_on_close: bool = True
+    check_updates_on_startup: bool = True
     restrict_to_target: bool = True
     encoder_mappings: dict[str, list[dict[str, int]]] = field(default_factory=dict)
     setup_request_on_connect: bool = True
     plugin_label: str = "LiveProfessor"
     profile_file: str = ""
-    show_hide_command: str = "/Command/PluginWindows/ShowHideSelectedPlugin"
+    show_hide_command: str = "/Command/PluginWindows/ShowHideselectedplugin"
     enable_processing_command: str = "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
     cue_previous_command: str = "/Command/CueLists/FirePreviousCue"
     cue_next_command: str = "/Command/CueLists/FireNextCue"
@@ -144,8 +147,8 @@ def load_config(path: Path | None = None) -> BridgeConfig:
 
     legacy_migrations = {
         "show_hide_command": (
-            "/Command/PluginWindows/ShowHideselectedplugin",
             "/Command/PluginWindows/ShowHideSelectedPlugin",
+            "/Command/PluginWindows/ShowHideselectedplugin",
         ),
         "enable_processing_command": (
             "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
@@ -193,5 +196,24 @@ def save_config(config: BridgeConfig, path: Path | None = None) -> Path:
     data = asdict(config)
     extra = data.pop("extra", {})
     data.update(extra)
-    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    payload = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
+    temporary_path: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="\n",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            handle.write(payload)
+            handle.flush()
+            os.fsync(handle.fileno())
+            temporary_path = Path(handle.name)
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink(missing_ok=True)
     return path

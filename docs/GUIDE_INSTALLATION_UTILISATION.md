@@ -16,7 +16,7 @@ Utilisez une licence, une période d'essai ou une licence de test fournie offici
 1. Copier le dossier de livraison où vous le souhaitez.
 2. Lancer `EC4-LiveProfessor-Bridge.exe` ; aucune installation et aucun droit administrateur ne sont nécessaires.
 3. Brancher le Faderfox EC4.
-4. Dans l'application, cliquer sur **Actualiser les ports MIDI** et choisir les entrées/sorties contenant `Faderfox EC4`.
+4. Dans l'application, ouvrir **Outils > Réglages**, cliquer sur **Actualiser les ports MIDI** et choisir les entrées/sorties contenant `Faderfox EC4`.
 5. Ne cliquer sur **Démarrer** qu'après la configuration du contrôleur LiveProfessor ci-dessous.
 
 La configuration est enregistrée dans `%LOCALAPPDATA%\EC4LiveProfessorBridge\config.json`. Pour une version portable, copier `config.example.json` à côté de l'exécutable sous le nom `config.json`.
@@ -62,7 +62,7 @@ Attention à ne pas confondre les deux apprentissages : **Learn** dans Hardware 
 
 ### Configurer et lancer le pont
 
-Dans l'interface du pont :
+Dans **Outils > Réglages** :
 
 - Mode : `companion` ;
 - Adresse LiveProfessor : `127.0.0.1` ;
@@ -91,7 +91,7 @@ Le mapping est mémorisé pour ce couple setup/groupe et réutilisé au prochain
 
 Lorsque **Afficher en permanence les paramètres du plugin sélectionné** est coché, l'EC4 montre une grille de 16 libellés correspondant à la banque active. Un mouvement ou un push affiche temporairement le nom complet et la valeur, puis la grille revient automatiquement.
 
-En mode Companion, les libellés viennent des retours `ControllerNames` de LiveProfessor. Ils suivent donc les contrôles de la Controller Map du plugin sélectionné. Le pont envoie `/init` et `/refresh` au démarrage et renouvelle la demande tant qu'aucun nom n'a été reçu. Sans LiveProfessor actif, sans Companion Controller correctement configuré ou sans Controller Map, les libellés restent génériques (`P001`, `P002`, etc.) : le pont ne peut pas inventer les noms internes du plugin.
+En mode Companion, les libellés viennent des retours `ControllerNames` de LiveProfessor. Ils suivent donc les contrôles de la Controller Map du plugin sélectionné. Le pont envoie `/init` et `/refresh` au démarrage, effectue un second rafraîchissement différé et renouvelle la demande de façon bornée si l'inventaire reste incomplet. Sans LiveProfessor actif, sans Companion Controller correctement configuré ou sans Controller Map, les emplacements concernés restent volontairement vides : le pont ne peut pas inventer les noms internes du plugin.
 
 ## Mode de repli — OSC générique
 
@@ -124,7 +124,8 @@ Sans profil, l'écran montre `P001`, `P002`, etc. Le contrôleur OSC générique
 | Shift+push encodeurs 13/14 | Cue précédent/suivant |
 | Shift+push encodeurs 15/16 | Snapshot global précédent/suivant |
 | Push simple encodeur 16 | Tap Tempo |
-| Appuyer sur un encodeur | Afficher temporairement nom, valeur, banque et numéro |
+| Push simples encodeurs 1–15 | Envoyer `GenericButton1` à `GenericButton15` au Companion Controller |
+| Appuyer sur un encodeur 1–15 | Envoyer le bouton et afficher temporairement nom, valeur, banque et numéro |
 | Bouton **Tester l'écran EC4** | Afficher un écran de diagnostic sans toucher à l'audio |
 
 Les gestes premier/dernier plugin ou chaîne et verrouillage affichent une limitation, car aucune commande publique correspondante n'a été trouvée.
@@ -152,6 +153,8 @@ Les champs d'identifiants sont conservés pour une future API, mais ne sont pas 
 
 - **Diagnostic** vérifie localement l'encodage OSC/SysEx et liste les ports MIDI.
 - **Raccourcis EC4** rappelle directement la disposition des touches Shift.
+- Le journal détaillé est accessible par **Affichage > Journal** et continue d'être alimenté quand sa fenêtre est masquée.
+- Le bouton `X` réduit par défaut l'application dans la zone de notification ; le clic gauche restaure la fenêtre et le clic droit ouvre les commandes Démarrer/Arrêter/Redémarrer/Journal/Mise à jour/Quitter.
 - Journal : `%LOCALAPPDATA%\EC4LiveProfessorBridge\bridge.log`.
 - Lorsqu'un encodeur tourne, le journal indique le CC reçu et le `/Companion/RotaryN` envoyé. `LiveProfessor confirme RotaryN` valide le trajet complet. Si aucun retour n'arrive après 0,8 seconde, le pont indique de vérifier le port d'entrée du Companion Controller et le Controller Map actif.
 - Quatre fichiers maximum sont conservés : le journal courant et trois rotations de 2 Mo.

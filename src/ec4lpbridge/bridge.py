@@ -102,9 +102,11 @@ class EC4LiveProfessorBridge:
         )
         self._midi_learn_callback: MidiLearnCallback | None = None
         self._received_companion_names = False
+        self._companion_inventory_retries = 0
         self._overlay_parameter_index: int | None = None
         self._active_viewset_index: int | None = None
         self._viewset_count: int | None = None
+        self._viewset_indices: set[int] = set()
         self._startup_banner_shown: bool = False
 
     @property
@@ -164,6 +166,9 @@ class EC4LiveProfessorBridge:
         self._reconnect_thread.start()
         if self.config.mode == "companion":
             self.refresh_companion()
+            self._schedule_companion_refresh(
+                max(0.25, self.config.companion_refresh_delay_ms / 1000.0)
+            )
         self._notify()
 
     def stop(self) -> None:
@@ -395,7 +400,11 @@ class EC4LiveProfessorBridge:
                 f"Definissez et mappez les Rotary manquants dans LiveProfessor: {', '.join(missing)}.",
                 logging.WARNING,
             )
+            if self._running and self._companion_inventory_retries < 2:
+                self._companion_inventory_retries += 1
+                self._schedule_companion_refresh(0.5)
         else:
+            self._companion_inventory_retries = 0
             self._log(f"Companion confirme les {expected} rotatifs de la premiere banque")
 
     def _global_index(self, physical_index: int) -> int | None:
@@ -465,6 +474,19 @@ class EC4LiveProfessorBridge:
             self._send_current_bank_feedback()
             self._refresh_main_display()
 
+    def reconnect_midi(self) -> None:
+        self._midi.close()
+        self.status = "Reconnexion EC4 demandee"
+        self._log("Reconnexion MIDI EC4 demandee")
+        self._notify()
+
+    def request_setup_state(self) -> None:
+        if not self._midi.is_open:
+            self._log("Requete setup/groupe impossible: EC4 absent", logging.WARNING)
+            return
+        self._midi.send_sysex(SETUP_REQUEST)
+        self._log("Requete du setup/groupe EC4 envoyee")
+
     def _is_echo(self, physical_index: int, value: int) -> bool:
         previous = self._last_feedback.get(physical_index)
         if not previous:
@@ -507,11 +529,11 @@ class EC4LiveProfessorBridge:
                             "note", message.channel, message.note, message.velocity
                         )
                     return
-                if not pressed:
-                    return
                 parameter = self._push_index(message.channel, message.note)
                 if parameter is not None:
-                    self._handle_parameter_push(parameter)
+                    self._handle_parameter_push(parameter, pressed=pressed)
+                    return
+                if not pressed:
                     return
                 self._handle_note(message.channel, message.note)
                 return
@@ -581,9 +603,17 @@ class EC4LiveProfessorBridge:
                 refresh_companion=True,
             )
 
-    def _handle_parameter_push(self, physical_index: int) -> None:
+    def _handle_parameter_push(self, physical_index: int, *, pressed: bool = True) -> None:
         if physical_index == 15:
-            self._command("/Command/Transport&Tempo/TempoTap", "Tap tempo")
+            if pressed:
+                self._command("/Command/Transport&Tempo/TempoTap", "Tap tempo")
+            return
+        if self.config.mode == "companion":
+            self._send_osc(
+                f"/Companion/GenericButtons/Button{physical_index + 1}",
+                1.0 if pressed else 0.0,
+            )
+        if not pressed:
             return
         global_index = self._global_index(physical_index)
         if global_index is not None:
@@ -594,9 +624,13 @@ class EC4LiveProfessorBridge:
             return
         if self._active_viewset_index is None:
             self._send_osc("/ViewSets/Refresh")
-            self._show_overlay(["View Set", "synchronisation...", "en cours"])
-            return
-        next_index = self._active_viewset_index + step
+            if not self._viewset_count:
+                self._show_overlay(["View Set", "synchronisation...", "en cours"])
+                return
+            self._active_viewset_index = 0 if step > 0 else self._viewset_count - 1
+            next_index = self._active_viewset_index
+        else:
+            next_index = self._active_viewset_index + step
         if self._viewset_count is not None:
             if self._viewset_count <= 0:
                 self._show_overlay(["View Set", "aucun", "View Set"])
@@ -711,59 +745,29 @@ class EC4LiveProfessorBridge:
 
     @staticmethod
     def _command_fallbacks(address: str) -> tuple[str, ...]:
-        if address == "/Command/PluginWindows/ShowHideselectedplugin":
-            return (
-                "/Command/PluginWindows/ShowHideselectedplugin",
-                "/Command/PluginWindows/ShowHideSelectedPlugin",
-                "/Command/PluginWindows/TogglePluginWindows",
-            )
-        if address == "/Command/SelectedPlugin/ShowHideSelectedPlugin":
-            return (
-                "/Command/SelectedPlugin/ShowHideSelectedPlugin",
-                "/Command/PluginWindows/ShowHideSelectedPlugin",
-                "/Command/PluginWindows/TogglePluginWindows",
-            )
-        if address == "/Command/SelectedPlugin/EnableProcessingonselectedplugin":
-            return (
-                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
-            )
-        if address == "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin":
-            return (
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
-                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
-            )
-        if address == "/Command/SelectedPlugin/EnableBypassonselectedplugin":
-            return (
-                "/Command/SelectedPlugin/EnableBypassonselectedplugin",
-                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
-                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
-            )
-        if address == "/Command/CueLists/FirePreviousCue":
-            return (
-                "/Command/CueLists/FirePreviousCue",
-                "/Command/CueList/RecallPreviousCue",
-                "/Command/CueList/FirePreviousCue",
-            )
-        if address == "/Command/CueLists/FireNextCue":
-            return (
-                "/Command/CueLists/FireNextCue",
-                "/Command/CueList/RecallNextCue",
-                "/Command/CueList/FireNextCue",
-            )
-        if address == "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot":
-            return (
-                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-                "/Command/GlobalSnapshots/RecallPrevious",
-                "/Command/Snapshots/RecallPrevious",
-            )
-        if address == "/Command/GlobalSnapshots/RecallNextGlobalSnapshot":
-            return (
-                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
-                "/Command/GlobalSnapshots/RecallNext",
-                "/Command/Snapshots/RecallNext",
-            )
-        return (address,)
+        official_aliases = {
+            "/Command/PluginWindows/ShowHideSelectedPlugin": (
+                "/Command/PluginWindows/ShowHideselectedplugin"
+            ),
+            "/Command/SelectedPlugin/ShowHideSelectedPlugin": (
+                "/Command/PluginWindows/ShowHideselectedplugin"
+            ),
+            "/Command/SelectedPlugin/EnableProcessingonselectedplugin": (
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+            ),
+            "/Command/SelectedPlugin/EnableBypassonselectedplugin": (
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+            ),
+            "/Command/CueList/RecallPreviousCue": "/Command/CueLists/FirePreviousCue",
+            "/Command/CueList/RecallNextCue": "/Command/CueLists/FireNextCue",
+            "/Command/GlobalSnapshots/RecallPrevious": (
+                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot"
+            ),
+            "/Command/GlobalSnapshots/RecallNext": (
+                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot"
+            ),
+        }
+        return (official_aliases.get(address, address),)
 
     @staticmethod
     def _coerce_viewset_count_argument(value: Any) -> int | None:
@@ -835,6 +839,16 @@ class EC4LiveProfessorBridge:
     @staticmethod
     def _coerce_viewset_feedback_index(value: Any) -> int | None:
         return EC4LiveProfessorBridge._coerce_viewset_count_argument(value)
+
+    @classmethod
+    def _viewset_index_from_arguments(cls, args: list[Any] | tuple[Any, ...]) -> int | None:
+        """Extract the zero-based index from LiveProfessor's name/index feedback."""
+
+        for value in reversed(args):
+            index = cls._coerce_viewset_feedback_index(value)
+            if index is not None and index >= 0:
+                return index
+        return None
 
     def change_bank(self, delta: int) -> None:
         self.set_bank(self.active_bank + delta)
@@ -1066,19 +1080,24 @@ class EC4LiveProfessorBridge:
                     self._schedule_parameter_overlay(number - 1)
             return
         if address.casefold().endswith("/viewsets/recall") and args:
-            value = self._coerce_viewset_feedback_index(args[0])
+            value = self._viewset_index_from_arguments(args)
             if value is not None:
                 self._active_viewset_index = value
             return
         if address.casefold().endswith("/viewsets/update"):
             if not args:
                 return
-            count = self._coerce_viewset_count_argument(args[0] if len(args) == 1 else len(args))
-            if count is None:
-                return
-            if count <= 0:
-                return
-            self._viewset_count = count
+            index = self._viewset_index_from_arguments(args)
+            if index is not None and index >= 0:
+                self._viewset_indices.add(index)
+                self._viewset_count = max(self._viewset_indices) + 1
+            elif all(not isinstance(arg, (int, float)) for arg in args):
+                self._viewset_count = max(1, (self._viewset_count or 0) + 1)
+            return
+        if address.casefold().endswith("/viewsets/changed"):
+            self._viewset_indices.clear()
+            self._viewset_count = None
+            self._send_osc("/ViewSets/Refresh")
             return
         if address.casefold().endswith("/touchandturnchange") and args:
             self._show_overlay(["Touch & Turn", str(args[0]), self.profile.plugin_label])

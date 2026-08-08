@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import sys
 import threading
 import time
@@ -66,14 +67,34 @@ if sys.platform == "win32":
     _TRAY_MENU_OPEN = 3001
     _TRAY_MENU_START = 3002
     _TRAY_MENU_STOP = 3003
-    _TRAY_MENU_QUIT = 3004
+    _TRAY_MENU_RESTART = 3004
+    _TRAY_MENU_LOG = 3005
+    _TRAY_MENU_UPDATE = 3006
+    _TRAY_MENU_QUIT = 3007
 
 from . import __version__
 from .bridge import BridgeSnapshot, EC4LiveProfessorBridge
 from .config import BridgeConfig, default_config_path, default_data_dir, load_config, save_config
 from .ec4_protocol import main_display_message, parameter_grid_message, total_display_message
+from .external_links import (
+    CONTRIBUTE_URL,
+    ISSUES_URL,
+    PAYPAL_URL,
+    RELEASES_URL,
+    REPOSITORY_URL,
+    open_external_url,
+)
 from .midi_backend import MidiBackendError, input_names, output_names
 from .osc_codec import decode_message, encode_message
+from .update_service import ReleaseInfo, fetch_latest_release, is_newer_version
+
+
+def tray_action_for_event(l_param: int) -> str | None:
+    if int(l_param) in (0x0202, 0x0203):
+        return "open"
+    if int(l_param) in (0x0205, 0x007B):
+        return "menu"
+    return None
 
 
 def configure_logging(level: str = "INFO") -> Path:
@@ -116,7 +137,7 @@ def protocol_self_test() -> list[str]:
 
 UI_TEXT = {
     "fr": {
-        "window_title": "SiLeMI/O | EC4 LiveProfessor Bridge {version} | By Mamat",
+        "window_title": "EC4 Bridge {version} | SiLeMI/O | By Mamat",
         "mode_label": "Mode LiveProfessor",
         "mode_help": "Companion: noms/valeurs dynamiques | Generic: libelles de profil",
         "mode_companion": "companion",
@@ -199,13 +220,41 @@ UI_TEXT = {
         "tray_open": "Ouvrir",
         "tray_start": "Démarrer le serveur",
         "tray_stop": "Arrêter le serveur",
+        "tray_restart": "Redémarrer le serveur",
+        "tray_log": "Ouvrir le journal",
+        "tray_update": "Vérifier les mises à jour",
         "tray_quit": "Quitter",
+        "menu_file": "Fichier",
+        "menu_view": "Affichage",
+        "menu_tools": "Outils",
+        "menu_help": "Aide",
+        "settings": "Réglages…",
+        "connections": "Connexions et rafraîchissement…",
+        "log_window": "Journal…",
+        "updates": "Vérifier les mises à jour…",
+        "about": "À propos",
+        "repository": "Dépôt GitHub",
+        "releases": "Releases GitHub",
+        "report_bug": "Signaler un bug",
+        "contribute": "Contribuer",
+        "support": "Soutenir via PayPal",
+        "last_event": "Dernier événement",
+        "save_close": "Enregistrer et fermer",
+        "open_log_file": "Ouvrir le fichier",
+        "open_log_folder": "Ouvrir le dossier",
+        "copy_all": "Copier tout",
+        "clear_display": "Effacer l’affichage",
+        "refresh_companion": "Rafraîchir Companion",
+        "reconnect_ec4": "Reconnecter l’EC4",
+        "request_setup": "Redemander setup/groupe",
+        "check_updates_startup": "Vérifier les mises à jour au démarrage",
+        "minimize_on_close": "Réduire dans la zone de notification à la fermeture",
         "language_en": "English",
         "language_fr": "Français",
         "bank_label": "Banque",
     },
     "en": {
-        "window_title": "SiLeMI/O | EC4 LiveProfessor Bridge {version} | By Mamat",
+        "window_title": "EC4 Bridge {version} | SiLeMI/O | By Mamat",
         "mode_label": "LiveProfessor mode",
         "mode_help": "Companion: dynamic names/values | Generic: profile labels",
         "mode_companion": "companion",
@@ -290,7 +339,35 @@ UI_TEXT = {
         "tray_open": "Open",
         "tray_start": "Start bridge",
         "tray_stop": "Stop bridge",
+        "tray_restart": "Restart bridge",
+        "tray_log": "Open log",
+        "tray_update": "Check for updates",
         "tray_quit": "Quit",
+        "menu_file": "File",
+        "menu_view": "View",
+        "menu_tools": "Tools",
+        "menu_help": "Help",
+        "settings": "Settings…",
+        "connections": "Connections and refresh…",
+        "log_window": "Log…",
+        "updates": "Check for updates…",
+        "about": "About",
+        "repository": "GitHub repository",
+        "releases": "GitHub releases",
+        "report_bug": "Report a bug",
+        "contribute": "Contribute",
+        "support": "Support via PayPal",
+        "last_event": "Last event",
+        "save_close": "Save and close",
+        "open_log_file": "Open file",
+        "open_log_folder": "Open folder",
+        "copy_all": "Copy all",
+        "clear_display": "Clear display",
+        "refresh_companion": "Refresh Companion",
+        "reconnect_ec4": "Reconnect EC4",
+        "request_setup": "Request setup/group again",
+        "check_updates_startup": "Check for updates on startup",
+        "minimize_on_close": "Minimize to notification area on close",
         "language_en": "English",
         "language_fr": "French",
         "bank_label": "Bank",
@@ -313,9 +390,9 @@ class BridgeGUI:
         self.root = tk.Tk()
         self.ui_language_var = tk.StringVar(master=self.root, value=self.config.ui_language)
         self.root.title(self._t("window_title", version=__version__))
-        self.root.geometry("840x780")
-        self.root.minsize(740, 680)
-        self.root.protocol("WM_DELETE_WINDOW", self.minimize_to_taskbar)
+        self.root.geometry("760x470")
+        self.root.minsize(680, 420)
+        self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self._suppress_unmap = False
         self.root.bind("<Unmap>", self._on_root_unmap)
         self._tray_ready = False
@@ -343,6 +420,12 @@ class BridgeGUI:
         self.persistent_display_var = tk.BooleanVar(
             value=self.config.persistent_parameter_display
         )
+        self.minimize_on_close_var = tk.BooleanVar(
+            value=self.config.minimize_to_tray_on_close
+        )
+        self.check_updates_var = tk.BooleanVar(
+            value=self.config.check_updates_on_startup
+        )
         self.parameter_overlay_interval_var = tk.StringVar(
             value=str(self.config.parameter_overlay_interval_ms)
         )
@@ -364,6 +447,7 @@ class BridgeGUI:
         self.status_var = tk.StringVar(value=self._t("status_stopped"))
         self.bank_var = tk.StringVar(value=f"{self._t('bank_label')} 1")
         self.learn_var = tk.StringVar(value=self._t("learn_default_label"))
+        self.last_event_var = tk.StringVar(value="—")
         self._status_key = "status_stopped"
         self._language_bindings = []
         self._learn_controls: list[tuple[int, int]] = []
@@ -371,12 +455,19 @@ class BridgeGUI:
         self._learn_phase = ""
         self._learning = False
         self._closing = False
+        self._log_lines: list[str] = []
+        self.settings_window = None
+        self.log_window = None
+        self.connections_window = None
+        self.about_window = None
         self._tray_icon_path = str((Path(__file__).resolve().parent / "assets" / "ec4lp.ico").resolve())
 
         self._build()
         self._update_mapping_status()
         self.refresh_ports()
         self._append_log(f"Configuration: {self.config_path}")
+        if self.config.check_updates_on_startup:
+            self.root.after(1500, lambda: self.check_updates(silent=True))
 
     def _language_code(self) -> str:
         value = "fr"
@@ -396,6 +487,26 @@ class BridgeGUI:
         self.config.ui_language = self._language_code()
         self.root.title(self._t("window_title", version=__version__))
         self._refresh_language()
+        self._rebuild_visible_secondary_windows()
+
+    def _rebuild_visible_secondary_windows(self) -> None:
+        windows = (
+            ("settings_window", self.show_settings),
+            ("log_window", self.show_log_window),
+            ("connections_window", self.show_connections_window),
+        )
+        for attribute, opener in windows:
+            window = getattr(self, attribute, None)
+            if window is None or not window.winfo_exists() or window.state() == "withdrawn":
+                continue
+            if attribute == "settings_window":
+                if hasattr(self, "input_combo"):
+                    del self.input_combo
+                if hasattr(self, "output_combo"):
+                    del self.output_combo
+            window.destroy()
+            setattr(self, attribute, None)
+            self.root.after_idle(opener)
 
     def _register_text_widget(
         self,
@@ -443,6 +554,8 @@ class BridgeGUI:
         }:
             self.status_var.set(self._t("status_stopped"))
         self._update_mapping_status()
+        if hasattr(self, "menu_bar"):
+            self._build_menu()
 
     def _ensure_tray_setup(self) -> None:
         if not sys.platform == "win32":
@@ -653,13 +766,11 @@ class BridgeGUI:
 
     def _on_tray_window_proc(self, hwnd: int, msg: int, w_param: int, l_param: int) -> int:
         if msg == self._tray_msg:
-            if l_param in (
-                _WM_LBUTTONUP,
-                _WM_LBUTTONDBLCLK,
-            ):
+            action = tray_action_for_event(l_param)
+            if action == "open":
                 self.root.after(0, self._restore_from_tray)
                 return 0
-            if l_param in (_WM_RBUTTONUP, _WM_CONTEXTMENU):
+            if action == "menu":
                 self.root.after(0, self._show_tray_menu)
                 return 0
             return 0
@@ -684,6 +795,9 @@ class BridgeGUI:
         else:
             menu.add_command(label=self._t("tray_start"), command=self.start)
             menu.add_command(label=self._t("tray_stop"), state="disabled")
+        menu.add_command(label=self._t("tray_restart"), command=self.restart)
+        menu.add_command(label=self._t("tray_log"), command=self.show_log_window)
+        menu.add_command(label=self._t("tray_update"), command=self.check_updates)
         menu.add_separator()
         menu.add_command(label=self._t("tray_quit"), command=self.quit)
 
@@ -732,6 +846,9 @@ class BridgeGUI:
             self._user32.AppendMenuW(menu, _MF_SEPARATOR, 0, "")
             self._user32.AppendMenuW(menu, start_flags, _TRAY_MENU_START, self._t("tray_start"))
             self._user32.AppendMenuW(menu, stop_flags, _TRAY_MENU_STOP, self._t("tray_stop"))
+            self._user32.AppendMenuW(menu, _MF_STRING, _TRAY_MENU_RESTART, self._t("tray_restart"))
+            self._user32.AppendMenuW(menu, _MF_STRING, _TRAY_MENU_LOG, self._t("tray_log"))
+            self._user32.AppendMenuW(menu, _MF_STRING, _TRAY_MENU_UPDATE, self._t("tray_update"))
             self._user32.AppendMenuW(menu, _MF_SEPARATOR, 0, "")
             self._user32.AppendMenuW(menu, _MF_STRING, _TRAY_MENU_QUIT, self._t("tray_quit"))
 
@@ -760,6 +877,12 @@ class BridgeGUI:
                 self.start()
             elif selected == _TRAY_MENU_STOP:
                 self.stop()
+            elif selected == _TRAY_MENU_RESTART:
+                self.restart()
+            elif selected == _TRAY_MENU_LOG:
+                self.show_log_window()
+            elif selected == _TRAY_MENU_UPDATE:
+                self.check_updates()
             elif selected == _TRAY_MENU_QUIT:
                 self.quit()
         except Exception:
@@ -811,13 +934,222 @@ class BridgeGUI:
             return
         if self._closing:
             return
+        try:
+            if self.root.state() != "iconic":
+                return
+        except Exception:
+            return
         self._suppress_unmap = True
         try:
-            self.minimize_to_taskbar()
+            self.root.after_idle(self.minimize_to_taskbar)
         finally:
             self._suppress_unmap = False
 
+    def _build_menu(self) -> None:
+        tk = self.tk
+        menu_bar = tk.Menu(self.root)
+        running = bool(self.bridge and self.bridge.running)
+
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        file_menu.add_command(
+            label=self._t("start"), command=self.start, state="disabled" if running else "normal"
+        )
+        file_menu.add_command(
+            label=self._t("stop"), command=self.stop, state="normal" if running else "disabled"
+        )
+        file_menu.add_command(label=self._t("save"), command=self.save)
+        file_menu.add_separator()
+        file_menu.add_command(label=self._t("minimize"), command=self.minimize_to_taskbar)
+        file_menu.add_command(label=self._t("quit"), command=self.quit)
+        menu_bar.add_cascade(label=self._t("menu_file"), menu=file_menu)
+
+        view_menu = tk.Menu(menu_bar, tearoff=0)
+        view_menu.add_command(label=self._t("log_window"), command=self.show_log_window)
+        view_menu.add_command(label=self._t("diagnostic"), command=self.diagnostic)
+        menu_bar.add_cascade(label=self._t("menu_view"), menu=view_menu)
+
+        tools_menu = tk.Menu(menu_bar, tearoff=0)
+        tools_menu.add_command(label=self._t("settings"), command=self.show_settings)
+        tools_menu.add_command(label=self._t("connections"), command=self.show_connections_window)
+        tools_menu.add_command(label=self._t("learn_button"), command=self.toggle_midi_learn)
+        tools_menu.add_command(label=self._t("test_display"), command=self.demo_display)
+        tools_menu.add_separator()
+        tools_menu.add_command(label=self._t("updates"), command=self.check_updates)
+        language_menu = tk.Menu(tools_menu, tearoff=0)
+        language_menu.add_radiobutton(
+            label="Français", variable=self.ui_language_var, value="fr"
+        )
+        language_menu.add_radiobutton(
+            label="English", variable=self.ui_language_var, value="en"
+        )
+        tools_menu.add_cascade(label=self._t("language_label"), menu=language_menu)
+        menu_bar.add_cascade(label=self._t("menu_tools"), menu=tools_menu)
+
+        help_menu = tk.Menu(menu_bar, tearoff=0)
+        help_menu.add_command(
+            label=self._t("repository"), command=lambda: self._open_link(REPOSITORY_URL)
+        )
+        help_menu.add_command(
+            label=self._t("releases"), command=lambda: self._open_link(RELEASES_URL)
+        )
+        help_menu.add_command(
+            label=self._t("report_bug"), command=lambda: self._open_link(ISSUES_URL)
+        )
+        help_menu.add_command(
+            label=self._t("contribute"), command=lambda: self._open_link(CONTRIBUTE_URL)
+        )
+        help_menu.add_command(
+            label=self._t("support"), command=lambda: self._open_link(PAYPAL_URL)
+        )
+        help_menu.add_separator()
+        help_menu.add_command(label=self._t("about"), command=self.show_about)
+        menu_bar.add_cascade(label=self._t("menu_help"), menu=help_menu)
+
+        self.menu_bar = menu_bar
+        self.root.configure(menu=menu_bar)
+
     def _build(self) -> None:
+        tk = self.tk
+        ttk = self.ttk
+        self._build_menu()
+
+        main = ttk.Frame(self.root, padding=12)
+        main.pack(fill="both", expand=True)
+        main.columnconfigure(0, weight=1)
+
+        brand = tk.Frame(
+            main,
+            bg="#111820",
+            height=62,
+            highlightthickness=1,
+            highlightbackground="#2a4050",
+        )
+        brand.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        brand.grid_propagate(False)
+        tk.Label(
+            brand,
+            text="EC4 Bridge",
+            bg="#111820",
+            fg="#e8f4f8",
+            font=("Segoe UI Semibold", 18),
+        ).pack(side="left", padx=(16, 12))
+        tk.Label(
+            brand,
+            text=f"LiveProfessor  •  v{__version__}",
+            bg="#111820",
+            fg="#91a9b5",
+            font=("Segoe UI", 11),
+        ).pack(side="left")
+
+        signature = tk.Frame(brand, bg="#111820")
+        signature.pack(side="right", padx=12)
+        tk.Label(
+            signature,
+            text="SiLeMI/O",
+            bg="#111820",
+            fg="#43d6ff",
+            font=("Segoe UI Semibold", 13),
+        ).pack(side="left", padx=(0, 10))
+        tk.Label(
+            signature,
+            text="By Mamat\n-----[]---",
+            bg="#111820",
+            fg="#91a9b5",
+            font=("Segoe UI", 9),
+            anchor="e",
+            justify="right",
+        ).pack(side="left")
+
+        action_frame = ttk.Frame(main)
+        action_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+        self.start_button = ttk.Button(action_frame, text=self._t("start"), command=self.start)
+        self.start_button.pack(side="left")
+        self.stop_button = ttk.Button(
+            action_frame, text=self._t("stop"), command=self.stop, state="disabled"
+        )
+        self.stop_button.pack(side="left", padx=6)
+        self.minimize_button = ttk.Button(
+            action_frame, text=self._t("minimize"), command=self.minimize_to_taskbar
+        )
+        self.minimize_button.pack(side="left", padx=6)
+        self.quit_button = ttk.Button(action_frame, text=self._t("quit"), command=self.quit)
+        self.quit_button.pack(side="left", padx=6)
+        self.settings_button = ttk.Button(
+            action_frame, text=self._t("settings"), command=self.show_settings
+        )
+        self.settings_button.pack(side="right")
+        for widget, key in (
+            (self.start_button, "start"),
+            (self.stop_button, "stop"),
+            (self.minimize_button, "minimize"),
+            (self.quit_button, "quit"),
+            (self.settings_button, "settings"),
+        ):
+            self._register_text_widget(widget, "text", key)
+
+        state_frame = ttk.LabelFrame(main, text=self._t("state_frame"), padding=10)
+        state_frame.grid(row=2, column=0, sticky="ew", pady=4)
+        state_frame.columnconfigure(0, weight=1)
+        self._register_text_widget(state_frame, "text", "state_frame")
+        ttk.Label(state_frame, textvariable=self.status_var).grid(row=0, column=0, sticky="w")
+        self.state_previous_button = ttk.Button(
+            state_frame, text=self._t("bank_previous"), command=lambda: self.change_bank(-1)
+        )
+        self.state_previous_button.grid(row=0, column=1, padx=4)
+        ttk.Label(state_frame, textvariable=self.bank_var, width=16, anchor="center").grid(
+            row=0, column=2
+        )
+        self.state_next_button = ttk.Button(
+            state_frame, text=self._t("bank_next"), command=lambda: self.change_bank(1)
+        )
+        self.state_next_button.grid(row=0, column=3, padx=4)
+        self._register_text_widget(self.state_previous_button, "text", "bank_previous")
+        self._register_text_widget(self.state_next_button, "text", "bank_next")
+
+        target_frame = ttk.LabelFrame(main, text=self._t("zone_label"), padding=10)
+        target_frame.grid(row=3, column=0, sticky="ew", pady=6)
+        self._register_text_widget(target_frame, "text", "zone_label")
+        self.setup_label = ttk.Label(target_frame, text=self._t("setup_label"))
+        self.setup_label.pack(side="left")
+        ttk.Spinbox(
+            target_frame, from_=1, to=16, textvariable=self.target_setup_var, width=5
+        ).pack(side="left", padx=(4, 14))
+        self.group_label = ttk.Label(target_frame, text=self._t("group_label"))
+        self.group_label.pack(side="left")
+        ttk.Spinbox(
+            target_frame, from_=1, to=16, textvariable=self.target_group_var, width=5
+        ).pack(side="left", padx=(4, 14))
+        self.use_current_target_button = ttk.Button(
+            target_frame, text=self._t("use_current_target"), command=self.use_current_target
+        )
+        self.use_current_target_button.pack(side="left")
+        self._register_text_widget(self.setup_label, "text", "setup_label")
+        self._register_text_widget(self.group_label, "text", "group_label")
+        self._register_text_widget(self.use_current_target_button, "text", "use_current_target")
+
+        learn_frame = ttk.Frame(main)
+        learn_frame.grid(row=4, column=0, sticky="ew", pady=8)
+        self.learn_button = ttk.Button(
+            learn_frame, text=self._t("learn_button"), command=self.toggle_midi_learn
+        )
+        self.learn_button.pack(side="left")
+        ttk.Label(learn_frame, textvariable=self.learn_var).pack(side="left", padx=12)
+        self.shortcuts_button = ttk.Button(
+            learn_frame, text=self._t("shortcuts"), command=self.show_shortcuts
+        )
+        self.shortcuts_button.pack(side="right")
+        self._register_text_widget(self.learn_button, "text", "learn_button")
+        self._register_text_widget(self.shortcuts_button, "text", "shortcuts")
+
+        event_frame = ttk.LabelFrame(main, text=self._t("last_event"), padding=8)
+        event_frame.grid(row=5, column=0, sticky="nsew", pady=(8, 0))
+        main.rowconfigure(5, weight=1)
+        self._register_text_widget(event_frame, "text", "last_event")
+        ttk.Label(
+            event_frame, textvariable=self.last_event_var, anchor="w", wraplength=680
+        ).pack(fill="both", expand=True)
+
+    def _build_legacy(self) -> None:
         tk = self.tk
         ttk = self.ttk
         main = ttk.Frame(self.root, padding=12)
@@ -1101,6 +1433,299 @@ class BridgeGUI:
         scroll.grid(row=0, column=1, sticky="ns")
         self.log_text.configure(yscrollcommand=scroll.set)
 
+    def show_settings(self) -> None:
+        if self.settings_window is not None and self.settings_window.winfo_exists():
+            self.settings_window.deiconify()
+            self.settings_window.lift()
+            self.settings_window.focus_force()
+            return
+
+        ttk = self.ttk
+        window = self.tk.Toplevel(self.root)
+        self.settings_window = window
+        window.title(self._t("settings"))
+        window.geometry("700x590")
+        window.transient(self.root)
+        self._set_window_icons()
+
+        notebook = ttk.Notebook(window)
+        notebook.pack(fill="both", expand=True, padx=10, pady=10)
+        connections = ttk.Frame(notebook, padding=12)
+        ec4 = ttk.Frame(notebook, padding=12)
+        display = ttk.Frame(notebook, padding=12)
+        advanced = ttk.Frame(notebook, padding=12)
+        notebook.add(connections, text=self._t("connections"))
+        notebook.add(ec4, text="EC4")
+        notebook.add(display, text=self._t("menu_view"))
+        notebook.add(advanced, text=self._t("menu_tools"))
+
+        for frame in (connections, ec4, display, advanced):
+            frame.columnconfigure(1, weight=1)
+
+        row = 0
+        ttk.Label(connections, text=self._t("mode_label")).grid(row=row, column=0, sticky="w", pady=4)
+        ttk.Combobox(
+            connections,
+            textvariable=self.mode_var,
+            values=("companion", "generic"),
+            state="readonly",
+        ).grid(row=row, column=1, sticky="ew", pady=4)
+        row += 1
+        ttk.Label(connections, text=self._t("midi_in_label")).grid(row=row, column=0, sticky="w", pady=4)
+        self.input_combo = ttk.Combobox(connections, textvariable=self.midi_in_var)
+        self.input_combo.grid(row=row, column=1, sticky="ew", pady=4)
+        row += 1
+        ttk.Label(connections, text=self._t("midi_out_label")).grid(row=row, column=0, sticky="w", pady=4)
+        self.output_combo = ttk.Combobox(connections, textvariable=self.midi_out_var)
+        self.output_combo.grid(row=row, column=1, sticky="ew", pady=4)
+        row += 1
+        ttk.Button(
+            connections, text=self._t("refresh_ports"), command=self.refresh_ports
+        ).grid(row=row, column=1, sticky="w", pady=(0, 10))
+        row += 1
+        ttk.Label(connections, text=self._t("lp_host_label")).grid(row=row, column=0, sticky="w", pady=4)
+        ttk.Entry(connections, textvariable=self.host_var).grid(row=row, column=1, sticky="ew", pady=4)
+        row += 1
+        ttk.Label(connections, text=self._t("lp_port_label")).grid(row=row, column=0, sticky="w", pady=4)
+        ttk.Entry(connections, textvariable=self.lp_port_var).grid(row=row, column=1, sticky="w", pady=4)
+        row += 1
+        ttk.Label(connections, text=self._t("lp_return_label")).grid(row=row, column=0, sticky="w", pady=4)
+        ttk.Entry(connections, textvariable=self.feedback_port_var).grid(row=row, column=1, sticky="w", pady=4)
+        row += 1
+        ttk.Label(connections, text=self._t("profile_label")).grid(row=row, column=0, sticky="w", pady=4)
+        ttk.Entry(connections, textvariable=self.profile_var).grid(row=row, column=1, sticky="ew", pady=4)
+
+        ttk.Label(ec4, text=self._t("setup_label")).grid(row=0, column=0, sticky="w", pady=4)
+        ttk.Spinbox(ec4, from_=1, to=16, textvariable=self.target_setup_var, width=6).grid(
+            row=0, column=1, sticky="w", pady=4
+        )
+        ttk.Label(ec4, text=self._t("group_label")).grid(row=1, column=0, sticky="w", pady=4)
+        ttk.Spinbox(ec4, from_=1, to=16, textvariable=self.target_group_var, width=6).grid(
+            row=1, column=1, sticky="w", pady=4
+        )
+        ttk.Button(
+            ec4, text=self._t("use_current_target"), command=self.use_current_target
+        ).grid(row=2, column=1, sticky="w", pady=8)
+        ttk.Button(ec4, text=self._t("learn_button"), command=self.toggle_midi_learn).grid(
+            row=3, column=1, sticky="w", pady=8
+        )
+        ttk.Label(ec4, textvariable=self.learn_var).grid(row=4, column=1, sticky="w")
+
+        ttk.Checkbutton(
+            display, text=self._t("display_check"), variable=self.display_var
+        ).grid(row=0, column=0, columnspan=2, sticky="w", pady=6)
+        ttk.Checkbutton(
+            display, text=self._t("persistent_check"), variable=self.persistent_display_var
+        ).grid(row=1, column=0, columnspan=2, sticky="w", pady=6)
+        ttk.Button(display, text=self._t("test_display"), command=self.demo_display).grid(
+            row=2, column=0, sticky="w", pady=8
+        )
+
+        advanced_fields = (
+            ("speed_overlay_interval", self.parameter_overlay_interval_var),
+            ("speed_refresh_companion", self.companion_refresh_delay_var),
+            ("speed_refresh_label", self.name_refresh_delay_var),
+            ("speed_feedback_timeout", self.feedback_timeout_var),
+            ("speed_overlay_duration", self.overlay_display_duration_var),
+        )
+        for row, (key, variable) in enumerate(advanced_fields):
+            ttk.Label(advanced, text=self._t(key)).grid(row=row, column=0, sticky="w", pady=4)
+            ttk.Entry(advanced, textvariable=variable, width=10).grid(
+                row=row, column=1, sticky="w", pady=4
+            )
+        row = len(advanced_fields)
+        ttk.Checkbutton(
+            advanced,
+            text=self._t("minimize_on_close"),
+            variable=self.minimize_on_close_var,
+        ).grid(row=row, column=0, columnspan=2, sticky="w", pady=(12, 4))
+        ttk.Checkbutton(
+            advanced,
+            text=self._t("check_updates_startup"),
+            variable=self.check_updates_var,
+        ).grid(row=row + 1, column=0, columnspan=2, sticky="w", pady=4)
+
+        footer = ttk.Frame(window, padding=(10, 0, 10, 10))
+        footer.pack(fill="x")
+
+        def save_and_close() -> None:
+            self.save()
+            close_window()
+
+        def close_window() -> None:
+            if hasattr(self, "input_combo"):
+                del self.input_combo
+            if hasattr(self, "output_combo"):
+                del self.output_combo
+            self.settings_window = None
+            window.destroy()
+
+        ttk.Button(footer, text=self._t("save_close"), command=save_and_close).pack(side="right")
+        ttk.Button(footer, text=self._t("quit"), command=close_window).pack(side="right", padx=6)
+        window.protocol("WM_DELETE_WINDOW", close_window)
+        self.refresh_ports()
+
+    def show_log_window(self) -> None:
+        if self.log_window is not None and self.log_window.winfo_exists():
+            self.log_window.deiconify()
+            self.log_window.lift()
+            self.log_window.focus_force()
+            return
+        window = self.tk.Toplevel(self.root)
+        self.log_window = window
+        window.title(self._t("log_window"))
+        window.geometry("820x460")
+        frame = self.ttk.Frame(window, padding=8)
+        frame.pack(fill="both", expand=True)
+        frame.rowconfigure(0, weight=1)
+        frame.columnconfigure(0, weight=1)
+        self.log_text = self.tk.Text(frame, wrap="word", state="normal")
+        self.log_text.grid(row=0, column=0, sticky="nsew")
+        self.log_text.insert("1.0", "".join(self._log_lines))
+        self.log_text.configure(state="disabled")
+        scroll = self.ttk.Scrollbar(frame, orient="vertical", command=self.log_text.yview)
+        scroll.grid(row=0, column=1, sticky="ns")
+        self.log_text.configure(yscrollcommand=scroll.set)
+        buttons = self.ttk.Frame(frame)
+        buttons.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        self.ttk.Button(buttons, text=self._t("copy_all"), command=self._copy_log).pack(side="left")
+        self.ttk.Button(
+            buttons, text=self._t("clear_display"), command=self._clear_log_display
+        ).pack(side="left", padx=5)
+        self.ttk.Button(
+            buttons, text=self._t("open_log_file"), command=self._open_log_file
+        ).pack(side="left", padx=5)
+        self.ttk.Button(
+            buttons, text=self._t("open_log_folder"), command=self._open_log_folder
+        ).pack(side="left", padx=5)
+
+        def hide() -> None:
+            window.withdraw()
+
+        window.protocol("WM_DELETE_WINDOW", hide)
+
+    def _copy_log(self) -> None:
+        content = "".join(self._log_lines)
+        self.root.clipboard_clear()
+        self.root.clipboard_append(content)
+
+    def _clear_log_display(self) -> None:
+        if hasattr(self, "log_text") and self.log_text.winfo_exists():
+            self.log_text.configure(state="normal")
+            self.log_text.delete("1.0", "end")
+            self.log_text.configure(state="disabled")
+
+    def _open_log_file(self) -> None:
+        path = default_data_dir() / "bridge.log"
+        if path.exists():
+            os.startfile(path)
+
+    def _open_log_folder(self) -> None:
+        folder = default_data_dir()
+        folder.mkdir(parents=True, exist_ok=True)
+        os.startfile(folder)
+
+    def show_connections_window(self) -> None:
+        if self.connections_window is not None and self.connections_window.winfo_exists():
+            self.connections_window.deiconify()
+            self.connections_window.lift()
+            return
+        window = self.tk.Toplevel(self.root)
+        self.connections_window = window
+        window.title(self._t("connections"))
+        frame = self.ttk.Frame(window, padding=12)
+        frame.pack(fill="both", expand=True)
+        self.ttk.Button(frame, text=self._t("refresh_ports"), command=self.refresh_ports).pack(
+            fill="x", pady=4
+        )
+        self.ttk.Button(frame, text=self._t("reconnect_ec4"), command=self.reconnect_ec4).pack(
+            fill="x", pady=4
+        )
+        self.ttk.Button(frame, text=self._t("request_setup"), command=self.request_setup).pack(
+            fill="x", pady=4
+        )
+        self.ttk.Button(
+            frame, text=self._t("refresh_companion"), command=self.refresh_companion
+        ).pack(fill="x", pady=4)
+
+        def hide() -> None:
+            window.withdraw()
+
+        window.protocol("WM_DELETE_WINDOW", hide)
+
+    def reconnect_ec4(self) -> None:
+        if self.bridge and self.bridge.running:
+            self.bridge.reconnect_midi()
+
+    def request_setup(self) -> None:
+        if self.bridge and self.bridge.running:
+            self.bridge.request_setup_state()
+
+    def refresh_companion(self) -> None:
+        if self.bridge and self.bridge.running:
+            self.bridge.refresh_companion()
+
+    def restart(self) -> None:
+        self.stop()
+        self.root.after(100, self.start)
+
+    def _open_link(self, url: str) -> None:
+        try:
+            if not open_external_url(url):
+                raise OSError("le navigateur n'a pas accepte la demande")
+        except Exception as exc:
+            self.messagebox.showerror(self._t("menu_help"), str(exc))
+
+    def show_about(self) -> None:
+        message = (
+            f"EC4 LiveProfessor Bridge {__version__}\n\n"
+            "SiLeMI/O\nBy Mamat\n----[]--\n\n"
+            "Bridge MIDI / OSC / SysEx. Aucun audio ne traverse l'application."
+        )
+        self.messagebox.showinfo(self._t("about"), message)
+
+    def check_updates(self, silent: bool = False) -> None:
+        self._append_log("Vérification des mises à jour GitHub…")
+
+        def worker() -> None:
+            try:
+                release = fetch_latest_release()
+                self.root.after(0, self._apply_update_result, release, silent, None)
+            except Exception as exc:
+                self.root.after(0, self._apply_update_result, None, silent, exc)
+
+        threading.Thread(target=worker, name="github-update-check", daemon=True).start()
+
+    def _apply_update_result(
+        self,
+        release: ReleaseInfo | None,
+        silent: bool,
+        error: Exception | None,
+    ) -> None:
+        if error is not None:
+            self._append_log(f"Mise à jour indisponible: {error}")
+            if not silent:
+                self.messagebox.showwarning(self._t("updates"), str(error))
+            return
+        assert release is not None
+        if not is_newer_version(release.version, __version__):
+            self._append_log(f"Version {__version__}: à jour")
+            if not silent:
+                self.messagebox.showinfo(
+                    self._t("updates"), f"La version {__version__} est à jour."
+                )
+            return
+        notes = release.notes or "Aucune note de version."
+        size = f"{release.asset_size / 1_048_576:.1f} Mo" if release.asset_size else "inconnue"
+        message = (
+            f"Version installée : {__version__}\n"
+            f"Version disponible : {release.version}\n"
+            f"Fichier : {release.asset_name or 'release GitHub'} ({size})\n\n"
+            f"{notes[:1800]}\n\nOuvrir la release pour télécharger la mise à jour ?"
+        )
+        if self.messagebox.askyesno(self._t("updates"), message):
+            self._open_link(RELEASES_URL)
+
     def _config_from_form(self) -> BridgeConfig:
         config = replace(
             self.config,
@@ -1119,6 +1744,8 @@ class BridgeGUI:
             feedback_confirm_timeout_ms=int(self.feedback_timeout_var.get()),
             overlay_display_duration_ms=int(self.overlay_display_duration_var.get()),
             ui_language=self.ui_language_var.get().strip().lower(),
+            minimize_to_tray_on_close=bool(self.minimize_on_close_var.get()),
+            check_updates_on_startup=bool(self.check_updates_var.get()),
             target_setup=int(self.target_setup_var.get()),
             target_group=int(self.target_group_var.get()),
             restrict_to_target=True,
@@ -1130,8 +1757,10 @@ class BridgeGUI:
         try:
             inputs = input_names()
             outputs = output_names()
-            self.input_combo.configure(values=inputs)
-            self.output_combo.configure(values=outputs)
+            if hasattr(self, "input_combo") and self.input_combo.winfo_exists():
+                self.input_combo.configure(values=inputs)
+            if hasattr(self, "output_combo") and self.output_combo.winfo_exists():
+                self.output_combo.configure(values=outputs)
             self._append_log(f"Ports MIDI: {len(inputs)} entree(s), {len(outputs)} sortie(s)")
             for name in inputs:
                 if "faderfox" in name.casefold():
@@ -1166,6 +1795,7 @@ class BridgeGUI:
             self.bridge.start()
             self.start_button.configure(state="disabled")
             self.stop_button.configure(state="normal")
+            self._build_menu()
         except Exception as exc:
             self._append_log(f"Demarrage impossible: {exc}")
             self.messagebox.showerror(self._t("bridge_start_error_title"), str(exc))
@@ -1178,6 +1808,8 @@ class BridgeGUI:
         self.start_button.configure(state="normal")
         self.stop_button.configure(state="disabled")
         self.status_var.set(self._t("status_stopped"))
+        if not self._closing:
+            self._build_menu()
 
     def change_bank(self, delta: int) -> None:
         if self.bridge:
@@ -1373,10 +2005,16 @@ class BridgeGUI:
 
     def _append_log(self, message: str) -> None:
         stamp = time.strftime("%H:%M:%S")
-        self.log_text.configure(state="normal")
-        self.log_text.insert("end", f"{stamp}  {message}\n")
-        self.log_text.see("end")
-        self.log_text.configure(state="disabled")
+        line = f"{stamp}  {message}\n"
+        self._log_lines.append(line)
+        if len(self._log_lines) > 2000:
+            del self._log_lines[:500]
+        self.last_event_var.set(message)
+        if hasattr(self, "log_text") and self.log_text.winfo_exists():
+            self.log_text.configure(state="normal")
+            self.log_text.insert("end", line)
+            self.log_text.see("end")
+            self.log_text.configure(state="disabled")
 
     def _ensure_tray_icon(self) -> bool:
         if not self._tray_ready or self._tray_icon_created:
@@ -1419,6 +2057,8 @@ class BridgeGUI:
         self.root.iconify()
 
     def quit(self) -> None:
+        if self._closing:
+            return
         self._closing = True
         self._remove_tray_icon()
         if sys.platform == "win32" and self._tray_previous_proc and self._tray_hwnd:
@@ -1426,18 +2066,16 @@ class BridgeGUI:
                 self._user32.SetWindowLongPtrW(self._tray_hwnd, _GWL_WNDPROC, self._tray_previous_proc)
             except Exception:
                 pass
-        self.stop()
-        self.root.destroy()
+        try:
+            self.stop()
+        finally:
+            self.root.destroy()
 
     def on_close(self) -> None:
-        self._remove_tray_icon()
-        if sys.platform == "win32" and self._tray_previous_proc and self._tray_hwnd:
-            try:
-                self._user32.SetWindowLongPtrW(self._tray_hwnd, _GWL_WNDPROC, self._tray_previous_proc)
-            except Exception:
-                pass
-        self.stop()
-        self.root.destroy()
+        if bool(self.minimize_on_close_var.get()):
+            self.minimize_to_taskbar()
+        else:
+            self.quit()
 
     def run(self) -> None:
         self.root.mainloop()

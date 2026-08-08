@@ -33,6 +33,7 @@ class ConfigTests(unittest.TestCase):
                 },
             )
             save_config(original, path)
+            self.assertFalse(list(Path(folder).glob(".*.tmp")))
             restored = load_config(path)
             self.assertEqual(
                 (
@@ -93,13 +94,13 @@ class ConfigTests(unittest.TestCase):
             path.write_text(
                 "{"
                 "\"mode\":\"companion\","
-                "\"show_hide_command\":\"/Command/PluginWindows/ShowHideselectedplugin\","
+                "\"show_hide_command\":\"/Command/PluginWindows/ShowHideSelectedPlugin\","
                 "\"enable_processing_command\":\"/Command/SelectedPlugin/EnableProcessingonselectedplugin\""
                 "}",
                 encoding="utf-8",
             )
             config = load_config(path)
-            self.assertEqual(config.show_hide_command, "/Command/PluginWindows/ShowHideSelectedPlugin")
+            self.assertEqual(config.show_hide_command, "/Command/PluginWindows/ShowHideselectedplugin")
             self.assertEqual(
                 config.enable_processing_command,
                 "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",

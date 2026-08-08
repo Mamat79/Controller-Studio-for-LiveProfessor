@@ -70,11 +70,67 @@ elseif (-not (Test-Path -LiteralPath $targetConfig) -and (Test-Path -LiteralPath
     Copy-Item -LiteralPath $portableExample -Destination (Join-Path $installDir "config.example.json") -Force
 }
 
-foreach ($folder in @("docs", "profiles")) {
-    $sourceFolder = Join-Path $sourceRoot $folder
-    $targetFolder = Join-Path $installDir $folder
-    if (Test-Path -LiteralPath $sourceFolder -PathType Container) {
-        Copy-Item -LiteralPath $sourceFolder -Destination $targetFolder -Recurse -Force
+foreach ($file in @("README.md", "CHANGELOG.md")) {
+    $sourceFile = Join-Path $sourceRoot $file
+    if (Test-Path -LiteralPath $sourceFile -PathType Leaf) {
+        Copy-Item -LiteralPath $sourceFile -Destination $installDir -Force
+    }
+}
+
+$publicDocs = @(
+    "CARTOGRAPHIE_MIDI_SYSEX.md",
+    "CONFIGURATION_EC4.md",
+    "GUIDE_INSTALLATION_UTILISATION.md",
+    "RAPPORT_STABILISATION_UI_UPDATER_V0.5.0.md",
+    "SOURCES.md"
+)
+$targetDocs = Join-Path $installDir "docs"
+New-Item -ItemType Directory -Path $targetDocs -Force | Out-Null
+$legacyDocNames = @(
+    "NOTE_SECURITE_LICENCE.md",
+    "RAPPORT_FAISABILITE.md",
+    "RAPPORT_TESTS.md",
+    "SAUVEGARDE_RESTAURATION_DESINSTALLATION.md"
+)
+foreach ($legacyDocName in $legacyDocNames) {
+    $legacyDocPath = Join-Path $targetDocs $legacyDocName
+    if (Test-Path -LiteralPath $legacyDocPath -PathType Leaf) {
+        Remove-Item -LiteralPath $legacyDocPath -Force
+    }
+}
+foreach ($legacyNestedPath in @(
+    (Join-Path $targetDocs "docs"),
+    (Join-Path $targetDocs "en\en")
+)) {
+    if (Test-Path -LiteralPath $legacyNestedPath -PathType Container) {
+        Remove-Item -LiteralPath $legacyNestedPath -Recurse -Force
+    }
+}
+foreach ($document in $publicDocs) {
+    $sourceDocument = Join-Path $sourceRoot "docs\$document"
+    if (Test-Path -LiteralPath $sourceDocument -PathType Leaf) {
+        Copy-Item -LiteralPath $sourceDocument -Destination $targetDocs -Force
+    }
+}
+$sourceEnglishDocs = Join-Path $sourceRoot "docs\en"
+if (Test-Path -LiteralPath $sourceEnglishDocs -PathType Container) {
+    $targetEnglishDocs = Join-Path $targetDocs "en"
+    New-Item -ItemType Directory -Path $targetEnglishDocs -Force | Out-Null
+    Get-ChildItem -LiteralPath $sourceEnglishDocs -File | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $targetEnglishDocs -Force
+    }
+}
+
+$sourceProfiles = Join-Path $sourceRoot "profiles"
+$targetProfiles = Join-Path $installDir "profiles"
+if (Test-Path -LiteralPath $sourceProfiles -PathType Container) {
+    $legacyNestedProfiles = Join-Path $targetProfiles "profiles"
+    if (Test-Path -LiteralPath $legacyNestedProfiles -PathType Container) {
+        Remove-Item -LiteralPath $legacyNestedProfiles -Recurse -Force
+    }
+    New-Item -ItemType Directory -Path $targetProfiles -Force | Out-Null
+    Get-ChildItem -LiteralPath $sourceProfiles -Force | ForEach-Object {
+        Copy-Item -LiteralPath $_.FullName -Destination $targetProfiles -Recurse -Force
     }
 }
 

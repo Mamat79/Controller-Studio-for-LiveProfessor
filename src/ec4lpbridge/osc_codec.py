@@ -102,7 +102,7 @@ def decode_message(data: bytes) -> tuple[str, list[Any]]:
 class OSCClient:
     host: str
     port: int
-    _socket: socket.socket = field(init=False, repr=False)
+    _socket: socket.socket | None = field(init=False, repr=False)
     _send_lock: threading.Lock = field(default_factory=threading.Lock, init=False, repr=False)
 
     def __post_init__(self) -> None:
@@ -111,15 +111,18 @@ class OSCClient:
     def send(self, address: str, *args: Any) -> None:
         packet = encode_message(address, args)
         with self._send_lock:
+            if self._socket is None:
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self._socket.sendto(packet, (self.host, self.port))
 
     def close(self) -> None:
         with self._send_lock:
             try:
-                self._socket.close()
+                if self._socket is not None:
+                    self._socket.close()
             except OSError:
                 pass
-            self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self._socket = None
 
 
 class OSCServer:

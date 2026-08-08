@@ -36,6 +36,8 @@ class BridgeTests(unittest.TestCase):
         changes.setdefault("restrict_to_target", False)
         config = BridgeConfig(**changes)
         bridge = EC4LiveProfessorBridge(config)
+        bridge._midi.close()
+        bridge._osc_client.close()
         bridge._midi = FakeMidi()
         bridge._osc_client = FakeOSC()
         return bridge
@@ -74,6 +76,7 @@ class BridgeTests(unittest.TestCase):
             BridgeConfig(display_enabled=False, restrict_to_target=False),
             log_callback=logs.append,
         )
+        self.addCleanup(bridge._osc_client.close)
         bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
         bridge._name_inventory_timer.cancel()
         bridge._name_inventory_timer = None
@@ -114,6 +117,7 @@ class BridgeTests(unittest.TestCase):
         bridge = EC4LiveProfessorBridge(
             BridgeConfig(display_enabled=True, target_setup=13, target_group=3)
         )
+        self.addCleanup(bridge._osc_client.close)
         bridge._midi = FakeMidi()
         bridge.setup_state = EC4SetupState(setup=12, group=1)
         self.assertFalse(bridge._display_allowed())
@@ -129,6 +133,7 @@ class BridgeTests(unittest.TestCase):
                 target_group=7,
             )
         )
+        self.addCleanup(bridge._osc_client.close)
         bridge._midi = FakeMidi()
         bridge.setup_state = EC4SetupState(setup=4, group=6)
         bridge._refresh_main_display()
@@ -138,6 +143,7 @@ class BridgeTests(unittest.TestCase):
         bridge = EC4LiveProfessorBridge(
             BridgeConfig(display_enabled=False, target_setup=9, target_group=13)
         )
+        bridge._osc_client.close()
         bridge._midi = FakeMidi()
         bridge._osc_client = FakeOSC()
         bridge.setup_state = EC4SetupState(setup=8, group=0)
@@ -166,6 +172,7 @@ class BridgeTests(unittest.TestCase):
                 encoder_mappings={"5:7": mapping},
             )
         )
+        bridge._osc_client.close()
         bridge._midi = FakeMidi()
         bridge._osc_client = FakeOSC()
         bridge.setup_state = EC4SetupState(setup=4, group=6)
@@ -187,7 +194,7 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(bridge.active_bank, 1)
         bridge._handle_sysex_button("shift_push", 4)
         self.assertEqual(
-            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/ShowHideSelectedPlugin"
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/ShowHideselectedplugin"
         )
         bridge._handle_sysex_button("shift_push", 8)
         self.assertEqual(
@@ -219,24 +226,18 @@ class BridgeTests(unittest.TestCase):
             bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectNextPlugin"
         )
         bridge._handle_sysex_button("shift_push", 12)
-        self.assertIn(
-            "/Command/CueLists/FirePreviousCue",
-            [message[0] for message in bridge._osc_client.messages[-3:]],
-        )
+        self.assertEqual(bridge._osc_client.messages[-1][0], "/Command/CueLists/FirePreviousCue")
         bridge._handle_sysex_button("shift_push", 13)
-        self.assertIn(
-            "/Command/CueLists/FireNextCue",
-            [message[0] for message in bridge._osc_client.messages[-3:]],
-        )
+        self.assertEqual(bridge._osc_client.messages[-1][0], "/Command/CueLists/FireNextCue")
         bridge._handle_sysex_button("shift_push", 14)
-        self.assertIn(
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
             "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-            [message[0] for message in bridge._osc_client.messages[-3:]],
         )
         bridge._handle_sysex_button("shift_push", 15)
-        self.assertIn(
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
             "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
-            [message[0] for message in bridge._osc_client.messages[-3:]],
         )
         bridge._active_viewset_index = 1
         bridge._viewset_count = 3
@@ -278,22 +279,37 @@ class BridgeTests(unittest.TestCase):
             "/Command/PluginWindows/SelectNextPlugin",
         )
 
-    def test_command_fallbacks_include_snapshot_and_cue_alternatives(self):
+    def test_legacy_command_paths_resolve_to_one_official_address(self):
         self.assertEqual(
-            EC4LiveProfessorBridge._command_fallbacks("/Command/CueLists/FirePreviousCue"),
-            (
-                "/Command/CueLists/FirePreviousCue",
-                "/Command/CueList/RecallPreviousCue",
-                "/Command/CueList/FirePreviousCue",
-            ),
+            EC4LiveProfessorBridge._command_fallbacks("/Command/CueList/RecallPreviousCue"),
+            ("/Command/CueLists/FirePreviousCue",),
         )
         self.assertEqual(
-            EC4LiveProfessorBridge._command_fallbacks("/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot"),
-            (
-                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-                "/Command/GlobalSnapshots/RecallPrevious",
-                "/Command/Snapshots/RecallPrevious",
+            EC4LiveProfessorBridge._command_fallbacks(
+                "/Command/PluginWindows/ShowHideSelectedPlugin"
             ),
+            ("/Command/PluginWindows/ShowHideselectedplugin",),
+        )
+
+    def test_viewset_inventory_uses_feedback_index_not_argument_count(self):
+        bridge = self.make_bridge()
+        for index in range(5):
+            bridge._on_osc("/ViewSets/Update", [f"View Set {index + 1}", index])
+        bridge._on_osc("/ViewSets/Recall", ["View Set 3", 2])
+        self.assertEqual((bridge._viewset_count, bridge._active_viewset_index), (5, 2))
+        bridge._handle_sysex_button("shift_push", 3)
+        self.assertEqual(bridge._osc_client.messages[-1], ("/ViewSets/Recall", (3,)))
+
+    def test_simple_pushes_send_companion_button_press_and_release(self):
+        bridge = self.make_bridge()
+        bridge._on_midi(SimpleNamespace(type="note_on", channel=12, note=40, velocity=127))
+        bridge._on_midi(SimpleNamespace(type="note_off", channel=12, note=40, velocity=0))
+        self.assertEqual(
+            bridge._osc_client.messages[-2:],
+            [
+                ("/Companion/GenericButtons/Button1", (1.0,)),
+                ("/Companion/GenericButtons/Button1", (0.0,)),
+            ],
         )
 
     def test_parameter_motion_is_confirmed_by_liveprofessor_feedback(self):

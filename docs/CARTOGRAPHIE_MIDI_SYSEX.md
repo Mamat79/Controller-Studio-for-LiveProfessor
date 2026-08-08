@@ -50,7 +50,7 @@ Le script crée 16 boutons SysEx correspondant aux poussoirs d'encodeurs utilis�
 | 14 | 15 | Snapshot global précédent | Snapshot global précédent |
 | 15 | 16 | Snapshot global suivant | Snapshot global suivant |
 
-Le **push simple de l'encodeur 16** déclenche le Tap Tempo. Les push simples 1 à 15 gardent l'affichage du détail du paramètre. Les actions de banque, cue et snapshot ci-dessus exigent bien Shift+push.
+Le **push simple de l'encodeur 16** déclenche le Tap Tempo et reste réservé à cette fonction. Les push simples 1 à 15 transmettent désormais un appui puis un relâchement vers `/Companion/GenericButtons/Button1` à `/Companion/GenericButtons/Button15`, tout en gardant l'affichage du détail du paramètre. Les actions de banque, cue et snapshot ci-dessus exigent bien Shift+push.
 
 ## Contrôle de 16 pistes — cartographié dans Ableton, non transmis par le prototype
 

@@ -161,8 +161,8 @@ SolidCompression=yes
 SetupIconFile=$IconPath
 WizardStyle=modern
 PrivilegesRequired=lowest
-ArchitecturesInstallIn64BitMode=x64
-ArchitecturesAllowed=x64
+ArchitecturesInstallIn64BitMode=x64compatible
+ArchitecturesAllowed=x64compatible
 
 [Languages]
 Name: "french"; MessagesFile: "compiler:Languages\\French.isl"
@@ -174,6 +174,15 @@ Name: startmenuicon; Description: "Créer un raccourci dans le &menu Démarrer";
 
 [Files]
 Source: "$appSourcePattern"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+Type: files; Name: "{app}\docs\NOTE_SECURITE_LICENCE.md"
+Type: files; Name: "{app}\docs\RAPPORT_FAISABILITE.md"
+Type: files; Name: "{app}\docs\RAPPORT_TESTS.md"
+Type: files; Name: "{app}\docs\SAUVEGARDE_RESTAURATION_DESINSTALLATION.md"
+Type: filesandordirs; Name: "{app}\docs\docs"
+Type: filesandordirs; Name: "{app}\docs\en\en"
+Type: filesandordirs; Name: "{app}\profiles\profiles"
 
 [Icons]
 Name: "{autodesktop}\\EC4 LiveProfessor Bridge"; Filename: "{app}\\EC4-LiveProfessor-Bridge.exe"; WorkingDir: "{app}"; IconFilename: "{app}\\EC4-LiveProfessor-Bridge.exe"; Tasks: desktopicon
@@ -227,8 +236,24 @@ New-Item -ItemType Directory -Path $appSourcePath -Force | Out-Null
 
 Copy-Item -LiteralPath $exePath -Destination $appSourcePath
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "README.md") -Destination $appSourcePath
+Copy-Item -LiteralPath (Join-Path $ProjectRoot "CHANGELOG.md") -Destination $appSourcePath
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "config.example.json") -Destination $appSourcePath
-Copy-Item -LiteralPath (Join-Path $ProjectRoot "docs") -Destination (Join-Path $appSourcePath "docs") -Recurse -Force
+$publicDocs = @(
+    "CARTOGRAPHIE_MIDI_SYSEX.md",
+    "CONFIGURATION_EC4.md",
+    "GUIDE_INSTALLATION_UTILISATION.md",
+    "RAPPORT_STABILISATION_UI_UPDATER_V0.5.0.md",
+    "SOURCES.md"
+)
+$publicDocsDestination = Join-Path $appSourcePath "docs"
+New-Item -ItemType Directory -Path $publicDocsDestination -Force | Out-Null
+foreach ($document in $publicDocs) {
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "docs\$document") -Destination $publicDocsDestination
+}
+$englishDocsSource = Join-Path $ProjectRoot "docs\en"
+if (Test-Path -LiteralPath $englishDocsSource -PathType Container) {
+    Copy-Item -LiteralPath $englishDocsSource -Destination (Join-Path $publicDocsDestination "en") -Recurse -Force
+}
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "profiles") -Destination (Join-Path $appSourcePath "profiles") -Recurse -Force
 
 if ($resolvedCtrl2) {

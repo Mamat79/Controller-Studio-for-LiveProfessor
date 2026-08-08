@@ -1,6 +1,6 @@
 # Sources et niveau de preuve
 
-Liens vérifiés le 7 août 2026.
+Liens vérifiés le 8 août 2026.
 
 ## Sources officielles
 
@@ -9,7 +9,7 @@ Liens vérifiés le 7 août 2026.
 - [Defining a new controller](https://intercom.help/audiostrom/en/articles/8319060-defining-a-new-controller) : contrôleurs MIDI, OSC, Companion et feedback.
 - [Controller Maps](https://intercom.help/audiostrom/en/articles/8318601-controller-maps) : maps, Quick Assign et changement de maps par snapshots/cues.
 - [Controller Transformations](https://intercom.help/audiostrom/en/articles/8320237-controller-transformations) : relatif, inversion, limites et courbes.
-- [List of OSC commands](https://intercom.help/audiostrom/en/articles/8319137-list-of-osc-commands) : commandes distantes publiées par LiveProfessor.
+- [Global OSC Commands](https://intercom.help/audiostrom/en/articles/8318618-global-osc-commands) : adresses officielles pour View Sets, Cues, snapshots, navigation, Show/Hide, Enable/Disable et Tap Tempo.
 - [Installing plugins / Plugin Manager](https://intercom.help/audiostrom/en/articles/8315264-installing-plugins-the-plugin-manager) : formats et gestion des plugins.
 - [Audiostrom change log](https://www.audiostrom.com/change-log) : historique des versions.
 - [Faderfox EC4](https://www.faderfox.de/ec4.html) : 16 encodeurs, groupes/setups, modes absolus/relatifs, feedback et OLED.
@@ -20,6 +20,8 @@ Liens vérifiés le 7 août 2026.
 - [Bitfocus Companion — module Audiostrom LiveProfessor](https://github.com/bitfocus/companion-module-audiostrom-liveprofessor) : implémentation open source du contrôleur Companion, ports 8010/8011, messages `/init`, `/refresh`, 99 rotatifs, commandes et feedback. Le fichier d'aide demande LiveProfessor 2023.0.8 ou supérieur.
 
 Cette source démontre un protocole réellement utilisé, mais ne transforme pas en API officielle les fonctions que LiveProfessor ne publie pas.
+
+La version 0.5.0 n'envoie qu'une adresse officielle par action globale. Les anciennes variantes de casse conservées dans des configurations historiques sont migrées vers l'adresse publiée au chargement.
 
 ## Témoignage de terrain non officiel
 

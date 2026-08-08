@@ -42,8 +42,24 @@ Copy-Item -LiteralPath (Join-Path $ProjectRoot "uninstall-ec4-liveprofessor-brid
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "install-ec4-liveprofessor-bridge.bat") -Destination $staging
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "uninstall-ec4-liveprofessor-bridge.bat") -Destination $staging
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "README.md") -Destination $staging
+Copy-Item -LiteralPath (Join-Path $ProjectRoot "CHANGELOG.md") -Destination $staging
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "config.example.json") -Destination $staging
-Copy-Item -LiteralPath (Join-Path $ProjectRoot "docs") -Destination (Join-Path $staging "docs") -Recurse -Force
+$publicDocs = @(
+    "CARTOGRAPHIE_MIDI_SYSEX.md",
+    "CONFIGURATION_EC4.md",
+    "GUIDE_INSTALLATION_UTILISATION.md",
+    "RAPPORT_STABILISATION_UI_UPDATER_V0.5.0.md",
+    "SOURCES.md"
+)
+$publicDocsDestination = Join-Path $staging "docs"
+New-Item -ItemType Directory -Path $publicDocsDestination -Force | Out-Null
+foreach ($document in $publicDocs) {
+    Copy-Item -LiteralPath (Join-Path $ProjectRoot "docs\$document") -Destination $publicDocsDestination
+}
+$englishDocsSource = Join-Path $ProjectRoot "docs\en"
+if (Test-Path -LiteralPath $englishDocsSource -PathType Container) {
+    Copy-Item -LiteralPath $englishDocsSource -Destination (Join-Path $publicDocsDestination "en") -Recurse -Force
+}
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "profiles") -Destination (Join-Path $staging "profiles") -Recurse -Force
 
 if ($ControllerFile) {
