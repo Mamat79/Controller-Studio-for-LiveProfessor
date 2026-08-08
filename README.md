@@ -4,6 +4,8 @@
 
 **Une passerelle intelligente entre le Faderfox EC4 et LiveProfessor.**
 
+**Version stable actuelle : 0.5.0**
+
 Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, équipé de 16 encodeurs avec poussoir et d’un écran OLED très utile pour le retour d’information.
 
 Avec une connexion MIDI classique, on peut bien sûr piloter LiveProfessor directement. Mais on se retrouve vite avec des affectations fixes, peu de contexte sur ce que contrôle chaque encodeur, et une intégration limitée lorsque l’on change de plugin, de banque ou de paramètre.
@@ -79,10 +81,13 @@ Les deux approches sont valables. Si vous souhaitez simplement piloter quelques 
 - grille permanente des 16 paramètres de la banque active ;
 - apprentissage des 16 CC rotatifs ;
 - apprentissage des 16 Notes correspondant aux poussoirs ;
+- transmission des push simples 1 à 15 vers les boutons Companion apprenables ;
 - choix d’un setup/groupe EC4 réservé à LiveProfessor ;
 - navigation entre plugins ;
 - navigation entre chaînes ;
 - navigation entre banques ;
+- navigation entre tous les View Sets ;
+- commandes Cue précédente/suivante ;
 - rappel des snapshots globaux ;
 - Tap Tempo ;
 - mode Companion recommandé ;
@@ -90,7 +95,11 @@ Les deux approches sont valables. Si vous souhaitez simplement piloter quelques 
 - profils JSON pour les noms de paramètres en mode générique ;
 - configuration portable ;
 - journal tournant ;
-- outils de diagnostic intégrés.
+- outils de diagnostic intégrés ;
+- fenêtre principale compacte avec réglages, journal et connexions dans des fenêtres dédiées ;
+- interface français/anglais avec changement immédiat ;
+- réduction dans la zone de notification avec restauration par clic et menu contextuel ;
+- vérification automatique ou manuelle des releases GitHub.
 
 ## Principe de fonctionnement
 
@@ -163,11 +172,14 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 - Companion Controller configuré dans LiveProfessor ;
 - Controller Maps pour les plugins à contrôler.
 
-## Télécharger
+## Télécharger la version stable 0.5.0
 
-La dernière version Windows est disponible dans les **Releases GitHub** :
+- [Télécharger l’installateur Windows 0.5.0](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe) — recommandé ;
+- [Télécharger l’archive portable 0.5.0](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.0-win64.zip) ;
+- [Télécharger le contrôleur LiveProfessor `Ec4.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2) ;
+- [Consulter la release et ses notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
 
-[Releases — EC4 LiveProfessor Bridge](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+L’installateur contient l’application, la documentation et le contrôleur `Ec4.ctrl2`.
 
 L’exécutable est autonome :
 
@@ -249,6 +261,19 @@ Pour chaque type de plugin :
 
 Une map VST2 et une map VST3 peuvent être considérées comme deux types de plugins différents par LiveProfessor.
 
+### Mapper les poussoirs des encodeurs
+
+L’apprentissage **Rotatifs + push** du bridge sert uniquement à reconnaître les messages MIDI envoyés par le groupe EC4 choisi. Dans LiveProfessor, le fichier `Ec4.ctrl2` définit déjà `GenericButton1` à `GenericButton15` : il ne faut donc pas refaire leur Learn comme des boutons MIDI bruts.
+
+Pour affecter un poussoir à une fonction de plugin :
+
+1. ouvrir l’éditeur **Controller Maps** ;
+2. sélectionner le contrôleur EC4 puis `GenericButton1`, `GenericButton2`, etc. ;
+3. choisir dans la liste le paramètre automatisable du plugin ;
+4. activer la transformation **Toggle** pour une fonction marche/arrêt, ou conserver le mode momentané pour une impulsion.
+
+Le **Quick Assign** n’est pas fiable pour tous les boutons. Si le paramètre n’apparaît pas dans la liste de la Controller Map, le plugin ne l’expose probablement pas à LiveProfessor et le bridge ne peut pas le mapper automatiquement.
+
 ## Configuration de l’EC4
 
 Le bridge peut apprendre directement n’importe quel setup/groupe EC4 adapté.
@@ -271,11 +296,17 @@ Les encodeurs doivent être configurés en **CC absolu 0–127** afin que le fee
 | Geste | Fonction |
 |---|---|
 | Encodeurs 1–16 | Contrôle des paramètres de la banque active |
-| Push 1–15 | Affichage détaillé du paramètre |
-| Push 16 | Tap Tempo |
-| Shift + Push | Navigation et commandes supplémentaires |
-
-Certaines fonctions peuvent évoluer entre les versions du bridge.
+| Push simples 1–15 | Boutons Companion 1–15 apprenables et mappables dans LiveProfessor |
+| Push simple 16 | Tap Tempo (réservé) |
+| Shift + Push 1 / 2 | Banque précédente / suivante |
+| Shift + Push 3 / 4 | View Set précédent / suivant |
+| Shift + Push 5 | Afficher / masquer le plugin sélectionné |
+| Shift + Push 6 / 10 | Chaîne précédente / suivante |
+| Shift + Push 7 / 8 | Plugin précédent / suivant |
+| Shift + Push 9 | Activer / désactiver le traitement du plugin sélectionné |
+| Shift + Push 11 / 12 | Plugin précédent / suivant |
+| Shift + Push 13 / 14 | Cue précédente / suivante |
+| Shift + Push 15 / 16 | Snapshot global précédent / suivant |
 
 ## Banques de paramètres
 
@@ -338,6 +369,8 @@ config.json
 - [Configuration EC4](docs/CONFIGURATION_EC4.md)
 - [Cartographie MIDI et SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
 - [Sources techniques](docs/SOURCES.md)
+- [Rapport de stabilisation 0.5.0](docs/RAPPORT_STABILISATION_UI_UPDATER_V0.5.0.md)
+- [Historique des versions](CHANGELOG.md)
 
 ## Développement
 
@@ -347,6 +380,7 @@ python -m venv .venv
 $env:PYTHONPATH = "src"
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\scripts\build.ps1
+.\scripts\build-installer.ps1 -NoBuild
 ```
 
 La version Windows autonome est générée avec **PyInstaller**.
@@ -372,6 +406,23 @@ Plugins
 ```
 
 Le bridge ne transporte **aucun signal audio**.
+
+## Mise à jour et contribution
+
+Le menu **Outils > Vérifier les mises à jour** interroge la dernière release stable du dépôt officiel. La vérification au démarrage est désactivable et aucune mise à jour n'est installée silencieusement.
+
+Le menu **Aide** ouvre le [dépôt](https://github.com/Mamat79/EC4-LiveProfessor-Bridge), les [releases](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases), les [issues](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/issues) et les informations de contribution.
+
+## Contribuer
+
+- Signaler un problème ou proposer une amélioration : [GitHub Issues](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/issues) ;
+- soutenir le développement : [PayPal — MamatLeroy](https://www.paypal.com/paypalme/MamatLeroy).
+
+## Feuille de route
+
+- **0.5.0** : version stable actuelle de l’intégration EC4 ↔ LiveProfessor ;
+- **1.0** : auto-mapping assisté et automatique, d'abord validé sur le Faderfox EC4 ;
+- version ultérieure : ouverture à d'autres surfaces MIDI/OSC au moyen de profils matériels, en conservant l'EC4 comme surface de référence.
 
 ## Auteur
 
@@ -462,10 +513,13 @@ Both approaches are valid. For a small fixed control setup, connecting the EC4 d
 - persistent 16-parameter bank grid;
 - MIDI Learn for the 16 encoders;
 - MIDI Learn for the 16 encoder push buttons;
+- simple push buttons 1 through 15 forwarded to learnable Companion buttons;
 - dedicated EC4 setup/group selection;
 - plugin navigation;
 - chain navigation;
 - bank navigation;
+- navigation across all View Sets;
+- previous/next Cue commands;
 - global snapshot recall;
 - Tap Tempo;
 - recommended Companion mode;
@@ -473,7 +527,11 @@ Both approaches are valid. For a small fixed control setup, connecting the EC4 d
 - JSON parameter profiles;
 - portable configuration;
 - rotating log files;
-- built-in diagnostics.
+- built-in diagnostics;
+- compact main window with separate settings, log and connection windows;
+- instant French/English language switching;
+- reliable notification-area minimization, click restore and context menu;
+- automatic or manual GitHub release checks.
 
 ## How it works
 
@@ -540,9 +598,14 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 - LiveProfessor Companion Controller;
 - Controller Maps for the plugins you want to control.
 
-## Download
+## Download stable version 0.5.0
 
-[Latest GitHub Release](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+- [Download the Windows 0.5.0 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe) — recommended;
+- [Download the portable 0.5.0 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.0-win64.zip);
+- [Download the LiveProfessor `Ec4.ctrl2` controller](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4.ctrl2);
+- [View the latest release and release notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
+
+The installer includes the application, documentation and the `Ec4.ctrl2` controller file.
 
 The Windows executable is standalone:
 
@@ -616,6 +679,19 @@ For each plugin type:
 7. save the map using **Save Map Preset**;
 8. apply the preset to the other instances of the same plugin.
 
+### Mapping encoder push buttons
+
+The bridge’s **Learn encoders + push** operation only identifies the MIDI messages sent by the selected EC4 group. In LiveProfessor, `Ec4.ctrl2` already defines `GenericButton1` through `GenericButton15`, so they should not be learned again as raw MIDI buttons.
+
+To assign a push button to a plugin function:
+
+1. open the **Controller Maps** editor;
+2. select the EC4 controller and then `GenericButton1`, `GenericButton2`, etc.;
+3. choose the plugin’s exposed automatable parameter from the list;
+4. enable the **Toggle** transformation for an on/off function, or keep momentary behaviour for a trigger.
+
+**Quick Assign** is not reliable for every button. If a parameter is absent from the Controller Map list, the plugin probably does not expose it to LiveProfessor and the bridge cannot map it automatically.
+
 ## EC4 configuration
 
 The bridge can learn any suitable EC4 setup/group directly.
@@ -634,9 +710,17 @@ Encoders should use **absolute CC values from 0 to 127** so feedback can correct
 | Gesture | Function |
 |---|---|
 | Encoders 1–16 | Control parameters in the active bank |
-| Push 1–15 | Display parameter details |
-| Push 16 | Tap Tempo |
-| Shift + Push | Navigation and additional commands |
+| Simple push 1–15 | Learnable and mappable Companion buttons 1–15 |
+| Simple push 16 | Tap Tempo (reserved) |
+| Shift + Push 1 / 2 | Previous / next parameter bank |
+| Shift + Push 3 / 4 | Previous / next View Set |
+| Shift + Push 5 | Show / hide selected plugin |
+| Shift + Push 6 / 10 | Previous / next chain |
+| Shift + Push 7 / 8 | Previous / next plugin |
+| Shift + Push 9 | Enable / disable processing on selected plugin |
+| Shift + Push 11 / 12 | Previous / next plugin |
+| Shift + Push 13 / 14 | Previous / next Cue |
+| Shift + Push 15 / 16 | Previous / next global snapshot |
 
 ## Parameter banks
 
@@ -673,6 +757,8 @@ For portable operation, place `config.json` next to the executable.
 - [EC4 configuration](docs/en/EC4_CONFIGURATION.md)
 - [MIDI and SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
 - [Technical sources](docs/en/SOURCES.md)
+- [0.5.0 stabilization report](docs/RAPPORT_STABILISATION_UI_UPDATER_V0.5.0.md)
+- [Changelog](CHANGELOG.md)
 
 ## Development
 
@@ -682,6 +768,7 @@ python -m venv .venv
 $env:PYTHONPATH = "src"
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\scripts\build.ps1
+.\scripts\build-installer.ps1 -NoBuild
 ```
 
 ## Architecture
@@ -705,6 +792,23 @@ Plugins
 ```
 
 The bridge carries **no audio signal**.
+
+## Updates and contribution
+
+**Tools > Check for updates** queries the latest stable release from the official repository. Startup checks can be disabled and no update is installed silently.
+
+The **Help** menu opens the [repository](https://github.com/Mamat79/EC4-LiveProfessor-Bridge), [releases](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases), [issues](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/issues) and contribution information.
+
+## Contribute
+
+- Report a problem or suggest an improvement: [GitHub Issues](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/issues);
+- support development: [PayPal — MamatLeroy](https://www.paypal.com/paypalme/MamatLeroy).
+
+## Roadmap
+
+- **0.5.0**: current stable EC4 ↔ LiveProfessor integration;
+- **1.0**: assisted and automatic mapping, first validated on the Faderfox EC4;
+- later: support additional MIDI/OSC control surfaces through hardware profiles while keeping the EC4 as the reference surface.
 
 ## Author
 

@@ -1,3 +1,4 @@
+
 # MIDI and SysEx Mapping for the Faderfox EC4
 
 🇫🇷 [Version française](../CARTOGRAPHIE_MIDI_SYSEX.md)
@@ -37,24 +38,24 @@ The EC4 provides 16 SysEx button messages for encoder pushes used together with 
 
 | Internal index | Encoder | Bridge action |
 |---:|---:|---|
-| 0 | 1 | Unavailable: no matching public command found |
-| 1 | 2 | Previous global snapshot |
-| 2 | 3 | Next global snapshot |
-| 3 | 4 | Unavailable |
-| 4 | 5 | Unavailable |
-| 5 | 6 | Previous plugin |
-| 6 | 7 | Next plugin |
-| 7 | 8 | Unavailable |
-| 8 | 9 | First bank |
-| 9 | 10 | Previous bank |
-| 10 | 11 | Next bank |
-| 11 | 12 | Last bank |
-| 12 | 13 | Enable/disable processing on the selected plugin |
-| 13 | 14 | Previous bank |
-| 14 | 15 | Next bank |
-| 15 | 16 | Show/hide the selected plugin |
+| 0 | 1 | Previous parameter bank |
+| 1 | 2 | Next parameter bank |
+| 2 | 3 | Previous View Set |
+| 3 | 4 | Next View Set |
+| 4 | 5 | Show/hide the selected plugin |
+| 5 | 6 | Previous chain |
+| 6 | 7 | Previous plugin |
+| 7 | 8 | Next plugin |
+| 8 | 9 | Enable/disable processing on the selected plugin |
+| 9 | 10 | Next chain |
+| 10 | 11 | Previous plugin |
+| 11 | 12 | Next plugin |
+| 12 | 13 | Previous Cue |
+| 13 | 14 | Next Cue |
+| 14 | 15 | Previous global snapshot |
+| 15 | 16 | Next global snapshot |
 
-A **simple push on encoder 16** triggers Tap Tempo. Simple pushes on encoders 1–15 display the corresponding parameter details. Bank and snapshot actions in the table above require Shift+push.
+A **simple push on encoder 16** triggers Tap Tempo and remains reserved for that function. Simple pushes on encoders 1–15 send press and release states to `/Companion/GenericButtons/Button1` through `/Companion/GenericButtons/Button15` while keeping the parameter detail overlay. Bank, Cue and snapshot actions in the table above require Shift+push.
 
 ## Additional controls present in the legacy EC4 preset but not forwarded by the bridge
 

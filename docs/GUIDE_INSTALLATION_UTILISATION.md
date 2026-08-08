@@ -15,11 +15,10 @@ Utilisez une licence, une période d’essai ou une licence de test fournie offi
 
 ## Installation du bridge
 
-1. Copiez le dossier de livraison où vous le souhaitez.
-2. Lancez `EC4-LiveProfessor-Bridge.exe`. Aucune installation et aucun droit administrateur ne sont nécessaires.
-3. Branchez le Faderfox EC4.
-4. Dans l’application, cliquez sur **Actualiser les ports MIDI** et choisissez l’entrée et la sortie contenant `Faderfox EC4`.
-5. Configurez le contrôleur LiveProfessor décrit ci-dessous avant de cliquer sur **Démarrer**.
+1. Téléchargez et lancez `EC4-LiveProfessor-Bridge-Setup-v0.5.0.exe`. L’archive portable reste disponible pour une utilisation sans installation.
+2. Branchez le Faderfox EC4.
+3. Dans l’application, ouvrez **Outils > Connexions**, actualisez les ports MIDI et choisissez l’entrée et la sortie contenant `Faderfox EC4`.
+4. Configurez le contrôleur LiveProfessor décrit ci-dessous avant de cliquer sur **Démarrer**.
 
 La configuration normale est enregistrée dans :
 
@@ -96,6 +95,8 @@ Cette opération remplace les MIDI Learn répétés par une définition unique e
 
 Une map appartient à un **type de plugin**. Ne supposez pas qu’une map VST2 puisse être réutilisée sans adaptation avec la version VST3 du même produit.
 
+Pour les poussoirs, l’apprentissage **Rotatifs + push** du bridge sert à reconnaître les Notes MIDI du groupe EC4. Dans LiveProfessor, utilisez ensuite directement `GenericButton1` à `GenericButton15`, déjà fournis par `Ec4.ctrl2`, dans l’éditeur **Controller Maps**. Activez la transformation **Toggle** pour une fonction marche/arrêt. Le Quick Assign peut échouer sur les boutons ; si le paramètre recherché n’apparaît pas dans la liste de la Controller Map, le plugin ne l’expose probablement pas à LiveProfessor.
+
 ### Configurer et démarrer le bridge
 
 Réglages recommandés :
@@ -160,17 +161,20 @@ Sans profil, l’EC4 affiche `P001`, `P002`, etc. Cette route OSC générique ne
 | Action EC4 | Résultat |
 |---|---|
 | Tourner les encodeurs 1–16 | Modifier les 16 paramètres de la banque active |
-| Shift+push encodeur 2 | Rappeler le snapshot global précédent |
-| Shift+push encodeur 3 | Rappeler le snapshot global suivant |
-| Shift+push encodeur 14 | Banque précédente |
-| Shift+push encodeur 15 | Banque suivante |
+| Shift+push encodeurs 1/2 | Banque de paramètres précédente / suivante |
+| Shift+push encodeurs 3/4 | View Set précédent / suivant |
+| Shift+push encodeur 5 | Afficher / masquer le plugin sélectionné |
+| Shift+push encodeur 6 | Chaîne précédente |
+| Shift+push encodeurs 7/8 | Plugin précédent / suivant |
+| Shift+push encodeur 9 | Activer / désactiver le traitement du plugin sélectionné |
+| Shift+push encodeur 10 | Chaîne suivante |
+| Shift+push encodeurs 11/12 | Plugin précédent / suivant |
+| Shift+push encodeurs 13/14 | Cue précédente / suivante |
+| Shift+push encodeurs 15/16 | Snapshot global précédent / suivant |
+| Push simples encodeurs 1–15 | Envoyer `GenericButton1` à `GenericButton15` au Companion Controller |
 | Push simple encodeur 16 | Tap Tempo |
-| Shift+push encodeurs 9/10/11/12 | Première/précédente/suivante/dernière banque, raccourcis de compatibilité |
-| Notes plugin précédent/suivant | Plugin précédent/suivant |
 | Appuyer sur un encodeur | Afficher temporairement son nom, sa valeur, sa banque et son numéro |
 | Bouton **Tester l’écran EC4** | Afficher un écran de diagnostic sans toucher au chemin audio |
-
-Les fonctions premier/dernier plugin ou chaîne et le verrouillage affichent une limitation, car aucune commande publique correspondante n’a été trouvée.
 
 ## Profils JSON
 

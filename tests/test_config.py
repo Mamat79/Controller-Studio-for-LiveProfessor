@@ -15,6 +15,11 @@ class ConfigTests(unittest.TestCase):
                 plugin_label="Test",
                 target_setup=9,
                 target_group=13,
+                parameter_overlay_interval_ms=150,
+                companion_refresh_delay_ms=300,
+                name_refresh_delay_ms=90,
+                feedback_confirm_timeout_ms=1200,
+                overlay_display_duration_ms=900,
                 encoder_mappings={
                     "9:13": [
                         {
@@ -28,6 +33,7 @@ class ConfigTests(unittest.TestCase):
                 },
             )
             save_config(original, path)
+            self.assertFalse(list(Path(folder).glob(".*.tmp")))
             restored = load_config(path)
             self.assertEqual(
                 (
@@ -40,6 +46,16 @@ class ConfigTests(unittest.TestCase):
                 ),
                 ("generic", 32, "Test", 9, 13, 16),
             )
+            self.assertEqual(
+                (
+                    restored.parameter_overlay_interval_ms,
+                    restored.companion_refresh_delay_ms,
+                    restored.name_refresh_delay_ms,
+                    restored.feedback_confirm_timeout_ms,
+                    restored.overlay_display_duration_ms,
+                ),
+                (150, 300, 90, 1200, 900),
+            )
 
     def test_unknown_fields_survive_round_trip(self):
         with tempfile.TemporaryDirectory() as folder:
@@ -48,6 +64,47 @@ class ConfigTests(unittest.TestCase):
             config = load_config(path)
             save_config(config, path)
             self.assertEqual(load_config(path).extra["future_option"], 42)
+
+    def test_legacy_cue_commands_are_migrated(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "config.json"
+            path.write_text(
+                "{"
+                "\"mode\":\"companion\","
+                "\"cue_previous_command\":\"/Command/CueList/RecallPreviousCue\","
+                "\"cue_next_command\":\"/Command/CueList/RecallNextCue\""
+                "}",
+                encoding="utf-8",
+            )
+            config = load_config(path)
+            self.assertEqual(
+                (
+                    config.cue_previous_command,
+                    config.cue_next_command,
+                ),
+                (
+                    "/Command/CueLists/FirePreviousCue",
+                    "/Command/CueLists/FireNextCue",
+                ),
+            )
+
+    def test_legacy_show_hide_and_enable_paths_are_migrated(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "config.json"
+            path.write_text(
+                "{"
+                "\"mode\":\"companion\","
+                "\"show_hide_command\":\"/Command/PluginWindows/ShowHideSelectedPlugin\","
+                "\"enable_processing_command\":\"/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin\""
+                "}",
+                encoding="utf-8",
+            )
+            config = load_config(path)
+            self.assertEqual(config.show_hide_command, "/Command/PluginWindows/ShowHideselectedplugin")
+            self.assertEqual(
+                config.enable_processing_command,
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            )
 
 
 if __name__ == "__main__":

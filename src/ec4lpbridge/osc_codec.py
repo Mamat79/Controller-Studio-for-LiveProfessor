@@ -4,7 +4,7 @@ import socket
 import struct
 import threading
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 
@@ -102,11 +102,27 @@ def decode_message(data: bytes) -> tuple[str, list[Any]]:
 class OSCClient:
     host: str
     port: int
+    _socket: socket.socket | None = field(init=False, repr=False)
+    _send_lock: threading.Lock = field(default_factory=threading.Lock, init=False, repr=False)
+
+    def __post_init__(self) -> None:
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     def send(self, address: str, *args: Any) -> None:
         packet = encode_message(address, args)
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.sendto(packet, (self.host, self.port))
+        with self._send_lock:
+            if self._socket is None:
+                self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self._socket.sendto(packet, (self.host, self.port))
+
+    def close(self) -> None:
+        with self._send_lock:
+            try:
+                if self._socket is not None:
+                    self._socket.close()
+            except OSError:
+                pass
+            self._socket = None
 
 
 class OSCServer:

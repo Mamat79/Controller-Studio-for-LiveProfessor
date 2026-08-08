@@ -37,24 +37,24 @@ L’EC4 fournit 16 messages de boutons SysEx correspondant aux poussoirs d’enc
 
 | Index interne | Encodeur | Action du bridge |
 |---:|---:|---|
-| 0 | 1 | Indisponible : aucune commande publique correspondante trouvée |
-| 1 | 2 | Snapshot global précédent |
-| 2 | 3 | Snapshot global suivant |
-| 3 | 4 | Indisponible |
-| 4 | 5 | Indisponible |
-| 5 | 6 | Plugin précédent |
-| 6 | 7 | Plugin suivant |
-| 7 | 8 | Indisponible |
-| 8 | 9 | Première banque |
-| 9 | 10 | Banque précédente |
-| 10 | 11 | Banque suivante |
-| 11 | 12 | Dernière banque |
-| 12 | 13 | Activer/désactiver le traitement du plugin sélectionné |
-| 13 | 14 | Banque précédente |
-| 14 | 15 | Banque suivante |
-| 15 | 16 | Afficher/masquer le plugin sélectionné |
+| 0 | 1 | Banque de paramètres précédente |
+| 1 | 2 | Banque de paramètres suivante |
+| 2 | 3 | View Set précédent |
+| 3 | 4 | View Set suivant |
+| 4 | 5 | Afficher/masquer le plugin sélectionné |
+| 5 | 6 | Chaîne précédente |
+| 6 | 7 | Plugin précédent |
+| 7 | 8 | Plugin suivant |
+| 8 | 9 | Activer/désactiver le traitement du plugin sélectionné |
+| 9 | 10 | Chaîne suivante |
+| 10 | 11 | Plugin précédent |
+| 11 | 12 | Plugin suivant |
+| 12 | 13 | Cue précédente |
+| 13 | 14 | Cue suivante |
+| 14 | 15 | Snapshot global précédent |
+| 15 | 16 | Snapshot global suivant |
 
-Un **push simple sur l’encodeur 16** déclenche le Tap Tempo. Les push simples sur les encodeurs 1 à 15 affichent le détail du paramètre correspondant. Les actions de banque et de snapshot du tableau exigent Shift+push.
+Un **push simple sur l’encodeur 16** déclenche le Tap Tempo et reste réservé à cette fonction. Les push simples sur les encodeurs 1 à 15 envoient les états pression et relâchement vers `/Companion/GenericButtons/Button1` à `/Companion/GenericButtons/Button15`, tout en conservant l’overlay du paramètre. Toutes les actions du tableau exigent Shift+push.
 
 ## Contrôles supplémentaires présents dans le preset EC4 historique mais non transmis par le bridge
 

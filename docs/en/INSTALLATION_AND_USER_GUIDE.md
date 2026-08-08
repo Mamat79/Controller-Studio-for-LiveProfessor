@@ -1,3 +1,4 @@
+
 # Installation and User Guide
 
 🇫🇷 [Version française](../GUIDE_INSTALLATION_UTILISATION.md)
@@ -96,6 +97,8 @@ This replaces repeated MIDI Learn operations with one reusable definition inside
 
 A map belongs to a specific **plugin type**. Do not assume that a VST2 map can be reused unchanged with the VST3 edition of the same product.
 
+For push buttons, the bridge’s **Learn encoders + push** operation identifies the MIDI Notes sent by the EC4 group. In LiveProfessor, then use `GenericButton1` through `GenericButton15`, already provided by `Ec4.ctrl2`, directly in the **Controller Maps** editor. Enable the **Toggle** transformation for an on/off function. Quick Assign may fail for buttons; if the required parameter is absent from the Controller Map list, the plugin probably does not expose it to LiveProfessor.
+
 ### Configure and start the bridge
 
 Recommended bridge settings:
@@ -160,17 +163,20 @@ Without a profile, the EC4 displays `P001`, `P002`, and so on. This generic OSC 
 | EC4 action | Result |
 |---|---|
 | Turn encoders 1–16 | Change the 16 parameters of the active bank |
-| Shift+push encoder 2 | Recall the previous global snapshot |
-| Shift+push encoder 3 | Recall the next global snapshot |
-| Shift+push encoder 14 | Previous bank |
-| Shift+push encoder 15 | Next bank |
+| Shift+push encoders 1/2 | Previous / next parameter bank |
+| Shift+push encoders 3/4 | Previous / next View Set |
+| Shift+push encoder 5 | Show / hide the selected plugin |
+| Shift+push encoder 6 | Previous chain |
+| Shift+push encoders 7/8 | Previous / next plugin |
+| Shift+push encoder 9 | Enable / disable processing on the selected plugin |
+| Shift+push encoder 10 | Next chain |
+| Shift+push encoders 11/12 | Previous / next plugin |
+| Shift+push encoders 13/14 | Previous / next Cue |
+| Shift+push encoders 15/16 | Previous / next global snapshot |
+| Simple push on encoders 1–15 | Send `GenericButton1` through `GenericButton15` to Companion |
 | Simple push on encoder 16 | Tap Tempo |
-| Shift+push encoders 9/10/11/12 | First/previous/next/last bank compatibility shortcuts |
-| Previous/next device Notes | Previous/next plugin |
 | Push an encoder | Temporarily display its name, value, bank and encoder number |
 | **Test EC4 display** button | Display a diagnostic screen without touching the audio path |
-
-First/last plugin or chain navigation and plugin locking display a limitation notice because no matching public command was found.
 
 ## JSON profiles
 

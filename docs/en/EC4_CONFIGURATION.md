@@ -1,3 +1,4 @@
+
 # EC4 Configuration Example
 
 🇫🇷 [Version française](../CONFIGURATION_EC4.md)
