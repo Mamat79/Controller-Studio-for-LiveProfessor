@@ -71,7 +71,15 @@ class RepairControllerTests(unittest.TestCase):
         return ValueTree(
             "LPController",
             [],
-            [ValueTree("Controls", [], buttons + rotaries), assignments],
+            [
+                ValueTree("Controls", [], buttons + rotaries),
+                assignments,
+                ValueTree(
+                    "MapPresets",
+                    [],
+                    [ValueTree("Presets", [prop("Name", "Ancien plugin")], [])],
+                ),
+            ],
         )
 
     def test_repair_restores_unique_buttons_rotaries_and_all_sixteen_tags(self):
@@ -95,6 +103,17 @@ class RepairControllerTests(unittest.TestCase):
 
         encoded = write_tree(controller)
         self.assertEqual(write_tree(parse_tree(encoded)), encoded)
+
+    def test_clean_map_presets_creates_neutral_controller(self):
+        controller = self.make_controller()
+
+        stats = repair_controller(controller, clean_map_presets=True)
+
+        map_presets = next(
+            child for child in controller.children if child.type_name == "MapPresets"
+        )
+        self.assertEqual(map_presets.children, [])
+        self.assertEqual(stats["map_presets_removed"], 1)
 
 
 if __name__ == "__main__":

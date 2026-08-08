@@ -32,6 +32,19 @@ class EC4ProtocolTests(unittest.TestCase):
         self.assertIsNotNone(event)
         self.assertEqual((event.kind, event.index, event.pressed), ("shift_push", 9, True))
 
+    def test_shift_press_and_release(self):
+        pressed = parse_button_sysex(
+            bytes.fromhex("f0 00 00 00 4e 2c 1b 4e 26 11 4e 2e 11 f7")
+        )
+        released = parse_button_sysex(
+            bytes.fromhex("f0 00 00 00 4e 2c 1b 4e 26 11 4e 2e 10 f7")
+        )
+        self.assertEqual((pressed.kind, pressed.index, pressed.pressed), ("shift", None, True))
+        self.assertEqual(
+            (released.kind, released.index, released.pressed),
+            ("shift", None, False),
+        )
+
     def test_macro_map_and_feedback(self):
         self.assertEqual(macro_index(12, 48), 0)
         self.assertEqual(macro_index(13, 80), 15)

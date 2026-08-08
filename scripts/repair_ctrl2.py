@@ -1,8 +1,10 @@
 """Repair a LiveProfessor Companion controller exported as a ``.ctrl2`` file.
 
 LiveProfessor stores controller definitions as a JUCE ValueTree binary stream.
-This utility keeps the original tree (including controller maps) and only cleans
-the hardware-control definitions that are required by EC4 LiveProfessor Bridge.
+By default this utility keeps the original tree (including controller maps) and
+only cleans the hardware-control definitions required by EC4 LiveProfessor
+Bridge. The optional ``--clean-map-presets`` switch creates a neutral controller
+template by removing plugin-specific map presets from the exported file.
 """
 
 from __future__ import annotations
@@ -237,7 +239,11 @@ def _walk(tree: ValueTree):
         yield from _walk(child)
 
 
-def repair_controller(tree: ValueTree) -> dict[str, int]:
+def repair_controller(
+    tree: ValueTree,
+    *,
+    clean_map_presets: bool = False,
+) -> dict[str, int]:
     if tree.type_name != "LPController":
         raise ValueTreeFormatError("le fichier n'est pas un controleur LiveProfessor")
 
@@ -294,6 +300,14 @@ def repair_controller(tree: ValueTree) -> dict[str, int]:
                 kept.append(assignment)
         node.children = kept
 
+    map_presets_removed = 0
+    if clean_map_presets:
+        for node in _walk(tree):
+            if node.type_name != "MapPresets":
+                continue
+            map_presets_removed += len(node.children)
+            node.children = []
+
     addresses: dict[str, str] = {}
     duplicates = []
     for control in controls:
@@ -313,6 +327,7 @@ def repair_controller(tree: ValueTree) -> dict[str, int]:
         "buttons": 16,
         "rotaries": 16,
         "assignments_removed": assignments_removed,
+        "map_presets_removed": map_presets_removed,
     }
 
 
@@ -320,6 +335,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
     parser.add_argument("destination", type=Path)
+    parser.add_argument(
+        "--clean-map-presets",
+        action="store_true",
+        help="supprime les presets de mapping lies a des plugins ou projets",
+    )
     args = parser.parse_args()
 
     original = args.source.read_bytes()
@@ -327,7 +347,10 @@ def main() -> int:
     if write_tree(original_tree) != original:
         raise ValueTreeFormatError("le test de reecriture identique a echoue")
 
-    stats = repair_controller(original_tree)
+    stats = repair_controller(
+        original_tree,
+        clean_map_presets=args.clean_map_presets,
+    )
     repaired = write_tree(original_tree)
     reparsed = parse_tree(repaired)
     if write_tree(reparsed) != repaired:
@@ -338,7 +361,8 @@ def main() -> int:
     print(
         f"Controleur repare: {args.destination} | "
         f"{stats['rotaries']} rotatifs uniques | "
-        f"{stats['assignments_removed']} assignation(s) parasite(s) supprimee(s)"
+        f"{stats['assignments_removed']} assignation(s) parasite(s) supprimee(s) | "
+        f"{stats['map_presets_removed']} preset(s) de mapping supprime(s)"
     )
     return 0
 
