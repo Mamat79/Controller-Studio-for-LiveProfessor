@@ -28,16 +28,25 @@ class AppHelperTests(unittest.TestCase):
     def test_controller_template_can_be_located_and_copied(self):
         with TemporaryDirectory() as temporary:
             root = Path(temporary)
-            source = root / "bundled" / "Ec4.ctrl2"
+            source = root / "bundled" / "Ec4-FullBank.ctrl2"
             source.parent.mkdir()
             source.write_bytes(b"neutral-controller")
-            located = controller_template_path([root / "missing.ctrl2", source])
-            destination = root / "export" / "Ec4.ctrl2"
+            located = controller_template_path(
+                "Ec4-FullBank.ctrl2",
+                candidates=[root / "missing.ctrl2", source],
+            )
+            destination = root / "export"
+            destination.mkdir()
 
             copied = copy_controller_template(destination, source=located)
 
-            self.assertEqual(copied, destination.resolve())
-            self.assertEqual(destination.read_bytes(), b"neutral-controller")
+            expected = destination / "Ec4-FullBank.ctrl2"
+            self.assertEqual(copied, expected.resolve())
+            self.assertEqual(expected.read_bytes(), b"neutral-controller")
+
+    def test_unknown_controller_template_is_rejected(self):
+        with self.assertRaises(ValueError):
+            controller_template_path("Unknown.ctrl2", candidates=[])
 
 
 if __name__ == "__main__":

@@ -113,25 +113,6 @@ function Resolve-InnoSetupCompiler {
     return $null
 }
 
-function Resolve-ControllerFile {
-    param([string]$PathHint)
-
-    if ($PathHint) {
-        $candidate = Resolve-Path -LiteralPath $PathHint -ErrorAction SilentlyContinue
-        if (-not $candidate) {
-            throw "Le fichier de contrôleur n'a pas été trouvé : $PathHint"
-        }
-        return $candidate.Path
-    }
-
-    $localCandidate = Join-Path $ProjectRoot "Ec4.ctrl2"
-    if (Test-Path -LiteralPath $localCandidate) {
-        return (Resolve-Path -LiteralPath $localCandidate).Path
-    }
-
-    return ""
-}
-
 function Write-SetupScript {
     param(
         [string]$InstallerPath,
@@ -176,6 +157,7 @@ Name: startmenuicon; Description: "Créer un raccourci dans le &menu Démarrer";
 Source: "$appSourcePattern"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [InstallDelete]
+Type: files; Name: "{app}\Ec4.ctrl2"
 Type: files; Name: "{app}\docs\NOTE_SECURITE_LICENCE.md"
 Type: files; Name: "{app}\docs\RAPPORT_FAISABILITE.md"
 Type: files; Name: "{app}\docs\RAPPORT_TESTS.md"
@@ -227,8 +209,6 @@ if (-not (Test-Path -LiteralPath $iconPath)) {
     throw "Icone introuvable: $iconPath"
 }
 
-$resolvedCtrl2 = Resolve-ControllerFile -PathHint $ControllerFile
-
 if (Test-Path -LiteralPath $stagingPath) {
     Remove-Item -LiteralPath $stagingPath -Recurse -Force
 }
@@ -256,8 +236,15 @@ if (Test-Path -LiteralPath $englishDocsSource -PathType Container) {
 }
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "profiles") -Destination (Join-Path $appSourcePath "profiles") -Recurse -Force
 
-if ($resolvedCtrl2) {
-    Copy-Item -LiteralPath $resolvedCtrl2 -Destination (Join-Path $appSourcePath "Ec4.ctrl2") -Force
+foreach ($controllerName in @("Ec4-UniBank.ctrl2", "Ec4-FullBank.ctrl2")) {
+    $controllerPath = Join-Path $ProjectRoot $controllerName
+    if (-not (Test-Path -LiteralPath $controllerPath -PathType Leaf)) {
+        throw "Fichier contrôleur introuvable : $controllerPath"
+    }
+    Copy-Item -LiteralPath $controllerPath -Destination $appSourcePath -Force
+}
+if ($ControllerFile) {
+    Write-Warning "-ControllerFile n'est plus nécessaire : les modèles UniBank et FullBank officiels sont inclus automatiquement."
 }
 
 $issPath = Join-Path $stagingPath "EC4-LiveProfessor-Bridge-Installer.iss"
@@ -274,7 +261,7 @@ if (-not $isccPath) {
     Write-Host "Le script ISS a bien été généré ici : $issPath"
     Write-Host "Copiez ce projet sur une machine avec Inno Setup 6 puis lancez :"
     Write-Host "  iscc $issPath"
-    Write-Host "Pour générer l'installateur, fournissez également Ec4.ctrl2 via -ControllerFile si nécessaire."
+    Write-Host "Les contrôleurs UniBank et FullBank sont déjà inclus dans le staging."
     exit 1
 }
 

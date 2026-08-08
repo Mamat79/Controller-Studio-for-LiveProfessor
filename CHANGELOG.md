@@ -6,8 +6,8 @@
 - retour automatique à la grille des paramètres au relâchement de Shift ;
 - repères `ChUp` / `ChDn` pour les chaînes et `<Plg` / `Plg>` pour les plugins, compatibles avec le jeu de caractères de l'EC4 ;
 - prise en compte explicite des messages SysEx de pression et de relâchement de Shift.
-- contrôleur `Ec4.ctrl2` nettoyé de son ancien preset Arousor et de ses affectations dupliquées, afin de fournir une base neutre pour les mappings de plugins.
-- fichier `Ec4.ctrl2` intégré dans l'exécutable, avec bouton de copie vers le dossier choisi et guide d'import LiveProfessor bilingue dans l'application.
+- deux contrôleurs neutres intégrés : `Ec4-UniBank.ctrl2` (16 rotatifs) et `Ec4-FullBank.ctrl2` (99 rotatifs), tous deux avec 16 boutons et sans ancien preset lié à un plugin.
+- choix UniBank/FullBank dans l'application, copie vers le dossier choisi et guide d'import LiveProfessor bilingue.
 
 ## 0.5.0
 
