@@ -4,7 +4,7 @@
 
 ## Avant de commencer
 
-Le bridge ne modifie pas les projets LiveProfessor. Il est néanmoins recommandé de sauvegarder le projet et les presets de Controller Maps avant tout essai dans une session importante.
+Le bridge ne modifie jamais le projet LiveProfessor choisi comme source. L'auto-mapping crée obligatoirement une nouvelle copie. Il reste recommandé de sauvegarder le projet et les presets de Controller Maps avant tout essai dans une session importante.
 
 Deux modes sont disponibles :
 
@@ -15,7 +15,7 @@ Utilisez une licence, une période d’essai ou une licence de test fournie offi
 
 ## Installation du bridge
 
-1. Téléchargez et lancez `EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe`. L’archive portable reste disponible pour une utilisation sans installation.
+1. Téléchargez et lancez `EC4-LiveProfessor-Bridge-Setup-v2026.1.exe`. L’archive portable reste disponible pour une utilisation sans installation.
 2. Branchez le Faderfox EC4.
 3. Dans l’application, ouvrez **Outils > Connexions**, actualisez les ports MIDI et choisissez l’entrée et la sortie contenant `Faderfox EC4`.
 4. Configurez le contrôleur LiveProfessor décrit ci-dessous avant de cliquer sur **Démarrer**.
@@ -97,7 +97,30 @@ Port de feedback : 8011
 
 Si le type Companion Controller n’existe pas, la version installée de LiveProfessor est trop ancienne. Ne tentez pas de contourner cette limite par injection ou automatisation de l’écran.
 
-### Créer une Controller Map par type de plugin
+### Créer automatiquement une copie mappée — version 2026.1
+
+1. Enregistrez le projet ouvert dans LiveProfessor.
+2. Dans le bridge, ouvrez **Outils > Auto-mapping…**.
+3. Choisissez le fichier `.rack2`, puis cliquez sur **Analyser le projet**.
+4. Sélectionnez un plugin précis ou **Tous les plugins détectés**.
+5. Choisissez le Companion Controller EC4. **UniBank — 16 paramètres** est recommandé et sélectionné par défaut. Choisissez FullBank uniquement pour accéder à 99 paramètres par banques.
+6. Cliquez sur **Créer la copie auto-mappée…** et utilisez un nouveau nom de fichier.
+7. Dans LiveProfessor, enregistrez le travail en cours puis ouvrez la copie générée.
+8. Sélectionnez un plugin mappé et vérifiez les noms, les valeurs et le contrôle des paramètres sur l'EC4.
+
+La map `EC4 AutoMap - Dynamic` contient plusieurs affectations par rotatif, toutes en mode **Only If Selected**. Elles peuvent donc cohabiter : seule l'instance de plugin sélectionnée doit répondre. Si plusieurs instances identiques étaient présentes lors de la génération, elles sont toutes incluses. Le générateur peuple aussi les `HardwareCtrlMaps` référencés par le projet et ses snapshots, car LiveProfessor peut rappeler l'une de ces maps après le chargement. Il n'est donc plus nécessaire de charger manuellement un preset plugin par plugin. Les affectations existantes des poussoirs sont conservées.
+
+Le projet source n'est jamais réécrit. Si la destination choisie existe, l'outil en crée d'abord une sauvegarde horodatée. Le fichier généré est relu et re-sérialisé avant d'être accepté.
+
+Limites actuelles :
+
+- l'ordre est celui des paramètres d'automation exposés par le plugin, pas encore un classement musical personnalisé ;
+- 16 paramètres sont mappés en UniBank, ou 99 maximum en FullBank ;
+- les paramètres non exposés à LiveProfessor ne peuvent pas être créés ;
+- les poussoirs et les raccourcis Shift restent inchangés ;
+- un plugin ajouté au projet après la génération nécessite une nouvelle copie auto-mappée.
+
+### Créer manuellement une Controller Map par type de plugin
 
 Cette opération remplace les MIDI Learn répétés par une définition unique et réutilisable dans LiveProfessor :
 
