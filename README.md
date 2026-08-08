@@ -669,10 +669,10 @@ For portable operation, place `config.json` next to the executable.
 
 ## Documentation
 
-- [Installation and user guide](docs/GUIDE_INSTALLATION_UTILISATION.md)
-- [EC4 configuration](docs/CONFIGURATION_EC4.md)
-- [MIDI and SysEx mapping](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
-- [Technical sources](docs/SOURCES.md)
+- [Installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
+- [EC4 configuration](docs/en/EC4_CONFIGURATION.md)
+- [MIDI and SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
+- [Technical sources](docs/en/SOURCES.md)
 
 ## Development
 
