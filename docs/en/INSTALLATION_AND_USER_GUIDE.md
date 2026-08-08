@@ -5,7 +5,7 @@
 
 ## Before you start
 
-The bridge does not modify LiveProfessor projects. Even so, back up the project and your Controller Map presets before testing it in an important session.
+The bridge never modifies the LiveProfessor project selected as its source. Auto-mapping always creates a new copy. Even so, back up the project and your Controller Map presets before testing it in an important session.
 
 Two operating modes are available:
 
@@ -16,7 +16,7 @@ Use an official LiveProfessor licence, trial period or test licence supplied by 
 
 ## Installing the bridge
 
-1. Download and run `EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe`. The portable archive remains available for use without installation.
+1. Download and run `EC4-LiveProfessor-Bridge-Setup-v2026.1.exe`. The portable archive remains available for use without installation.
 2. Connect the Faderfox EC4.
 3. In the application, open **Tools > Connections**, refresh the MIDI ports, and select the input and output containing `Faderfox EC4`.
 4. Configure the LiveProfessor controller described below before clicking **Start**.
@@ -98,7 +98,30 @@ Feedback port: 8011
 
 If the Companion Controller type is not available, the installed LiveProfessor version is too old. Do not attempt to work around this by injecting code or automating the screen.
 
-### Create one Controller Map per plugin type
+### Automatically create a mapped copy — version 2026.1
+
+1. Save the project currently open in LiveProfessor.
+2. In the bridge, open **Tools > Auto-mapping…**.
+3. Choose the `.rack2` file, then click **Analyze project**.
+4. Select one plugin or **All detected plugins**.
+5. Choose the EC4 Companion Controller. **UniBank — 16 parameters** is recommended and selected by default. Choose FullBank only when you need access to 99 parameters through banks.
+6. Click **Create auto-mapped copy…** and use a new file name.
+7. Save the current work in LiveProfessor, then open the generated copy.
+8. Select a mapped plugin and verify parameter names, values and control on the EC4.
+
+The `EC4 AutoMap - Dynamic` map contains several assignments per rotary, all using **Only If Selected**. They can therefore coexist while only the selected plugin instance should respond. When several identical instances existed during generation, every instance is included. The generator also populates the `HardwareCtrlMaps` referenced by the project and its snapshots because LiveProfessor can recall one of those maps after loading. Presets therefore no longer have to be loaded manually plugin by plugin. Existing push-button assignments are preserved.
+
+The source project is never rewritten. If the selected destination already exists, the tool first creates a timestamped backup. The generated file is parsed and serialized again before it is accepted.
+
+Current limitations:
+
+- controls follow the automation parameter order exposed by the plugin, not yet a custom musical ranking;
+- 16 parameters are mapped in UniBank, or up to 99 in FullBank;
+- parameters that LiveProfessor cannot see cannot be created;
+- push buttons and Shift shortcuts remain unchanged;
+- a plugin added after generation requires a new auto-mapped copy.
+
+### Create one Controller Map per plugin type manually
 
 This replaces repeated MIDI Learn operations with one reusable definition inside LiveProfessor:
 

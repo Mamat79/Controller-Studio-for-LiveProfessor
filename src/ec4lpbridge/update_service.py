@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 LATEST_RELEASE_API = (
     "https://api.github.com/repos/Mamat79/EC4-LiveProfessor-Bridge/releases/latest"
 )
-USER_AGENT = "EC4-LiveProfessor-Bridge-Updater/0.5"
+USER_AGENT = "EC4-LiveProfessor-Bridge-Updater/2026.1"
 
 
 @dataclass(frozen=True, slots=True)

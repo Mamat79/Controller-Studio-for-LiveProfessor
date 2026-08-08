@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026.1
+
+- premier auto-mapping assisté des paramètres exposés par les plugins d'un projet LiveProfessor ;
+- création obligatoire d'une nouvelle copie `.rack2`, sans modification du projet source ;
+- map `EC4 AutoMap - Dynamic` combinant les plugins présents avec `Only If Selected` ;
+- application directe dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : aucun chargement manuel plugin par plugin n'est nécessaire ;
+- conservation des affectations de boutons existantes lors de la fusion dans la map active ;
+- prise en charge de plusieurs instances d'un même type de plugin dans la map dynamique ;
+- choix explicite UniBank/FullBank, avec UniBank 16 paramètres recommandé et sélectionné par défaut ;
+- extension optionnelle du Companion Controller à 99 rotatifs en mode FullBank ;
+- validation binaire du projet généré avant son enregistrement et sauvegarde de la destination si elle existe déjà ;
+- fenêtre bilingue accessible depuis la page principale et le menu **Outils** ;
+- les poussoirs, raccourcis Shift et projets originaux restent inchangés.
+
 ## 0.5.1
 
 - affichage immédiat des 16 raccourcis sur l'EC4 pendant le maintien de Shift ;

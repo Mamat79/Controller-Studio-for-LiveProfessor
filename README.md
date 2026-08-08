@@ -4,7 +4,7 @@
 
 **Une passerelle intelligente entre le Faderfox EC4 et LiveProfessor.**
 
-**Version stable actuelle : 0.5.1**
+**Version stable actuelle : 2026.1**
 
 Le **Faderfox EC4** est un excellent contrôleur MIDI : compact, robuste, équipé de 16 encodeurs avec poussoir et d’un écran OLED très utile pour le retour d’information.
 
@@ -84,6 +84,7 @@ Les deux approches sont valables. Si vous souhaitez simplement piloter quelques 
 - transmission des push simples 1 à 15 vers les boutons Companion apprenables ;
 - affichage des raccourcis directement sur l’EC4 pendant le maintien de Shift ;
 - contrôleurs neutres `Ec4-UniBank.ctrl2` (16 rotatifs) et `Ec4-FullBank.ctrl2` (99 rotatifs), copiables depuis l’application ;
+- auto-mapping assisté dans une copie sécurisée du projet LiveProfessor ;
 - choix d’un setup/groupe EC4 réservé à LiveProfessor ;
 - navigation entre plugins ;
 - navigation entre chaînes ;
@@ -174,10 +175,10 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 - Companion Controller configuré dans LiveProfessor ;
 - Controller Maps pour les plugins à contrôler.
 
-## Télécharger la version stable 0.5.1
+## Télécharger la version stable 2026.1
 
-- [Télécharger l’installateur Windows 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommandé ;
-- [Télécharger l’archive portable 0.5.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip) ;
+- [Télécharger l’installateur Windows 2026.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe) — recommandé ;
+- [Télécharger l’archive portable 2026.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) ;
 - [Télécharger `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — une seule banque de 16 rotatifs ;
 - [Télécharger `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotatifs pour toutes les banques ;
 - [Consulter la release et ses notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
@@ -250,7 +251,22 @@ Port feedback : 8011
 
 Le bridge utilise par défaut ces mêmes valeurs.
 
-## Création d’une Controller Map
+## Auto-mapping automatique — version 2026.1
+
+Le menu **Outils > Auto-mapping…** analyse un projet LiveProfessor `.rack2` et crée une **nouvelle copie** contenant une map `EC4 AutoMap - Dynamic` :
+
+1. enregistrez d'abord le projet dans LiveProfessor ;
+2. choisissez ce fichier `.rack2` dans l'outil d'auto-mapping ;
+3. sélectionnez un plugin ou **Tous les plugins détectés** ;
+4. conservez **UniBank — 16 paramètres**, sélectionné par défaut, ou choisissez FullBank si le plugin a réellement besoin de plusieurs banques ;
+5. enregistrez la copie sous un nouveau nom ;
+6. ouvrez cette copie dans LiveProfessor et sélectionnez le plugin à contrôler.
+
+Chaque affectation générée utilise **Only If Selected**. Une même map dynamique peut donc contenir plusieurs plugins et plusieurs instances : seuls les paramètres du plugin sélectionné doivent réagir. Les affectations sont fusionnées dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : il n'est plus nécessaire de charger manuellement un preset pour chaque plugin dans LiveProfessor. Les affectations de poussoirs déjà présentes sont conservées.
+
+La version 2026.1 suit l'ordre technique des paramètres exposés par le plugin : 16 paramètres en UniBank ou 99 en FullBank. Elle ne peut pas deviner leur importance musicale, ni créer un paramètre que le plugin n'expose pas à LiveProfessor. Les poussoirs et les raccourcis Shift ne sont jamais modifiés. Le projet source reste intact ; si le fichier de destination existe déjà, une sauvegarde horodatée est créée avant son remplacement.
+
+## Création manuelle d’une Controller Map
 
 Le fait d’avoir `Rotary1` à `Rotary16` dans le Companion Controller ne suffit pas encore à contrôler un plugin : les Rotary doivent ensuite être reliés aux paramètres du plugin dans une **Controller Map**.
 
@@ -426,8 +442,8 @@ Le menu **Aide** ouvre le [dépôt](https://github.com/Mamat79/EC4-LiveProfessor
 
 ## Feuille de route
 
-- **0.5.1** : version stable actuelle avec aide Shift sur l’EC4, poussoirs 1 à 15 assignables et choix entre CTRL2 UniBank et FullBank ;
-- **1.0** : auto-mapping assisté et automatique, d'abord validé sur le Faderfox EC4 ;
+- **2026.1** : version stable avec auto-mapping automatique validé, UniBank/FullBank, affectation directe aux maps rappelées par le projet et compatibilité snapshots ;
+- version ultérieure : profils d'ordre logique personnalisés pour organiser les paramètres selon les plugins ;
 - version ultérieure : ouverture à d'autres surfaces MIDI/OSC au moyen de profils matériels, en conservant l'EC4 comme surface de référence.
 
 ## Auteur
@@ -606,10 +622,10 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 - LiveProfessor Companion Controller;
 - Controller Maps for the plugins you want to control.
 
-## Download stable version 0.5.1
+## Download stable version 2026.1
 
-- [Download the Windows 0.5.1 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v0.5.1.exe) — recommended;
-- [Download the portable 0.5.1 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v0.5.1-win64.zip);
+- [Download the Windows 2026.1 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe) — recommended;
+- [Download the portable 2026.1 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip);
 - [Download `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — one bank with 16 rotaries;
 - [Download `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotaries for every bank;
 - [View the latest release and release notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
@@ -676,7 +692,22 @@ Feedback address: 127.0.0.1
 Feedback port: 8011
 ```
 
-## Creating a Controller Map
+## Automatic mapping — version 2026.1
+
+**Tools > Auto-mapping…** analyzes a saved LiveProfessor `.rack2` project and creates a **new copy** containing an `EC4 AutoMap - Dynamic` map:
+
+1. save the project in LiveProfessor first;
+2. choose that `.rack2` file in the auto-mapping tool;
+3. select one plugin or **All detected plugins**;
+4. keep **UniBank — 16 parameters**, selected by default, or choose FullBank when the plugin genuinely needs several banks;
+5. save the copy under a new name;
+6. open the copy in LiveProfessor and select the plugin to control.
+
+Every generated assignment uses **Only If Selected**. One dynamic map can therefore contain several plugins and instances while only the selected plugin should react. Assignments are merged into the `HardwareCtrlMaps` actually recalled by the project and its snapshots, so a preset no longer needs to be loaded manually for each plugin in LiveProfessor. Existing push-button assignments are preserved.
+
+Version 2026.1 follows the technical parameter order exposed by the plugin: 16 parameters in UniBank or 99 in FullBank. It cannot infer musical importance or map a parameter that the plugin does not expose to LiveProfessor. Push buttons and Shift shortcuts are never changed. The source project remains untouched; if the destination already exists, a timestamped backup is created first.
+
+## Creating a Controller Map manually
 
 Having `Rotary1` through `Rotary16` in the Companion Controller is not enough by itself: those Rotary controls must then be assigned to actual plugin parameters in a **Controller Map**.
 
@@ -818,8 +849,8 @@ The **Help** menu opens the [repository](https://github.com/Mamat79/EC4-LiveProf
 
 ## Roadmap
 
-- **0.5.1**: current stable release with the on-device Shift guide, assignable pushes 1 through 15, and a choice of UniBank or FullBank CTRL2;
-- **1.0**: assisted and automatic mapping, first validated on the Faderfox EC4;
+- **2026.1**: stable release with validated automatic mapping, UniBank/FullBank, direct assignment to project-recalled maps and snapshot compatibility;
+- later: custom logical-order profiles to organize parameters for specific plugins;
 - later: support additional MIDI/OSC control surfaces through hardware profiles while keeping the EC4 as the reference surface.
 
 ## Author

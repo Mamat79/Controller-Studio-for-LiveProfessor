@@ -90,6 +90,7 @@ if sys.platform == "win32":
     _TRAY_MENU_QUIT = 3007
 
 from . import __version__
+from .automap import AutoMapError, ProjectInventory, create_automapped_project, inspect_project
 from .bridge import BridgeSnapshot, EC4LiveProfessorBridge
 from .config import BridgeConfig, default_config_path, default_data_dir, load_config, save_config
 from .ec4_protocol import main_display_message, parameter_grid_message, total_display_message
@@ -246,6 +247,44 @@ UI_TEXT = {
         "save": "Enregistrer",
         "diagnostic": "Diagnostic",
         "shortcuts": "Raccourcis EC4",
+        "automap": "Auto-mapping…",
+        "automap_title": "Auto-mapping des plugins",
+        "automap_intro": (
+            "Le bridge crée une copie du projet LiveProfessor avec une Controller Map dynamique. "
+            "Chaque rotatif agit uniquement sur le plugin sélectionné. Le projet original n'est "
+            "jamais modifié."
+        ),
+        "automap_warning": (
+            "Première version assistée : les paramètres suivent l'ordre technique exposé par le "
+            "plugin (16 en UniBank, 99 en FullBank). Les poussoirs et les raccourcis Shift ne "
+            "sont pas modifiés."
+        ),
+        "automap_project": "Projet LiveProfessor (.rack2)",
+        "automap_browse": "Parcourir…",
+        "automap_analyze": "Analyser le projet",
+        "automap_plugin": "Plugin à mapper",
+        "automap_all_plugins": "Tous les plugins détectés",
+        "automap_controller": "Contrôleur",
+        "automap_bank_mode": "Mode de banques créé dans la copie",
+        "automap_unibank": "UniBank — 16 paramètres (recommandé)",
+        "automap_fullbank": "FullBank — 99 paramètres",
+        "automap_create": "Créer la copie auto-mappée…",
+        "automap_file_type": "Projet LiveProfessor",
+        "automap_output_title": "Enregistrer la copie auto-mappée",
+        "automap_error_title": "Auto-mapping impossible",
+        "automap_success_title": "Copie auto-mappée créée",
+        "automap_status_empty": "Choisissez un projet puis lancez l'analyse.",
+        "automap_status_inventory": (
+            "{plugins} plugin(s), {controllers} contrôleur(s). "
+            "Le contrôleur source expose {rotaries} rotatifs. Sortie : {mode}."
+        ),
+        "automap_success": (
+            "Fichier créé :\n{path}\n\n"
+            "{plugins} plugin(s) mappé(s), {mappings} affectation(s), "
+            "{rotaries} rotatifs disponibles.\n\n"
+            "Dans LiveProfessor : enregistrez votre projet actuel, fermez-le, puis ouvrez cette "
+            "copie. Sélectionnez un plugin mappé : ses noms et valeurs doivent remonter sur l'EC4."
+        ),
         "copy_controller_unibank": "CTRL2 UniBank…",
         "copy_controller_fullbank": "CTRL2 FullBank…",
         "controller_guide": "Comment importer les CTRL2…",
@@ -391,6 +430,43 @@ UI_TEXT = {
         "save": "Save",
         "diagnostic": "Diagnostics",
         "shortcuts": "EC4 shortcuts",
+        "automap": "Auto-mapping…",
+        "automap_title": "Plugin auto-mapping",
+        "automap_intro": (
+            "The bridge creates a copy of the LiveProfessor project with one dynamic Controller "
+            "Map. Each rotary acts only on the selected plugin. The original project is never "
+            "modified."
+        ),
+        "automap_warning": (
+            "First assisted version: parameters follow the technical order exposed by the plugin "
+            "(16 in UniBank, 99 in FullBank). Push buttons and Shift shortcuts are not changed."
+        ),
+        "automap_project": "LiveProfessor project (.rack2)",
+        "automap_browse": "Browse…",
+        "automap_analyze": "Analyze project",
+        "automap_plugin": "Plugin to map",
+        "automap_all_plugins": "All detected plugins",
+        "automap_controller": "Controller",
+        "automap_bank_mode": "Bank mode created in the copy",
+        "automap_unibank": "UniBank — 16 parameters (recommended)",
+        "automap_fullbank": "FullBank — 99 parameters",
+        "automap_create": "Create auto-mapped copy…",
+        "automap_file_type": "LiveProfessor project",
+        "automap_output_title": "Save auto-mapped copy",
+        "automap_error_title": "Auto-mapping failed",
+        "automap_success_title": "Auto-mapped copy created",
+        "automap_status_empty": "Choose a project, then analyze it.",
+        "automap_status_inventory": (
+            "{plugins} plugin(s), {controllers} controller(s). "
+            "The source controller exposes {rotaries} rotaries. Output: {mode}."
+        ),
+        "automap_success": (
+            "File created:\n{path}\n\n"
+            "{plugins} plugin(s) mapped, {mappings} assignment(s), "
+            "{rotaries} rotaries available.\n\n"
+            "In LiveProfessor: save and close the current project, then open this copy. Select a "
+            "mapped plugin: its names and values should appear on the EC4."
+        ),
         "copy_controller_unibank": "UniBank CTRL2…",
         "copy_controller_fullbank": "FullBank CTRL2…",
         "controller_guide": "How to import the CTRL2 files…",
@@ -590,6 +666,7 @@ class BridgeGUI:
         self.settings_window = None
         self.log_window = None
         self.connections_window = None
+        self.automap_window = None
         self.about_window = None
         self._tray_icon_path = str((Path(__file__).resolve().parent / "assets" / "ec4lp.ico").resolve())
 
@@ -626,6 +703,7 @@ class BridgeGUI:
             ("settings_window", self.show_settings),
             ("log_window", self.show_log_window),
             ("connections_window", self.show_connections_window),
+            ("automap_window", self.show_automap_window),
         )
         for attribute, opener in windows:
             window = getattr(self, attribute, None)
@@ -1118,6 +1196,7 @@ class BridgeGUI:
         tools_menu.add_command(label=self._t("settings"), command=self.show_settings)
         tools_menu.add_command(label=self._t("connections"), command=self.show_connections_window)
         tools_menu.add_command(label=self._t("learn_button"), command=self.toggle_midi_learn)
+        tools_menu.add_command(label=self._t("automap"), command=self.show_automap_window)
         tools_menu.add_command(label=self._t("test_display"), command=self.demo_display)
         tools_menu.add_command(
             label=self._t("copy_controller_unibank"),
@@ -1236,12 +1315,17 @@ class BridgeGUI:
             action_frame, text=self._t("settings"), command=self.show_settings
         )
         self.settings_button.pack(side="right")
+        self.automap_button = ttk.Button(
+            action_frame, text=self._t("automap"), command=self.show_automap_window
+        )
+        self.automap_button.pack(side="right", padx=6)
         for widget, key in (
             (self.start_button, "start"),
             (self.stop_button, "stop"),
             (self.minimize_button, "minimize"),
             (self.quit_button, "quit"),
             (self.settings_button, "settings"),
+            (self.automap_button, "automap"),
         ):
             self._register_text_widget(widget, "text", key)
 
@@ -1800,6 +1884,257 @@ class BridgeGUI:
         folder = default_data_dir()
         folder.mkdir(parents=True, exist_ok=True)
         os.startfile(folder)
+
+    def show_automap_window(self) -> None:
+        if self.automap_window is not None and self.automap_window.winfo_exists():
+            self.automap_window.deiconify()
+            self.automap_window.lift()
+            self.automap_window.focus_force()
+            return
+
+        ttk = self.ttk
+        window = self.tk.Toplevel(self.root)
+        self.automap_window = window
+        window.title(self._t("automap_title"))
+        window.geometry("760x500")
+        window.minsize(680, 460)
+        window.transient(self.root)
+        self._set_window_icons()
+
+        self.automap_project_var = self.tk.StringVar(value="")
+        self.automap_plugin_var = self.tk.StringVar(value="")
+        self.automap_controller_var = self.tk.StringVar(value="")
+        self.automap_bank_mode_var = self.tk.StringVar(value="unibank")
+        self.automap_status_var = self.tk.StringVar(value=self._t("automap_status_empty"))
+        self._automap_inventory: ProjectInventory | None = None
+        self._automap_plugins_by_label: dict[str, int | None] = {}
+        self._automap_controllers_by_label: dict[str, int] = {}
+
+        frame = ttk.Frame(window, padding=14)
+        frame.pack(fill="both", expand=True)
+        frame.columnconfigure(0, weight=1)
+        ttk.Label(
+            frame,
+            text=self._t("automap_intro"),
+            wraplength=700,
+            justify="left",
+        ).grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 14))
+
+        ttk.Label(frame, text=self._t("automap_project")).grid(
+            row=1, column=0, columnspan=3, sticky="w"
+        )
+        ttk.Entry(frame, textvariable=self.automap_project_var).grid(
+            row=2, column=0, sticky="ew", pady=(4, 10)
+        )
+        ttk.Button(
+            frame,
+            text=self._t("automap_browse"),
+            command=self._browse_automap_project,
+        ).grid(row=2, column=1, padx=(8, 0), pady=(4, 10))
+        ttk.Button(
+            frame,
+            text=self._t("automap_analyze"),
+            command=self._analyze_automap_project,
+        ).grid(row=2, column=2, padx=(8, 0), pady=(4, 10))
+
+        ttk.Label(frame, text=self._t("automap_plugin")).grid(row=3, column=0, sticky="w")
+        self.automap_plugin_combo = ttk.Combobox(
+            frame,
+            textvariable=self.automap_plugin_var,
+            state="readonly",
+        )
+        self.automap_plugin_combo.grid(row=4, column=0, columnspan=3, sticky="ew", pady=(4, 10))
+
+        ttk.Label(frame, text=self._t("automap_controller")).grid(row=5, column=0, sticky="w")
+        self.automap_controller_combo = ttk.Combobox(
+            frame,
+            textvariable=self.automap_controller_var,
+            state="readonly",
+        )
+        self.automap_controller_combo.grid(
+            row=6, column=0, columnspan=3, sticky="ew", pady=(4, 10)
+        )
+        self.automap_controller_combo.bind(
+            "<<ComboboxSelected>>", lambda _event: self._update_automap_status()
+        )
+
+        ttk.Label(frame, text=self._t("automap_bank_mode")).grid(
+            row=7, column=0, columnspan=3, sticky="w", pady=(4, 2)
+        )
+        bank_mode_frame = ttk.Frame(frame)
+        bank_mode_frame.grid(row=8, column=0, columnspan=3, sticky="w", pady=(0, 8))
+        ttk.Radiobutton(
+            bank_mode_frame,
+            text=self._t("automap_unibank"),
+            variable=self.automap_bank_mode_var,
+            value="unibank",
+            command=self._update_automap_status,
+        ).pack(side="left")
+        ttk.Radiobutton(
+            bank_mode_frame,
+            text=self._t("automap_fullbank"),
+            variable=self.automap_bank_mode_var,
+            value="fullbank",
+            command=self._update_automap_status,
+        ).pack(side="left", padx=(16, 0))
+
+        ttk.Label(
+            frame,
+            textvariable=self.automap_status_var,
+            wraplength=700,
+            justify="left",
+        ).grid(row=9, column=0, columnspan=3, sticky="ew", pady=(8, 14))
+
+        ttk.Label(
+            frame,
+            text=self._t("automap_warning"),
+            wraplength=700,
+            justify="left",
+        ).grid(row=10, column=0, columnspan=3, sticky="ew", pady=(0, 14))
+
+        self.automap_create_button = ttk.Button(
+            frame,
+            text=self._t("automap_create"),
+            command=self._create_automap_copy,
+            state="disabled",
+        )
+        self.automap_create_button.grid(row=11, column=2, sticky="e")
+
+        def close_window() -> None:
+            self.automap_window = None
+            window.destroy()
+
+        window.protocol("WM_DELETE_WINDOW", close_window)
+
+    def _browse_automap_project(self) -> None:
+        selected = self.filedialog.askopenfilename(
+            parent=self.automap_window or self.root,
+            title=self._t("automap_project"),
+            filetypes=(
+                (self._t("automap_file_type"), "*.rack2"),
+                (
+                    "Tous les fichiers" if self._language_code() == "fr" else "All files",
+                    "*.*",
+                ),
+            ),
+        )
+        if selected:
+            self.automap_project_var.set(selected)
+            self._analyze_automap_project()
+
+    def _analyze_automap_project(self) -> None:
+        try:
+            inventory = inspect_project(Path(self.automap_project_var.get()))
+        except (AutoMapError, OSError, ValueError) as exc:
+            self._automap_inventory = None
+            if hasattr(self, "automap_create_button"):
+                self.automap_create_button.configure(state="disabled")
+            self.messagebox.showerror(self._t("automap_error_title"), str(exc))
+            return
+
+        self._automap_inventory = inventory
+        self._automap_plugins_by_label = {self._t("automap_all_plugins"): None}
+        for plugin in inventory.plugins:
+            label = f"{plugin.display_name} [#{plugin.plugin_uid}]"
+            self._automap_plugins_by_label[label] = plugin.plugin_uid
+        self._automap_controllers_by_label = {}
+        for controller in inventory.controllers:
+            label = f"{controller.display_name} [#{controller.controller_uid}]"
+            self._automap_controllers_by_label[label] = controller.controller_uid
+
+        plugin_labels = tuple(self._automap_plugins_by_label)
+        controller_labels = tuple(self._automap_controllers_by_label)
+        self.automap_plugin_combo.configure(values=plugin_labels)
+        self.automap_controller_combo.configure(values=controller_labels)
+        self.automap_plugin_var.set(plugin_labels[0])
+        self.automap_controller_var.set(controller_labels[0])
+        self.automap_create_button.configure(state="normal")
+        self._update_automap_status()
+
+    def _update_automap_status(self) -> None:
+        inventory = getattr(self, "_automap_inventory", None)
+        if inventory is None:
+            self.automap_status_var.set(self._t("automap_status_empty"))
+            return
+        selected_uid = self._automap_controllers_by_label.get(
+            self.automap_controller_var.get()
+        )
+        controller = next(
+            (
+                item
+                for item in inventory.controllers
+                if item.controller_uid == selected_uid
+            ),
+            inventory.controllers[0],
+        )
+        self.automap_status_var.set(
+            self._t(
+                "automap_status_inventory",
+                plugins=len(inventory.plugins),
+                controllers=len(inventory.controllers),
+                rotaries=controller.rotary_count,
+                mode=self._t(
+                    "automap_fullbank"
+                    if self.automap_bank_mode_var.get() == "fullbank"
+                    else "automap_unibank"
+                ),
+            )
+        )
+
+    def _create_automap_copy(self) -> None:
+        inventory = getattr(self, "_automap_inventory", None)
+        if inventory is None:
+            self.messagebox.showerror(
+                self._t("automap_error_title"),
+                self._t("automap_status_empty"),
+            )
+            return
+        plugin_uid = self._automap_plugins_by_label.get(self.automap_plugin_var.get())
+        controller_uid = self._automap_controllers_by_label.get(
+            self.automap_controller_var.get()
+        )
+        if controller_uid is None:
+            self.messagebox.showerror(
+                self._t("automap_error_title"),
+                self._t("automap_status_empty"),
+            )
+            return
+        initial_name = f"{inventory.path.stem}-EC4-AutoMap{inventory.path.suffix}"
+        destination = self.filedialog.asksaveasfilename(
+            parent=self.automap_window or self.root,
+            title=self._t("automap_output_title"),
+            initialdir=str(inventory.path.parent),
+            initialfile=initial_name,
+            defaultextension=".rack2",
+            filetypes=((self._t("automap_file_type"), "*.rack2"),),
+        )
+        if not destination:
+            return
+        try:
+            result = create_automapped_project(
+                inventory.path,
+                Path(destination),
+                plugin_uid=plugin_uid,
+                controller_uid=controller_uid,
+                expand_to_fullbank=self.automap_bank_mode_var.get() == "fullbank",
+            )
+        except (AutoMapError, OSError, ValueError) as exc:
+            self.messagebox.showerror(self._t("automap_error_title"), str(exc))
+            return
+        self._append_log(
+            f"AutoMap: {len(result.mapped_plugins)} plugin(s), "
+            f"{result.mapped_rotaries} affectation(s) -> {result.output_path}"
+        )
+        self.messagebox.showinfo(
+            self._t("automap_success_title"),
+            self._t(
+                "automap_success",
+                path=result.output_path,
+                plugins=len(result.mapped_plugins),
+                mappings=result.mapped_rotaries,
+                rotaries=result.controller_rotaries,
+            ),
+        )
 
     def show_connections_window(self) -> None:
         if self.connections_window is not None and self.connections_window.winfo_exists():

@@ -38,6 +38,7 @@ class UpdateServiceTests(unittest.TestCase):
     def test_version_comparison(self):
         self.assertEqual(version_tuple("v1.2"), (1, 2, 0, 0))
         self.assertTrue(is_newer_version("0.5.0", "0.4.1"))
+        self.assertTrue(is_newer_version("2026.1", "0.5.1"))
         self.assertFalse(is_newer_version("v0.5.0", "0.5.0"))
 
     def test_parse_release_prefers_setup(self):
