@@ -2,6 +2,11 @@
 
 ## 2026.1
 
+- prise en charge des identifiants JUCE hexadécimaux non complétés à huit chiffres, dont CEDAR StageVox ;
+- lorsqu'un plugin est incompatible avec l'auto-mapping, il est maintenant ignoré avec un avertissement tandis que les autres plugins continuent d'être traités ;
+- ajout de notices PDF complètes en français et en anglais, accessibles depuis le menu Aide et intégrées aux paquets ;
+- ajout de paquets macOS expérimentaux distincts pour Apple Silicon et Intel, construits nativement par GitHub Actions ;
+- ouverture multiplateforme des notices, projets et journaux locaux ;
 - l'auto-mapping injecte désormais automatiquement le modèle EC4 intégré quand le projet
   LiveProfessor ne contient encore aucun contrôleur Companion/OSC, au lieu de refuser l'analyse ;
 - le bouton principal d'auto-mapping est maintenant mis en évidence par une couleur et une icône ;

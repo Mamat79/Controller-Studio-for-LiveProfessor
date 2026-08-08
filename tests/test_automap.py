@@ -115,8 +115,36 @@ class AutoMapTests(unittest.TestCase):
             plugin_map_type_id("VST3-Avalon VT-747SP-b86068d4-ca0ebedb"),
             "plugin-UID-905003301",
         )
+        self.assertEqual(
+            plugin_map_type_id("VST3-CEDAR StageVox-b91618f4-50070f0"),
+            "plugin-UID-83914992",
+        )
         with self.assertRaises(AutoMapError):
             plugin_map_type_id("unsupported")
+
+    def test_inventory_skips_unsupported_plugin_and_keeps_supported_ones(self):
+        with TemporaryDirectory() as temporary:
+            source = Path(temporary) / "test.rack2"
+            project = controller_project()
+            chains = next(child for child in project.children if child.type_name == "Chains")
+            supported_chain = chains.children[0]
+            unsupported_chain = parse_tree(write_tree(supported_chain))
+            unsupported_plugin = next(
+                child
+                for child in unsupported_chain.children
+                if child.type_name == "ChainPlugins"
+            ).children[0]
+            unsupported_plugin.set("pluginTypeName", "Unsupported Test")
+            unsupported_plugin.set("pluginTypeId", "unsupported")
+            unsupported_plugin.set("pluginUid", 9_999_999)
+            chains.children.append(unsupported_chain)
+            source.write_bytes(write_tree(project))
+
+            inventory = inspect_project(source)
+
+            self.assertEqual(len(inventory.plugins), 1)
+            self.assertEqual(len(inventory.skipped_plugins), 1)
+            self.assertIn("Unsupported Test", inventory.skipped_plugins[0])
 
     def test_project_inventory_finds_plugin_and_companion_controller(self):
         with TemporaryDirectory() as temporary:

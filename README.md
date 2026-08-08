@@ -12,12 +12,16 @@
 
 **C’est le téléchargement recommandé.** L’installateur contient l’application, les deux contrôleurs `CTRL2` UniBank/FullBank et la documentation française/anglaise.
 
-[Archive portable ZIP](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Notes et fichiers de la dernière version](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+[Archive portable Windows](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [macOS Apple Silicon](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-arm64.zip) · [macOS Intel](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-x86_64.zip) · [Notes et fichiers de la dernière version](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+
+Les paquets macOS sont fournis en version expérimentale, non signée et non notarifiée. Ils sont construits nativement pour chaque architecture, mais doivent encore être validés avec un EC4 et LiveProfessor sur un vrai Mac.
 
 ### 📘 Notices en français et en anglais
 
 - 🇫🇷 [Notice complète d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
 - 🇬🇧 [Complete installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
+- 🇫🇷 [Notice illustrée au format PDF](docs/NOTICE_EC4_BRIDGE_FR.pdf)
+- 🇬🇧 [Illustrated PDF user guide](docs/en/EC4_BRIDGE_USER_GUIDE_EN.pdf)
 - 🇫🇷 [Configuration détaillée de l’EC4](docs/CONFIGURATION_EC4.md) · [Cartographie MIDI/SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
 - 🇬🇧 [Detailed EC4 configuration](docs/en/EC4_CONFIGURATION.md) · [MIDI/SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
 
@@ -211,7 +215,7 @@ Avec **Only If Selected**, les encodeurs suivent automatiquement le plugin actue
 
 ## Prérequis
 
-- Windows 10 ou Windows 11 x64 ;
+- Windows 10/11 x64, ou macOS 15 sur Apple Silicon/Intel pour les paquets expérimentaux ;
 - Faderfox EC4 ;
 - LiveProfessor 2023.0.8 ou supérieur ;
 - licence ou période d’essai officielle LiveProfessor ;
@@ -224,6 +228,8 @@ Le contrôleur et les Controller Maps n’ont pas besoin d’être préparés ma
 
 - [Télécharger l’installateur Windows 2026.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe) — recommandé ;
 - [Télécharger l’archive portable 2026.1](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) ;
+- [Télécharger macOS Apple Silicon](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-arm64.zip) — expérimental, non signé ;
+- [Télécharger macOS Intel](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-x86_64.zip) — expérimental, non signé ;
 - [Télécharger `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — une seule banque de 16 rotatifs ;
 - [Télécharger `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotatifs pour toutes les banques ;
 - [Consulter la release et ses notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
@@ -312,7 +318,7 @@ Si le projet ne contient encore aucun contrôleur Companion/OSC, le bridge utili
 
 Chaque affectation générée utilise **Only If Selected**. Une même map dynamique peut donc contenir plusieurs plugins et plusieurs instances : seuls les paramètres du plugin sélectionné doivent réagir. Les affectations sont fusionnées dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : il n'est plus nécessaire de charger manuellement un preset pour chaque plugin dans LiveProfessor. Les affectations de poussoirs déjà présentes sont conservées.
 
-La version 2026.1 suit l'ordre technique des paramètres exposés par le plugin : 16 paramètres en UniBank ou 99 en FullBank. Elle ne peut pas deviner leur importance musicale, ni créer un paramètre que le plugin n'expose pas à LiveProfessor. Les poussoirs et les raccourcis Shift ne sont jamais modifiés. Le projet source reste intact ; si le fichier de destination existe déjà, une sauvegarde horodatée est créée avant son remplacement.
+La version 2026.1 suit l'ordre technique des paramètres exposés par le plugin : 16 paramètres en UniBank ou 99 en FullBank. Elle ne peut pas deviner leur importance musicale, ni créer un paramètre que le plugin n'expose pas à LiveProfessor. Si un identifiant de plugin n'est pas pris en charge, ce plugin est ignoré, la suite du projet est traitée et un avertissement précis est affiché. Les identifiants JUCE non complétés à huit chiffres, notamment celui de CEDAR StageVox, sont reconnus. Les poussoirs et les raccourcis Shift ne sont jamais modifiés. Le projet source reste intact ; si le fichier de destination existe déjà, une sauvegarde horodatée est créée avant son remplacement.
 
 ## Création manuelle d’une Controller Map
 
@@ -435,6 +441,8 @@ config.json
 
 ## Documentation
 
+- [Notice complète PDF en français](docs/NOTICE_EC4_BRIDGE_FR.pdf)
+- [Complete PDF user guide in English](docs/en/EC4_BRIDGE_USER_GUIDE_EN.pdf)
 - [Guide d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
 - [Configuration EC4](docs/CONFIGURATION_EC4.md)
 - [Cartographie MIDI et SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
@@ -524,12 +532,16 @@ Aucun logiciel propriétaire tiers n’est redistribué dans ce dépôt.
 
 **This is the recommended download.** The installer includes the application, both UniBank/FullBank `CTRL2` controllers, and the English/French documentation.
 
-[Portable ZIP archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Latest release notes and files](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+[Windows portable ZIP](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [macOS Apple Silicon](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-arm64.zip) · [macOS Intel](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-x86_64.zip) · [Latest release notes and files](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+
+The macOS packages are experimental, unsigned and not notarized. They are built natively for each architecture but still require real-world validation with an EC4 and LiveProfessor on a Mac.
 
 ### 📘 English and French manuals
 
 - 🇬🇧 [Complete installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
 - 🇫🇷 [Notice complète d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
+- 🇬🇧 [Illustrated PDF user guide](docs/en/EC4_BRIDGE_USER_GUIDE_EN.pdf)
+- 🇫🇷 [Notice illustrée au format PDF](docs/NOTICE_EC4_BRIDGE_FR.pdf)
 - 🇬🇧 [Detailed EC4 configuration](docs/en/EC4_CONFIGURATION.md) · [MIDI/SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
 - 🇫🇷 [Configuration détaillée de l’EC4](docs/CONFIGURATION_EC4.md) · [Cartographie MIDI/SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
 
@@ -707,7 +719,7 @@ With **Only If Selected**, the EC4 controls automatically follow the currently s
 
 ## Requirements
 
-- Windows 10 or Windows 11 x64;
+- Windows 10/11 x64, or macOS 15 on Apple Silicon/Intel for the experimental packages;
 - Faderfox EC4;
 - LiveProfessor 2023.0.8 or later;
 - official LiveProfessor licence or trial;
@@ -720,6 +732,8 @@ The controller and Controller Maps do not have to be configured manually before 
 
 - [Download the Windows 2026.1 installer](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-Setup-v2026.1.exe) — recommended;
 - [Download the portable 2026.1 archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip);
+- [Download macOS for Apple Silicon](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-arm64.zip) — experimental, unsigned;
+- [Download macOS for Intel](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-macos-x86_64.zip) — experimental, unsigned;
 - [Download `Ec4-UniBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-UniBank.ctrl2) — one bank with 16 rotaries;
 - [Download `Ec4-FullBank.ctrl2`](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Ec4-FullBank.ctrl2) — 99 rotaries for every bank;
 - [View the latest release and release notes](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest).
@@ -802,7 +816,7 @@ If the project does not contain a Companion/OSC controller yet, the bridge autom
 
 Every generated assignment uses **Only If Selected**. One dynamic map can therefore contain several plugins and instances while only the selected plugin should react. Assignments are merged into the `HardwareCtrlMaps` actually recalled by the project and its snapshots, so a preset no longer needs to be loaded manually for each plugin in LiveProfessor. Existing push-button assignments are preserved.
 
-Version 2026.1 follows the technical parameter order exposed by the plugin: 16 parameters in UniBank or 99 in FullBank. It cannot infer musical importance or map a parameter that the plugin does not expose to LiveProfessor. Push buttons and Shift shortcuts are never changed. The source project remains untouched; if the destination already exists, a timestamped backup is created first.
+Version 2026.1 follows the technical parameter order exposed by the plugin: 16 parameters in UniBank or 99 in FullBank. It cannot infer musical importance or map a parameter that the plugin does not expose to LiveProfessor. If a plugin identifier is unsupported, that plugin is skipped, the rest of the project is processed, and a precise warning is displayed. Unpadded JUCE identifiers, including CEDAR StageVox, are supported. Push buttons and Shift shortcuts are never changed. The source project remains untouched; if the destination already exists, a timestamped backup is created first.
 
 ## Creating a Controller Map manually
 
@@ -893,6 +907,8 @@ For portable operation, place `config.json` next to the executable.
 
 ## Documentation
 
+- [Complete PDF user guide in English](docs/en/EC4_BRIDGE_USER_GUIDE_EN.pdf)
+- [Notice complète PDF en français](docs/NOTICE_EC4_BRIDGE_FR.pdf)
 - [Installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
 - [EC4 configuration](docs/en/EC4_CONFIGURATION.md)
 - [MIDI and SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)

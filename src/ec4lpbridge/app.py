@@ -5,6 +5,7 @@ import logging
 import os
 import queue
 import shutil
+import subprocess
 import sys
 import threading
 import time
@@ -112,6 +113,11 @@ CONTROLLER_TEMPLATES = (
     "Ec4-FullBank.ctrl2",
 )
 
+USER_GUIDES = {
+    "fr": Path("docs") / "NOTICE_EC4_BRIDGE_FR.pdf",
+    "en": Path("docs") / "en" / "EC4_BRIDGE_USER_GUIDE_EN.pdf",
+}
+
 
 def controller_template_path(
     filename: str = "Ec4-FullBank.ctrl2",
@@ -154,17 +160,66 @@ def copy_controller_template(destination: Path, source: Path | None = None) -> P
     return destination_path
 
 
+def user_guide_path(
+    language: str = "fr",
+    candidates: list[Path] | None = None,
+) -> Path:
+    """Locate the language-specific PDF guide bundled with the application."""
+
+    relative = USER_GUIDES.get(language, USER_GUIDES["fr"])
+    if candidates is None:
+        candidates = []
+        bundle_dir = getattr(sys, "_MEIPASS", None)
+        if bundle_dir:
+            candidates.append(Path(bundle_dir) / relative)
+        if getattr(sys, "frozen", False):
+            candidates.append(Path(sys.executable).resolve().parent / relative)
+        candidates.extend(
+            [
+                Path(__file__).resolve().parents[2] / relative,
+                Path.cwd() / relative,
+            ]
+        )
+    for candidate in candidates:
+        path = Path(candidate).expanduser()
+        if path.is_file():
+            return path.resolve()
+    raise FileNotFoundError(f"notice PDF absente de l'application : {relative}")
+
+
+def open_local_path(path: Path, launcher=None) -> Path:
+    """Open a local file or directory with the platform's default application."""
+
+    resolved = Path(path).expanduser().resolve()
+    if not resolved.exists():
+        raise FileNotFoundError(f"chemin introuvable : {resolved}")
+    if launcher is not None:
+        launcher(str(resolved))
+    elif sys.platform == "win32":
+        os.startfile(resolved)
+    elif sys.platform == "darwin":
+        subprocess.run(["open", str(resolved)], check=True)
+    else:
+        subprocess.run(["xdg-open", str(resolved)], check=True)
+    return resolved
+
+
+def open_local_document(path: Path, launcher=None) -> Path:
+    """Open a local document with the platform's default application."""
+
+    resolved = Path(path).expanduser().resolve()
+    if not resolved.is_file():
+        raise FileNotFoundError(f"fichier introuvable : {resolved}")
+    return open_local_path(resolved, launcher=launcher)
+
+
 def open_liveprofessor_project(project_path: Path, launcher=None) -> Path:
     """Open a generated rack2 file through the registered LiveProfessor association."""
 
     path = Path(project_path).expanduser().resolve()
     if not path.is_file():
         raise FileNotFoundError(f"projet LiveProfessor introuvable : {path}")
-    selected_launcher = launcher or getattr(os, "startfile", None)
-    if selected_launcher is None:
-        raise OSError("aucune application Windows n'est associée aux fichiers .rack2")
-    selected_launcher(str(path))
-    return path
+    return open_local_document(path, launcher=launcher)
 
 
 def tray_action_for_event(l_param: int) -> str | None:
@@ -294,6 +349,12 @@ UI_TEXT = {
             "{plugins} plugin(s), {controllers} contrôleur(s). "
             "Le contrôleur source expose {rotaries} rotatifs. Sortie : {mode}."
         ),
+        "automap_status_skipped": "\nPlugins ignorés : {plugins}",
+        "automap_skipped_title": "Plugins ignorés",
+        "automap_skipped_message": (
+            "L'auto-mapping continuera avec les plugins compatibles. "
+            "Les plugins suivants ont été ignorés :\n\n{plugins}"
+        ),
         "automap_success": (
             "Fichier créé :\n{path}\n\n"
             "{plugins} plugin(s) mappé(s), {mappings} affectation(s), "
@@ -312,6 +373,8 @@ UI_TEXT = {
         "copy_controller_unibank": "CTRL2 UniBank…",
         "copy_controller_fullbank": "CTRL2 FullBank…",
         "controller_guide": "Comment importer les CTRL2…",
+        "user_guide": "Notice complète (PDF)…",
+        "user_guide_error_title": "Notice indisponible",
         "controller_copy_title": "Copier le contrôleur LiveProfessor {name}",
         "controller_file_type": "Contrôleur LiveProfessor",
         "controller_missing_title": "Fichier contrôleur introuvable",
@@ -487,6 +550,12 @@ UI_TEXT = {
             "{plugins} plugin(s), {controllers} controller(s). "
             "The source controller exposes {rotaries} rotaries. Output: {mode}."
         ),
+        "automap_status_skipped": "\nSkipped plugins: {plugins}",
+        "automap_skipped_title": "Skipped plugins",
+        "automap_skipped_message": (
+            "Auto-mapping will continue with compatible plugins. "
+            "The following plugins were skipped:\n\n{plugins}"
+        ),
         "automap_success": (
             "File created:\n{path}\n\n"
             "{plugins} plugin(s) mapped, {mappings} assignment(s), "
@@ -505,6 +574,8 @@ UI_TEXT = {
         "copy_controller_unibank": "UniBank CTRL2…",
         "copy_controller_fullbank": "FullBank CTRL2…",
         "controller_guide": "How to import the CTRL2 files…",
+        "user_guide": "Complete user guide (PDF)…",
+        "user_guide_error_title": "User guide unavailable",
         "controller_copy_title": "Copy the {name} LiveProfessor controller",
         "controller_file_type": "LiveProfessor controller",
         "controller_missing_title": "Controller file not found",
@@ -1254,6 +1325,7 @@ class BridgeGUI:
         menu_bar.add_cascade(label=self._t("menu_tools"), menu=tools_menu)
 
         help_menu = tk.Menu(menu_bar, tearoff=0)
+        help_menu.add_command(label=self._t("user_guide"), command=self.open_user_guide)
         help_menu.add_command(
             label=self._t("controller_guide"), command=self.show_controller_guide
         )
@@ -1926,12 +1998,12 @@ class BridgeGUI:
     def _open_log_file(self) -> None:
         path = default_data_dir() / "bridge.log"
         if path.exists():
-            os.startfile(path)
+            open_local_document(path)
 
     def _open_log_folder(self) -> None:
         folder = default_data_dir()
         folder.mkdir(parents=True, exist_ok=True)
-        os.startfile(folder)
+        open_local_path(folder)
 
     def show_automap_window(self) -> None:
         if self.automap_window is not None and self.automap_window.winfo_exists():
@@ -2108,6 +2180,15 @@ class BridgeGUI:
         self.automap_controller_var.set(controller_labels[0])
         self.automap_create_button.configure(state="normal")
         self._update_automap_status()
+        if inventory.skipped_plugins:
+            self.messagebox.showwarning(
+                self._t("automap_skipped_title"),
+                self._t(
+                    "automap_skipped_message",
+                    plugins="\n".join(inventory.skipped_plugins),
+                ),
+                parent=self.automap_window or self.root,
+            )
 
     def _update_automap_status(self) -> None:
         inventory = getattr(self, "_automap_inventory", None)
@@ -2125,8 +2206,7 @@ class BridgeGUI:
             ),
             inventory.controllers[0],
         )
-        self.automap_status_var.set(
-            self._t(
+        status = self._t(
                 "automap_status_inventory",
                 plugins=len(inventory.plugins),
                 controllers=len(inventory.controllers),
@@ -2137,7 +2217,12 @@ class BridgeGUI:
                     else "automap_unibank"
                 ),
             )
-        )
+        if inventory.skipped_plugins:
+            status += self._t(
+                "automap_status_skipped",
+                plugins=", ".join(inventory.skipped_plugins),
+            )
+        self.automap_status_var.set(status)
 
     def _create_automap_copy(self) -> None:
         inventory = getattr(self, "_automap_inventory", None)
@@ -2204,7 +2289,7 @@ class BridgeGUI:
         if open_now:
             try:
                 open_liveprofessor_project(result.output_path)
-            except (OSError, ValueError) as exc:
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
                 self.messagebox.showerror(
                     self._t("automap_open_error_title"),
                     self._t("automap_open_error", error=exc, path=result.output_path),
@@ -2581,6 +2666,12 @@ class BridgeGUI:
             self._t("controller_guide_title"),
             self._t("controller_guide_text"),
         )
+
+    def open_user_guide(self) -> None:
+        try:
+            open_local_document(user_guide_path(self._language_code()))
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            self.messagebox.showerror(self._t("user_guide_error_title"), str(exc))
 
     def copy_controller_file(self, filename: str) -> None:
         try:

@@ -5,8 +5,11 @@ from tempfile import TemporaryDirectory
 from ec4lpbridge.app import (
     controller_template_path,
     copy_controller_template,
+    open_local_document,
+    open_local_path,
     open_liveprofessor_project,
     tray_action_for_event,
+    user_guide_path,
 )
 
 
@@ -69,6 +72,30 @@ class AppHelperTests(unittest.TestCase):
                     launcher=opened.append,
                 )
             self.assertEqual(opened, [])
+
+    def test_language_specific_pdf_guide_can_be_located_and_opened(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            guide = root / "docs" / "en" / "EC4_BRIDGE_USER_GUIDE_EN.pdf"
+            guide.parent.mkdir(parents=True)
+            guide.write_bytes(b"%PDF-test")
+            located = user_guide_path("en", candidates=[root / "missing.pdf", guide])
+            opened: list[str] = []
+
+            result = open_local_document(located, launcher=opened.append)
+
+            self.assertEqual(result, guide.resolve())
+            self.assertEqual(opened, [str(guide.resolve())])
+
+    def test_local_directory_can_be_opened(self):
+        with TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            opened: list[str] = []
+
+            result = open_local_path(folder, launcher=opened.append)
+
+            self.assertEqual(result, folder.resolve())
+            self.assertEqual(opened, [str(folder.resolve())])
 
 
 if __name__ == "__main__":

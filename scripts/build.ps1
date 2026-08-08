@@ -20,6 +20,15 @@ foreach ($controllerPath in $ControllerPaths) {
         throw "LiveProfessor controller file missing: $controllerPath"
     }
 }
+$GuidePaths = @(
+    (Join-Path $ProjectRoot "docs\NOTICE_EC4_BRIDGE_FR.pdf"),
+    (Join-Path $ProjectRoot "docs\en\EC4_BRIDGE_USER_GUIDE_EN.pdf")
+)
+foreach ($guidePath in $GuidePaths) {
+    if (-not (Test-Path -LiteralPath $guidePath)) {
+        throw "PDF user guide missing: $guidePath. Run scripts\build-pdf-guides.py first."
+    }
+}
 
 Push-Location $ProjectRoot
 try {
@@ -36,6 +45,8 @@ try {
         --add-data "$IconPath;ec4lpbridge\\assets" `
         --add-data "$($ControllerPaths[0]);." `
         --add-data "$($ControllerPaths[1]);." `
+        --add-data "$($GuidePaths[0]);docs" `
+        --add-data "$($GuidePaths[1]);docs\en" `
         --name "EC4-LiveProfessor-Bridge" `
         --paths "src" `
         --collect-submodules "mido.backends" `

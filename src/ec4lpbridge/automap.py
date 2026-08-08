@@ -18,7 +18,10 @@ from .value_tree import (
 
 ROTARY_ADDRESS = re.compile(r"^/Companion/Rotary(\d+)$", re.IGNORECASE)
 PARAMETER_PROPERTY = re.compile(r"^P(\d+)$")
-PLUGIN_TYPE_SUFFIX = re.compile(r"-([0-9a-fA-F]{8})$")
+# JUCE writes hexadecimal hashes without left-padding. Most VST3 identifiers end
+# in eight digits, but valid values such as CEDAR StageVox's 0x050070f0 are
+# serialized by LiveProfessor as ``50070f0``.
+PLUGIN_TYPE_SUFFIX = re.compile(r"-([0-9a-fA-F]{1,8})$")
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,6 +55,7 @@ class ProjectInventory:
     path: Path
     plugins: tuple[ProjectPlugin, ...]
     controllers: tuple[ProjectController, ...]
+    skipped_plugins: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -142,9 +146,12 @@ def _button_count(controller: ValueTree) -> int:
     )
 
 
-def _project_plugins(tree: ValueTree) -> list[tuple[ProjectPlugin, ValueTree]]:
+def _project_plugins(
+    tree: ValueTree,
+) -> tuple[list[tuple[ProjectPlugin, ValueTree]], list[str]]:
     chains = _child(tree, "Chains")
     result: list[tuple[ProjectPlugin, ValueTree]] = []
+    skipped: list[str] = []
     for chain in chains.children:
         chain_plugins = next(
             (child for child in chain.children if child.type_name == "ChainPlugins"),
@@ -160,15 +167,21 @@ def _project_plugins(tree: ValueTree) -> list[tuple[ProjectPlugin, ValueTree]]:
             parameter_count = _parameter_count(plugin_node)
             if parameter_count <= 0:
                 continue
+            plugin_name = str(plugin_node.get("pluginTypeName", "Plugin"))
+            try:
+                map_type_id = plugin_map_type_id(plugin_type_id)
+            except AutoMapError as exc:
+                skipped.append(f"{plugin_name} ({plugin_type_id}) : {exc}")
+                continue
             plugin = ProjectPlugin(
-                name=str(plugin_node.get("pluginTypeName", "Plugin")),
+                name=plugin_name,
                 plugin_type_id=plugin_type_id,
                 plugin_uid=int(plugin_uid),
                 parameter_count=parameter_count,
-                map_type_id=plugin_map_type_id(plugin_type_id),
+                map_type_id=map_type_id,
             )
             result.append((plugin, plugin_node))
-    return result
+    return result, skipped
 
 
 def _project_controllers(tree: ValueTree) -> list[tuple[ProjectController, ValueTree]]:
@@ -265,16 +278,21 @@ def inspect_project(
 ) -> ProjectInventory:
     project_path = Path(path).expanduser().resolve()
     tree = _load_project(project_path)
-    plugins = tuple(item[0] for item in _project_plugins(tree))
+    plugin_pairs, skipped_plugins = _project_plugins(tree)
+    plugins = tuple(item[0] for item in plugin_pairs)
     controller_pairs = _project_controllers(tree)
     if not controller_pairs and controller_template is not None:
         controller_pairs = [_controller_from_template(tree, controller_template)]
     controllers = tuple(item[0] for item in controller_pairs)
     if not plugins:
-        raise AutoMapError("aucun plugin avec paramètres automatisables n'a été trouvé")
+        details = f"\n\nPlugins ignorés :\n" + "\n".join(skipped_plugins) if skipped_plugins else ""
+        raise AutoMapError(
+            "aucun plugin pris en charge avec paramètres automatisables n'a été trouvé"
+            + details
+        )
     if not controllers:
         raise AutoMapError("aucun contrôleur Companion/OSC avec rotatifs n'a été trouvé")
-    return ProjectInventory(project_path, plugins, controllers)
+    return ProjectInventory(project_path, plugins, controllers, tuple(skipped_plugins))
 
 
 def _assignment(
@@ -542,7 +560,7 @@ def create_automapped_project(
         raise AutoMapError("l'auto-mapping crée une copie : choisissez un autre nom de fichier")
     tree = _load_project(source_path)
 
-    plugins = _project_plugins(tree)
+    plugins, _skipped_plugins = _project_plugins(tree)
     if plugin_uid is None:
         selected_plugins = list(plugins)
     else:

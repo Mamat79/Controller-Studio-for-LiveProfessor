@@ -1,0 +1,52 @@
+name: Build macOS packages
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: macOS ${{ matrix.package_arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            python_arch: arm64
+            package_arch: arm64
+          - runner: macos-15-intel
+            python_arch: x64
+            package_arch: x86_64
+    runs-on: ${{ matrix.runner }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: ${{ matrix.python_arch }}
+          cache: pip
+
+      - name: Install build dependencies
+        run: python -m pip install --upgrade pip && python -m pip install -r requirements-build.txt pillow
+
+      - name: Build and test
+        run: bash scripts/build-macos.sh
+
+      - name: Verify architecture
+        run: |
+          APP="output/macos/${{ matrix.package_arch }}/EC4-LiveProfessor-Bridge.app/Contents/MacOS/EC4-LiveProfessor-Bridge"
+          file "$APP"
+          file "$APP" | grep -q "${{ matrix.package_arch }}"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: EC4-LiveProfessor-Bridge-v2026.1-macos-${{ matrix.package_arch }}
+          path: output/distribution/EC4-LiveProfessor-Bridge-v2026.1-macos-${{ matrix.package_arch }}.zip
+          if-no-files-found: error
