@@ -103,6 +103,9 @@ class EC4LiveProfessorBridge:
         self._midi_learn_callback: MidiLearnCallback | None = None
         self._received_companion_names = False
         self._overlay_parameter_index: int | None = None
+        self._active_viewset_index: int | None = None
+        self._viewset_count: int | None = None
+        self._startup_banner_shown: bool = False
 
     @property
     def bank_count(self) -> int:
@@ -215,6 +218,7 @@ class EC4LiveProfessorBridge:
                     )
                     self.status = "Connecte"
                     self._log(f"MIDI connecte: entree={input_name!r}, sortie={output_name!r}")
+                    self.show_startup_banner()
                     if self.config.setup_request_on_connect:
                         self._midi.send_sysex(SETUP_REQUEST)
                         self._log("Requete du setup/groupe EC4 envoyee")
@@ -251,6 +255,7 @@ class EC4LiveProfessorBridge:
             return
         self._send_osc("/init")
         self._send_osc("/refresh")
+        self._send_osc("/ViewSets/Refresh")
         if log_request:
             self._log("Demande des noms et valeurs Companion envoyee")
 
@@ -553,14 +558,14 @@ class EC4LiveProfessorBridge:
                 refresh_companion=True,
             )
         elif channel == MIDI_CHANNEL_13 and note == 112:
-            self._command("/Command/PluginWindows/ShowHideselectedplugin", "Afficher/masquer plugin")
+            self._command(self.config.show_hide_command, "Afficher/masquer plugin")
         elif channel == MIDI_CHANNEL_13 and note == 113:
             self._command(
-                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+                self.config.enable_processing_command,
                 "Traitement plugin active/desactive",
             )
         elif channel == MIDI_CHANNEL_13 and note == 116:
-            self._command("/Command/PluginWindows/ShowHideselectedplugin", "Afficher/masquer plugin")
+            self._command(self.config.show_hide_command, "Afficher/masquer plugin")
         elif channel == MIDI_CHANNEL_13 and note == 117:
             self._show_overlay(["Verrouillage plugin", "non expose par", "l'API LiveProfessor"])
         elif channel == MIDI_CHANNEL_13 and note == 118:
@@ -584,48 +589,109 @@ class EC4LiveProfessorBridge:
         if global_index is not None:
             self._show_parameter(global_index)
 
+    def _navigate_viewset(self, step: int) -> None:
+        if step == 0:
+            return
+        if self._active_viewset_index is None:
+            self._send_osc("/ViewSets/Refresh")
+            self._show_overlay(["View Set", "synchronisation...", "en cours"])
+            return
+        next_index = self._active_viewset_index + step
+        if self._viewset_count is not None:
+            if self._viewset_count <= 0:
+                self._show_overlay(["View Set", "aucun", "View Set"])
+                return
+            next_index %= self._viewset_count
+        elif next_index < 0:
+            self._show_overlay(["View Set", "premier", "déja atteint"])
+            return
+        if self._viewset_count is not None and next_index < 0:
+            next_index %= self._viewset_count
+        self._active_viewset_index = next_index
+        self._send_osc("/ViewSets/Recall", next_index)
+        self._show_overlay(
+            ["View Set", f"{next_index + 1}"]
+        )
+        self._schedule_companion_refresh()
+
     def _handle_sysex_button(self, kind: str, index: int | None) -> None:
         if kind != "shift_push" or index is None:
             return
-        commands = {
-            5: ("/Command/PluginWindows/SelectPreviousChain", "Chaine precedente", True),
-            6: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent", True),
-            7: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant", True),
-            9: ("/Command/PluginWindows/SelectNextChain", "Chaine suivante", True),
-            10: ("/Command/PluginWindows/SelectPreviousPlugin", "Plugin precedent", True),
-            11: ("/Command/PluginWindows/SelectNextPlugin", "Plugin suivant", True),
-            12: (
-                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
-                "Traitement plugin active/desactive",
-            ),
-            13: (
-                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-                "Snapshot precedent",
-            ),
-            14: (
-                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
-                "Snapshot suivant",
-            ),
-            15: ("/Command/PluginWindows/ShowHideselectedplugin", "Afficher/masquer plugin"),
-        }
         if index == 0:
-            self.set_bank(0)
-        elif index == 1:
             self.change_bank(-1)
-        elif index == 2:
+            return
+        if index == 1:
             self.change_bank(1)
-        elif index == 3:
-            self.set_bank(self.bank_count - 1)
-        elif index in commands:
-            command = commands[index]
-            if len(command) == 3:
-                address, label, refresh = command
-            else:
-                address, label = command
-                refresh = False
-            self._command(address, label, refresh_companion=refresh)
-        elif index in {4, 8}:
-            self._show_overlay(["Navigation", "Premier/dernier", "non expose par", "l'API LiveProfessor"])
+            return
+        if index == 2:
+            self._navigate_viewset(-1)
+            return
+        if index == 3:
+            self._navigate_viewset(1)
+            return
+        if index == 4:
+            self._command(self.config.show_hide_command, "Afficher/masquer plugin")
+            return
+        if index == 5:
+            self._command(
+                "/Command/PluginWindows/SelectPreviousChain",
+                "Chaine precedente",
+                refresh_companion=True,
+            )
+            return
+        if index == 6:
+            self._command(
+                "/Command/PluginWindows/SelectPreviousPlugin",
+                "Plugin precedent",
+                refresh_companion=True,
+            )
+            return
+        if index == 7:
+            self._command(
+                "/Command/PluginWindows/SelectNextPlugin",
+                "Plugin suivant",
+                refresh_companion=True,
+            )
+            return
+        if index == 8:
+            self._command(
+                self.config.enable_processing_command,
+                "Traitement plugin active/desactive",
+            )
+            return
+        if index == 9:
+            self._command(
+                "/Command/PluginWindows/SelectNextChain",
+                "Chaine suivante",
+                refresh_companion=True,
+            )
+            return
+        if index == 10:
+            self._command(
+                "/Command/PluginWindows/SelectPreviousPlugin",
+                "Plugin precedent",
+                refresh_companion=True,
+            )
+            return
+        if index == 11:
+            self._command(
+                "/Command/PluginWindows/SelectNextPlugin",
+                "Plugin suivant",
+                refresh_companion=True,
+            )
+            return
+        if index == 12:
+            self._command(self.config.cue_previous_command, "Cue precedent")
+            return
+        if index == 13:
+            self._command(self.config.cue_next_command, "Cue suivant")
+            return
+        if index == 14:
+            self._command(self.config.snapshot_previous_command, "Snapshot precedent")
+            return
+        if index == 15:
+            self._command(self.config.snapshot_next_command, "Snapshot suivant")
+            return
 
     def _command(
         self,
@@ -634,10 +700,141 @@ class EC4LiveProfessorBridge:
         *,
         refresh_companion: bool = False,
     ) -> None:
-        self._send_osc(address, 1.0)
+        command_address = self._command_fallbacks(address)[0]
+        if command_address in self._COMMAND_ADDRESSES_WITHOUT_VALUE:
+            self._send_osc(command_address)
+        else:
+            self._send_osc(command_address, 1.0)
         self._show_overlay([label, self.profile.plugin_label, f"Banque {self.active_bank + 1}/{self.bank_count}"])
         if refresh_companion:
             self._schedule_companion_refresh()
+
+    @staticmethod
+    def _command_fallbacks(address: str) -> tuple[str, ...]:
+        if address == "/Command/PluginWindows/ShowHideselectedplugin":
+            return (
+                "/Command/PluginWindows/ShowHideselectedplugin",
+                "/Command/PluginWindows/ShowHideSelectedPlugin",
+                "/Command/PluginWindows/TogglePluginWindows",
+            )
+        if address == "/Command/SelectedPlugin/ShowHideSelectedPlugin":
+            return (
+                "/Command/SelectedPlugin/ShowHideSelectedPlugin",
+                "/Command/PluginWindows/ShowHideSelectedPlugin",
+                "/Command/PluginWindows/TogglePluginWindows",
+            )
+        if address == "/Command/SelectedPlugin/EnableProcessingonselectedplugin":
+            return (
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            )
+        if address == "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin":
+            return (
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            )
+        if address == "/Command/SelectedPlugin/EnableBypassonselectedplugin":
+            return (
+                "/Command/SelectedPlugin/EnableBypassonselectedplugin",
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+                "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            )
+        if address == "/Command/CueLists/FirePreviousCue":
+            return (
+                "/Command/CueLists/FirePreviousCue",
+                "/Command/CueList/RecallPreviousCue",
+                "/Command/CueList/FirePreviousCue",
+            )
+        if address == "/Command/CueLists/FireNextCue":
+            return (
+                "/Command/CueLists/FireNextCue",
+                "/Command/CueList/RecallNextCue",
+                "/Command/CueList/FireNextCue",
+            )
+        if address == "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot":
+            return (
+                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+                "/Command/GlobalSnapshots/RecallPrevious",
+                "/Command/Snapshots/RecallPrevious",
+            )
+        if address == "/Command/GlobalSnapshots/RecallNextGlobalSnapshot":
+            return (
+                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
+                "/Command/GlobalSnapshots/RecallNext",
+                "/Command/Snapshots/RecallNext",
+            )
+        return (address,)
+
+    @staticmethod
+    def _coerce_viewset_count_argument(value: Any) -> int | None:
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, int):
+            return value
+        if isinstance(value, float):
+            if math.isnan(value) or math.isinf(value):
+                return None
+            return int(value)
+        if isinstance(value, (bytes, bytearray)):
+            try:
+                value = bytes(value).decode("utf-8", errors="replace")
+            except Exception:
+                return None
+        if not isinstance(value, str):
+            return None
+        text = value.strip()
+        if not text:
+            return None
+        if "," in text or ";" in text or "|" in text or "\n" in text or "\r" in text:
+            tokens = [chunk.strip() for chunk in re.split(r"[;,|\n\r]+", text) if chunk.strip()]
+            if len(tokens) > 1:
+                return len(tokens)
+        try:
+            return int(float(text))
+        except ValueError:
+            return None
+
+    _COMMAND_ADDRESSES_WITHOUT_VALUE = frozenset(
+        {
+            "/Command/PluginWindows/ShowHideselectedplugin",
+            "/Command/PluginWindows/ShowHideSelectedPlugin",
+            "/Command/PluginWindows/TogglePluginWindows",
+            "/Command/SelectedPlugin/ShowHideSelectedPlugin",
+            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            "/Command/SelectedPlugin/EnableBypassonselectedplugin",
+            "/Command/CueList/RecallPreviousCue",
+            "/Command/CueLists/FirePreviousCue",
+            "/Command/CueList/RecallNextCue",
+            "/Command/CueLists/FireNextCue",
+            "/Command/CueList/FirePreviousCue",
+            "/Command/CueList/FireNextCue",
+            "/Command/CueList/StepUp",
+            "/Command/CueLists/StepUp",
+            "/Command/CueList/StepDown",
+            "/Command/CueLists/StepDown",
+            "/Command/CueList/GoToTop",
+            "/Command/CueLists/GoToTop",
+            "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+            "/Command/GlobalSnapshots/RecallPrevious",
+            "/Command/Snapshots/RecallPrevious",
+            "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
+            "/Command/GlobalSnapshots/RecallNext",
+            "/Command/Snapshots/RecallNext",
+            "/Command/PluginWindows/SelectNextChain",
+            "/Command/PluginWindows/SelectPreviousChain",
+            "/Command/PluginWindows/SelectNextPlugin",
+            "/Command/PluginWindows/SelectPreviousPlugin",
+            "/Command/SelectedPlugin/CreateNewPluginSnapshot",
+            "/Command/Transport&Tempo/TempoTap",
+        }
+    )
+
+    @staticmethod
+    def _coerce_viewset_feedback_index(value: Any) -> int | None:
+        return EC4LiveProfessorBridge._coerce_viewset_count_argument(value)
 
     def change_bank(self, delta: int) -> None:
         self.set_bank(self.active_bank + delta)
@@ -762,6 +959,32 @@ class EC4LiveProfessorBridge:
             ]
         )
 
+    def show_startup_banner(self) -> None:
+        if self._startup_banner_shown:
+            return
+        if self.config.display_enabled is False:
+            return
+        if not self._midi.is_open:
+            return
+        self._startup_banner_shown = True
+        status_line = "Connection OK" if self.config.ui_language == "en" else "Connexion OK"
+        self._overlay_parameter_index = None
+        if self._overlay_timer:
+            self._overlay_timer.cancel()
+        try:
+            self._midi.send_sysex(
+                total_display_message(
+                    [status_line, "SiLeMcI/O", "By Mamat", "----[]--"],
+                    alignments=["center", "center", "right", "right"],
+                )
+            )
+        except MidiBackendError as exc:
+            self._log(str(exc), logging.WARNING)
+            return
+        self._overlay_timer = threading.Timer(2.0, lambda: self._hide_overlay(force=True))
+        self._overlay_timer.daemon = True
+        self._overlay_timer.start()
+
     def _show_overlay(
         self,
         lines: list[str],
@@ -784,10 +1007,10 @@ class EC4LiveProfessorBridge:
         self._overlay_timer.daemon = True
         self._overlay_timer.start()
 
-    def _hide_overlay(self) -> None:
+    def _hide_overlay(self, force: bool = False) -> None:
         self._overlay_timer = None
         self._overlay_parameter_index = None
-        if not self._display_allowed():
+        if not force and not self._display_allowed():
             return
         try:
             if self.config.persistent_parameter_display:
@@ -841,6 +1064,21 @@ class EC4LiveProfessorBridge:
                 self.display_values[number - 1] = self._normalize_companion_value(args[1])
                 if self._overlay_parameter_index == number - 1:
                     self._schedule_parameter_overlay(number - 1)
+            return
+        if address.casefold().endswith("/viewsets/recall") and args:
+            value = self._coerce_viewset_feedback_index(args[0])
+            if value is not None:
+                self._active_viewset_index = value
+            return
+        if address.casefold().endswith("/viewsets/update"):
+            if not args:
+                return
+            count = self._coerce_viewset_count_argument(args[0] if len(args) == 1 else len(args))
+            if count is None:
+                return
+            if count <= 0:
+                return
+            self._viewset_count = count
             return
         if address.casefold().endswith("/touchandturnchange") and args:
             self._show_overlay(["Touch & Turn", str(args[0]), self.profile.plugin_label])

@@ -104,8 +104,22 @@ def parameter_grid_message(labels: list[str]) -> bytes:
     return header + _nibble_encoded(content) + bytes((0x4E, 0x22, 0x14, 0xF7))
 
 
-def total_display_message(lines: list[str], offset: int = 0) -> bytes:
-    rows = [_single_line(line)[:DISPLAY_ROW_SIZE].center(DISPLAY_ROW_SIZE) for line in lines[:DISPLAY_ROWS]]
+def total_display_message(
+    lines: list[str], offset: int = 0, alignments: list[str] | None = None
+) -> bytes:
+    if alignments is None:
+        alignments = ["center"] * DISPLAY_ROWS
+    alignments = [str(a or "center").lower() for a in alignments]
+    alignments.extend(["center"] * (DISPLAY_ROWS - len(alignments)))
+    rows = []
+    for line, align in zip(lines[:DISPLAY_ROWS], alignments):
+        formatted = _single_line(line)[:DISPLAY_ROW_SIZE]
+        if align == "left":
+            rows.append(formatted.ljust(DISPLAY_ROW_SIZE))
+        elif align == "right":
+            rows.append(formatted.rjust(DISPLAY_ROW_SIZE))
+        else:
+            rows.append(formatted.center(DISPLAY_ROW_SIZE))
     rows.extend([" " * DISPLAY_ROW_SIZE] * (DISPLAY_ROWS - len(rows)))
     content = translate_text("".join(rows))
     header = EC4_PREFIX + bytes(

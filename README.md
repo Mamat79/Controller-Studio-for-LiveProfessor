@@ -10,6 +10,28 @@ La dernière version Windows est disponible dans les [releases GitHub](https://g
 
 L'exécutable est autonome : copiez `EC4-LiveProfessor-Bridge.exe` sur le PC, branchez l'EC4 et lancez-le. Python n'est pas requis et aucun droit administrateur n'est nécessaire.
 
+### Installer `.exe` (recommandé)
+
+L'installateur Windows peut être généré avec :
+
+```powershell
+pwsh .\scripts\build-installer.ps1
+```
+
+Le fichier généré sera :
+
+`output\installer\windows\EC4-LiveProfessor-Bridge-Setup-vX.Y.Z.exe`
+
+Ce fichier propose un vrai assistant d'installation (choix du répertoire) et déploie le fichier `Ec4.ctrl2` présent dans le dépôt.
+
+Si Inno Setup n'est pas installé, lance la commande suivante (avec droits utilisateur suffisants) :
+
+```powershell
+pwsh .\scripts\build-installer.ps1 -AutoInstallInnoSetup
+```
+
+Si l'installation automatique échoue, installe Inno Setup 6 une fois, puis relance la commande sans `-AutoInstallInnoSetup`.
+
 ## Prérequis
 
 - Windows 10 ou 11 x64 ;
@@ -37,15 +59,16 @@ L'exécutable est autonome : copiez `EC4-LiveProfessor-Bridge.exe` sur le PC, br
 | Geste | Action |
 |---|---|
 | Tourner les encodeurs 1–16 | Modifier les paramètres de la banque active |
-| Shift + push 1 / 4 | Première / dernière banque |
-| Shift + push 2 / 3 | Banque précédente / suivante |
+| Shift + push 1 / 2 | Banque précédente / suivante |
+| Shift + push 3 / 4 | Viewset précédent / suivant |
+| Shift + push 5 | Afficher / masquer le plugin |
 | Shift + push 6 | Chaîne précédente |
 | Shift + push 7 / 8 | Plugin précédent / suivant |
+| Shift + push 9 | Activer / désactiver le plugin |
 | Shift + push 10 | Chaîne suivante |
 | Shift + push 11 / 12 | Plugin précédent / suivant |
-| Shift + push 14 / 15 | Snapshot global précédent / suivant |
-| Shift + push 13 | Activer / désactiver le traitement du plugin |
-| Shift + push 16 | Afficher / masquer le plugin sélectionné |
+| Shift + push 13 / 14 | Cue précédent / suivant |
+| Shift + push 15 / 16 | Snapshot global précédent / suivant |
 | Push simple 16 | Tap Tempo |
 
 Install simple sur un autre PC :
@@ -54,6 +77,30 @@ Install simple sur un autre PC :
 2. Décompresser dans `C:\\Apps\\EC4-LiveProfessor-Bridge`.
 3. Lancer `install-ec4-liveprofessor-bridge.bat` (ou `install-ec4-liveprofessor-bridge.ps1`) pour copier l'application, créer le raccourci et préparer `config.json`.
 4. Lancer l'application depuis le raccourci.
+
+## Fichier `Ec4.ctrl2` (concept et personnalisation)
+
+`Ec4.ctrl2` est le contrôleur Companion exporté depuis LiveProfessor utilisé par le pont pour mapper les 16 boutons et 16 rotatifs de l'EC4.
+
+Concrètement, c’est le format attendu par LiveProfessor pour :
+
+- les notes/inputs MIDI des boutons (`GenericButton1` à `GenericButton16`) ;
+- les messages OSC `/Companion/RotaryN` avec les tags `Rotary1` à `Rotary16`.
+
+Le dépôt propose une version prête à l’emploi :
+
+- [Ec4.ctrl2](./Ec4.ctrl2)
+
+Pour le personnaliser :
+
+1. Exporter ton contrôleur Companion (`.ctrl2`) depuis LiveProfessor ;
+2. (Recommandé) corriger le format avec :
+
+```powershell
+python .\scripts\repair_ctrl2.py "C:\chemin\mon.ctrl2" .\Ec4.ctrl2
+```
+
+3. Re-générer l'installateur pour inclure cette version.
 
 ## Démarrage rapide
 
@@ -81,6 +128,7 @@ python -m venv .venv
 $env:PYTHONPATH = "src"
 .\.venv\Scripts\python.exe -m unittest discover -s tests -v
 .\scripts\build.ps1
+.\scripts\build-installer.ps1 -NoBuild
 ```
 
 La version 0.4.1 trace chaque mouvement EC4 jusqu'au `RotaryN` envoyé et confirme le retour LiveProfessor. Elle passe les tests unitaires ainsi que les diagnostics autonomes `--self-test` et `--list-midi`.

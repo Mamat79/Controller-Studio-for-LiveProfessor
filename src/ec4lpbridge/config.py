@@ -46,6 +46,12 @@ class BridgeConfig:
     setup_request_on_connect: bool = True
     plugin_label: str = "LiveProfessor"
     profile_file: str = ""
+    show_hide_command: str = "/Command/PluginWindows/ShowHideSelectedPlugin"
+    enable_processing_command: str = "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin"
+    cue_previous_command: str = "/Command/CueLists/FirePreviousCue"
+    cue_next_command: str = "/Command/CueLists/FireNextCue"
+    snapshot_previous_command: str = "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot"
+    snapshot_next_command: str = "/Command/GlobalSnapshots/RecallNextGlobalSnapshot"
     log_level: str = "INFO"
     extra: dict[str, Any] = field(default_factory=dict)
 
@@ -130,8 +136,50 @@ def load_config(path: Path | None = None) -> BridgeConfig:
         config.validate()
         return config
     raw = json.loads(path.read_text(encoding="utf-8-sig"))
+    if not isinstance(raw, dict):
+        raise TypeError("le fichier de configuration doit contenir un objet JSON de type dictionnaire")
+
+    defaults = BridgeConfig()
+    normalized = dict(raw)
+
+    legacy_migrations = {
+        "show_hide_command": (
+            "/Command/PluginWindows/ShowHideselectedplugin",
+            "/Command/PluginWindows/ShowHideSelectedPlugin",
+        ),
+        "enable_processing_command": (
+            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+        ),
+        "cue_previous_command": (
+            "/Command/CueList/RecallPreviousCue",
+            "/Command/CueLists/FirePreviousCue",
+        ),
+        "cue_next_command": (
+            "/Command/CueList/RecallNextCue",
+            "/Command/CueLists/FireNextCue",
+        ),
+    }
+    for key, (old_value, new_value) in legacy_migrations.items():
+        if (
+            key in normalized
+            and isinstance(normalized[key], str)
+            and normalized[key].strip() == old_value
+        ):
+            normalized[key] = new_value
+
+    # Keep legacy installations working: keep current keys even if empty/invalidly
+    # typed and fill missing values with the current defaults.
+    normalized.setdefault("show_hide_command", defaults.show_hide_command)
+    normalized.setdefault("enable_processing_command", defaults.enable_processing_command)
+    normalized.setdefault(
+        "snapshot_previous_command",
+        defaults.snapshot_previous_command,
+    )
+    normalized.setdefault("snapshot_next_command", defaults.snapshot_next_command)
+
     known = set(BridgeConfig.__dataclass_fields__)
-    kwargs = {key: value for key, value in raw.items() if key in known}
+    kwargs = {key: value for key, value in normalized.items() if key in known}
     config = BridgeConfig(**kwargs)
     config.extra.update({key: value for key, value in raw.items() if key not in known})
     config.validate()

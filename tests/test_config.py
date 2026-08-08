@@ -64,6 +64,47 @@ class ConfigTests(unittest.TestCase):
             save_config(config, path)
             self.assertEqual(load_config(path).extra["future_option"], 42)
 
+    def test_legacy_cue_commands_are_migrated(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "config.json"
+            path.write_text(
+                "{"
+                "\"mode\":\"companion\","
+                "\"cue_previous_command\":\"/Command/CueList/RecallPreviousCue\","
+                "\"cue_next_command\":\"/Command/CueList/RecallNextCue\""
+                "}",
+                encoding="utf-8",
+            )
+            config = load_config(path)
+            self.assertEqual(
+                (
+                    config.cue_previous_command,
+                    config.cue_next_command,
+                ),
+                (
+                    "/Command/CueLists/FirePreviousCue",
+                    "/Command/CueLists/FireNextCue",
+                ),
+            )
+
+    def test_legacy_show_hide_and_enable_paths_are_migrated(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "config.json"
+            path.write_text(
+                "{"
+                "\"mode\":\"companion\","
+                "\"show_hide_command\":\"/Command/PluginWindows/ShowHideselectedplugin\","
+                "\"enable_processing_command\":\"/Command/SelectedPlugin/EnableProcessingonselectedplugin\""
+                "}",
+                encoding="utf-8",
+            )
+            config = load_config(path)
+            self.assertEqual(config.show_hide_command, "/Command/PluginWindows/ShowHideSelectedPlugin")
+            self.assertEqual(
+                config.enable_processing_command,
+                "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -27,6 +27,12 @@
   "encoder_mappings": {},
   "setup_request_on_connect": true,
   "plugin_label": "LiveProfessor",
+  "show_hide_command": "/Command/PluginWindows/ShowHideSelectedPlugin",
+  "enable_processing_command": "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+  "cue_previous_command": "/Command/CueLists/FirePreviousCue",
+  "cue_next_command": "/Command/CueLists/FireNextCue",
+  "snapshot_previous_command": "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+  "snapshot_next_command": "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
   "profile_file": "",
   "log_level": "INFO"
 }

@@ -33,24 +33,24 @@ Le script crée 16 boutons SysEx correspondant aux poussoirs d'encodeurs utilis�
 
 | Index interne | Encodeur | Fonction Ableton | Adaptation du prototype |
 |---:|---:|---|---|
-| 0 | 1 | Première piste | Première banque |
-| 1 | 2 | Piste précédente | Banque précédente |
-| 2 | 3 | Piste suivante | Banque suivante |
-| 3 | 4 | Dernière piste | Dernière banque |
-| 4 | 5 | Premier device/plugin | Indisponible |
-| 5 | 6 | Device/plugin précédent | Plugin précédent |
-| 6 | 7 | Device/plugin suivant | Plugin suivant |
-| 7 | 8 | Dernier device/plugin | Indisponible |
-| 8 | 9 | Première banque | Indisponible : pas de commande première chaîne |
-| 9 | 10 | Banque précédente | Chaîne précédente |
-| 10 | 11 | Banque suivante | Chaîne suivante |
-| 11 | 12 | Dernière banque | Indisponible : pas de commande dernière chaîne |
-| 12 | 13 | Device actif/inactif | Traitement plugin actif/inactif |
-| 13 | 14 | Verrouiller le device | Snapshot global précédent |
-| 14 | 15 | Afficher/masquer le device | Snapshot global suivant |
-| 15 | 16 | Afficher/masquer la vue rack | Afficher/masquer le plugin |
+| 0 | 1 | Banque précédente | Banque précédente |
+| 1 | 2 | Banque suivante | Banque suivante |
+| 2 | 3 | ViewSet précédent | ViewSet précédent |
+| 3 | 4 | ViewSet suivant | ViewSet suivant |
+| 4 | 5 | Afficher/masquer le plugin sélectionné | Afficher/masquer le plugin |
+| 5 | 6 | Chaîne précédente | Chaîne précédente |
+| 6 | 7 | Plugin précédent | Plugin précédent |
+| 7 | 8 | Plugin suivant | Plugin suivant |
+| 8 | 9 | Traitement plugin actif/inactif | Activer/désactiver le traitement du plugin |
+| 9 | 10 | Chaîne suivante | Chaîne suivante |
+| 10 | 11 | Plugin précédent | Plugin précédent |
+| 11 | 12 | Plugin suivant | Plugin suivant |
+| 12 | 13 | Cue précédent | Cue précédent |
+| 13 | 14 | Cue suivant | Cue suivant |
+| 14 | 15 | Snapshot global précédent | Snapshot global précédent |
+| 15 | 16 | Snapshot global suivant | Snapshot global suivant |
 
-Le **push simple de l'encodeur 16** déclenche le Tap Tempo. Les push simples 1 à 15 gardent l'affichage du détail du paramètre. Les actions de banque et de snapshot ci-dessus exigent bien Shift+push.
+Le **push simple de l'encodeur 16** déclenche le Tap Tempo. Les push simples 1 à 15 gardent l'affichage du détail du paramètre. Les actions de banque, cue et snapshot ci-dessus exigent bien Shift+push.
 
 ## Contrôle de 16 pistes — cartographié dans Ableton, non transmis par le prototype
 

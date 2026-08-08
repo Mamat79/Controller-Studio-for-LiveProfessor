@@ -1,5 +1,6 @@
 param(
     [string]$InstallPath = "$env:LOCALAPPDATA\Programs\EC4LiveProfessorBridge",
+    [string]$ControllerFile = "",
     [bool]$CreateDesktopShortcut = $true,
     [bool]$CreateStartMenuShortcut = $true,
     [bool]$OverwriteConfig = $false
@@ -62,7 +63,7 @@ $sourceConfig = Join-Path $sourceRoot "config.json"
 $portableExample = Join-Path $sourceRoot "config.example.json"
 $targetConfig = Join-Path $installDir "config.json"
 
-if (Test-Path -LiteralPath $sourceConfig -PathType Leaf -and (-not (Test-Path -LiteralPath $targetConfig) -or $OverwriteConfig)) {
+if ((Test-Path -LiteralPath $sourceConfig -PathType Leaf) -and ((-not (Test-Path -LiteralPath $targetConfig)) -or $OverwriteConfig)) {
     Copy-Item -LiteralPath $sourceConfig -Destination $targetConfig -Force
 }
 elseif (-not (Test-Path -LiteralPath $targetConfig) -and (Test-Path -LiteralPath $portableExample)) {
@@ -74,6 +75,20 @@ foreach ($folder in @("docs", "profiles")) {
     $targetFolder = Join-Path $installDir $folder
     if (Test-Path -LiteralPath $sourceFolder -PathType Container) {
         Copy-Item -LiteralPath $sourceFolder -Destination $targetFolder -Recurse -Force
+    }
+}
+
+if ($ControllerFile) {
+    $resolvedCtrl2 = Resolve-Path -LiteralPath $ControllerFile -ErrorAction SilentlyContinue
+    if (-not $resolvedCtrl2) {
+        throw "Fichier Ec4.ctrl2 introuvable: $ControllerFile"
+    }
+    Copy-Item -LiteralPath $resolvedCtrl2.Path -Destination $installDir -Force
+}
+else {
+    $sourceCtrl2 = Join-Path $sourceRoot "Ec4.ctrl2"
+    if (Test-Path -LiteralPath $sourceCtrl2) {
+        Copy-Item -LiteralPath $sourceCtrl2 -Destination $installDir -Force
     }
 }
 

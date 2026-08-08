@@ -182,18 +182,16 @@ UI_TEXT = {
         "diagnostic_title": "Diagnostic",
         "shortcuts_title": "Raccourcis EC4",
         "shortcuts_text": (
-            "Shift + push 1 : premiere banque\n"
-            "Shift + push 2 / 3 : banque precedente / suivante\n"
-            "Shift + push 4 : derniere banque\n\n"
+            "Shift + push 1 / 2 : banque precedente / suivante\n"
+            "Shift + push 3 / 4 : Viewset precedent / suivant\n\n"
+            "Shift + push 5 : afficher / masquer le plugin\n"
+            "Shift + push 9 : activer / desactiver le plugin\n"
             "Shift + push 6 : chaine precedente\n"
-            "Shift + push 7 : plugin precedent\n"
-            "Shift + push 8 : plugin suivant\n"
-            "Shift + push 10 : chaine suivante\n\n"
-            "Shift + push 11 : plugin precedent\n"
-            "Shift + push 12 : plugin suivant\n\n"
-            "Shift + push 14 / 15 : snapshot precedent / suivant\n"
-            "Shift + push 13 : activer / desactiver le plugin\n"
-            "Shift + push 16 : afficher / masquer le plugin\n"
+            "Shift + push 7 / 8 : plugin precedent / suivant\n"
+            "Shift + push 10 : chaine suivante\n"
+            "Shift + push 11 / 12 : plugin precedent / suivant\n"
+            "Shift + push 13 / 14 : cue precedent / suivant\n"
+            "Shift + push 15 / 16 : snapshot precedent / suivant\n"
             "Push 16 seul : Tap Tempo"
         ),
         "learn_default_label": "Mapping Ableton par defaut",
@@ -275,18 +273,16 @@ UI_TEXT = {
         "diagnostic_title": "Diagnostics",
         "shortcuts_title": "EC4 shortcuts",
         "shortcuts_text": (
-            "Shift + push 1: first bank\n"
-            "Shift + push 2 / 3: previous / next bank\n"
-            "Shift + push 4: last bank\n\n"
+            "Shift + push 1 / 2: previous / next bank\n"
+            "Shift + push 3 / 4: previous / next viewset\n\n"
+            "Shift + push 5: show / hide selected plugin\n"
+            "Shift + push 9: enable / disable selected plugin\n"
             "Shift + push 6: previous chain\n"
-            "Shift + push 7: previous plugin\n"
-            "Shift + push 8: next plugin\n"
-            "Shift + push 10: next chain\n\n"
-            "Shift + push 11: previous plugin\n"
-            "Shift + push 12: next plugin\n\n"
-            "Shift + push 14 / 15: previous / next snapshot\n"
-            "Shift + push 13: enable / disable selected plugin\n"
-            "Shift + push 16: show / hide selected plugin\n"
+            "Shift + push 7 / 8: previous / next plugin\n"
+            "Shift + push 10: next chain\n"
+            "Shift + push 11 / 12: previous / next plugin\n"
+            "Shift + push 13 / 14: previous / next cue\n"
+            "Shift + push 15 / 16: previous / next global snapshot\n"
             "Push 16 only: Tap Tempo"
         ),
         "learn_default_label": "Default Ableton mapping",

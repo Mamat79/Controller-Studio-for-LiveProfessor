@@ -32,7 +32,9 @@ class FakeOSC:
 
 class BridgeTests(unittest.TestCase):
     def make_bridge(self, **changes):
-        config = BridgeConfig(display_enabled=False, restrict_to_target=False, **changes)
+        changes.setdefault("display_enabled", False)
+        changes.setdefault("restrict_to_target", False)
+        config = BridgeConfig(**changes)
         bridge = EC4LiveProfessorBridge(config)
         bridge._midi = FakeMidi()
         bridge._osc_client = FakeOSC()
@@ -84,7 +86,7 @@ class BridgeTests(unittest.TestCase):
         bridge._handle_note(12, 113)
         self.assertEqual(
             bridge._osc_client.messages[-1][0],
-            "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
+            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
         )
 
     def test_plugin_and_chain_navigation_commands(self):
@@ -177,44 +179,121 @@ class BridgeTests(unittest.TestCase):
 
     def test_shift_pushes_control_banks_snapshots_navigation_and_tap_tempo(self):
         bridge = self.make_bridge()
-        bridge._handle_sysex_button("shift_push", 2)
-        self.assertEqual(bridge.active_bank, 1)
+        bridge._osc_client.messages.clear()
+        bridge.set_bank(1)
         bridge._handle_sysex_button("shift_push", 1)
-        self.assertEqual(bridge.active_bank, 0)
-        bridge._handle_sysex_button("shift_push", 13)
-        bridge._handle_sysex_button("shift_push", 14)
+        self.assertEqual(bridge.active_bank, 2)
+        bridge._handle_sysex_button("shift_push", 0)
+        self.assertEqual(bridge.active_bank, 1)
+        bridge._handle_sysex_button("shift_push", 4)
         self.assertEqual(
-            [message[0] for message in bridge._osc_client.messages[-2:]],
-            [
-                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
-                "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
-            ],
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/ShowHideSelectedPlugin"
+        )
+        bridge._handle_sysex_button("shift_push", 8)
+        self.assertEqual(
+            "/Command/SelectedPlugin/EnableProcessingOnSelectedPlugin",
+            bridge._osc_client.messages[-1][0],
         )
         bridge._handle_sysex_button("shift_push", 5)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectPreviousChain"
+        )
         bridge._handle_sysex_button("shift_push", 6)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectPreviousPlugin"
+        )
         bridge._handle_sysex_button("shift_push", 7)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectNextPlugin"
+        )
         bridge._handle_sysex_button("shift_push", 9)
         self.assertEqual(
-            [message[0] for message in bridge._osc_client.messages[-4:]],
-            [
-                "/Command/PluginWindows/SelectPreviousChain",
-                "/Command/PluginWindows/SelectPreviousPlugin",
-                "/Command/PluginWindows/SelectNextPlugin",
-                "/Command/PluginWindows/SelectNextChain",
-            ],
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectNextChain"
         )
         bridge._handle_sysex_button("shift_push", 10)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectPreviousPlugin"
+        )
         bridge._handle_sysex_button("shift_push", 11)
         self.assertEqual(
-            [message[0] for message in bridge._osc_client.messages[-2:]],
+            bridge._osc_client.messages[-1][0], "/Command/PluginWindows/SelectNextPlugin"
+        )
+        bridge._handle_sysex_button("shift_push", 12)
+        self.assertIn(
+            "/Command/CueLists/FirePreviousCue",
+            [message[0] for message in bridge._osc_client.messages[-3:]],
+        )
+        bridge._handle_sysex_button("shift_push", 13)
+        self.assertIn(
+            "/Command/CueLists/FireNextCue",
+            [message[0] for message in bridge._osc_client.messages[-3:]],
+        )
+        bridge._handle_sysex_button("shift_push", 14)
+        self.assertIn(
+            "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+            [message[0] for message in bridge._osc_client.messages[-3:]],
+        )
+        bridge._handle_sysex_button("shift_push", 15)
+        self.assertIn(
+            "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
+            [message[0] for message in bridge._osc_client.messages[-3:]],
+        )
+        bridge._active_viewset_index = 1
+        bridge._viewset_count = 3
+        bridge._handle_sysex_button("shift_push", 2)
+        bridge._handle_sysex_button("shift_push", 3)
+        self.assertEqual(
+            [message for message in bridge._osc_client.messages[-2:]],
             [
-                "/Command/PluginWindows/SelectPreviousPlugin",
-                "/Command/PluginWindows/SelectNextPlugin",
+                ("/ViewSets/Recall", (0,)),
+                ("/ViewSets/Recall", (1,)),
             ],
         )
         bridge._handle_parameter_push(15)
         self.assertEqual(
             bridge._osc_client.messages[-1][0], "/Command/Transport&Tempo/TempoTap"
+        )
+
+    def test_shift_push_11_12_map_same_as_7_8_plugins(self):
+        bridge = self.make_bridge()
+        bridge._osc_client.messages.clear()
+        bridge._handle_sysex_button("shift_push", 6)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/PluginWindows/SelectPreviousPlugin",
+        )
+        bridge._handle_sysex_button("shift_push", 7)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/PluginWindows/SelectNextPlugin",
+        )
+        bridge._handle_sysex_button("shift_push", 10)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/PluginWindows/SelectPreviousPlugin",
+        )
+        bridge._handle_sysex_button("shift_push", 11)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/PluginWindows/SelectNextPlugin",
+        )
+
+    def test_command_fallbacks_include_snapshot_and_cue_alternatives(self):
+        self.assertEqual(
+            EC4LiveProfessorBridge._command_fallbacks("/Command/CueLists/FirePreviousCue"),
+            (
+                "/Command/CueLists/FirePreviousCue",
+                "/Command/CueList/RecallPreviousCue",
+                "/Command/CueList/FirePreviousCue",
+            ),
+        )
+        self.assertEqual(
+            EC4LiveProfessorBridge._command_fallbacks("/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot"),
+            (
+                "/Command/GlobalSnapshots/RecallPreviousGlobalSnapshot",
+                "/Command/GlobalSnapshots/RecallPrevious",
+                "/Command/Snapshots/RecallPrevious",
+            ),
         )
 
     def test_parameter_motion_is_confirmed_by_liveprofessor_feedback(self):
@@ -226,6 +305,17 @@ class BridgeTests(unittest.TestCase):
         bridge._on_osc("/Companion/Rotary1", [64 / 127])
         self.assertNotIn(0, bridge._pending_feedback)
         self.assertNotIn(0, bridge._feedback_timers)
+
+    def test_startup_banner_shown_on_connect(self):
+        bridge = self.make_bridge(display_enabled=True, restrict_to_target=False, ui_language="fr")
+        bridge._midi.sysex.clear()
+        bridge._startup_banner_shown = False
+        bridge.show_startup_banner()
+        self.assertTrue(bridge._startup_banner_shown)
+        self.assertTrue(len(bridge._midi.sysex) > 0)
+        banner_count = len(bridge._midi.sysex)
+        bridge.show_startup_banner()
+        self.assertEqual(len(bridge._midi.sysex), banner_count)
 
 
 if __name__ == "__main__":

@@ -113,15 +113,16 @@ Sans profil, l'écran montre `P001`, `P002`, etc. Le contrôleur OSC générique
 | Action EC4 | Résultat |
 |---|---|
 | Tourner les encodeurs 1–16 | Modifier les 16 paramètres de la banque active |
-| Shift+push encodeurs 1/4 | Première/dernière banque |
-| Shift+push encodeurs 2/3 | Banque précédente/suivante |
+| Shift+push encodeurs 1/2 | Banque précédente/suivante |
+| Shift+push encodeurs 3/4 | Viewset précédent/suivant |
+| Shift+push encodeur 5 | Afficher/masquer le plugin sélectionné |
 | Shift+push encodeur 6 | Chaîne précédente |
-| Shift+push encodeurs 7/8 | Plugin précédent/suivant |
+| Shift+push encodeurs 7/8 | Plugin précédent / suivant |
+| Shift+push encodeur 9 | Activer/désactiver le traitement du plugin sélectionné |
 | Shift+push encodeur 10 | Chaîne suivante |
-| Shift+push encodeurs 11/12 | Plugin précédent/suivant |
-| Shift+push encodeurs 14/15 | Snapshot global précédent/suivant |
-| Shift+push encodeur 13 | Activer/désactiver le traitement du plugin sélectionné |
-| Shift+push encodeur 16 | Afficher/masquer le plugin sélectionné |
+| Shift+push encodeurs 11/12 | Plugin précédent / suivant |
+| Shift+push encodeurs 13/14 | Cue précédent/suivant |
+| Shift+push encodeurs 15/16 | Snapshot global précédent/suivant |
 | Push simple encodeur 16 | Tap Tempo |
 | Appuyer sur un encodeur | Afficher temporairement nom, valeur, banque et numéro |
 | Bouton **Tester l'écran EC4** | Afficher un écran de diagnostic sans toucher à l'audio |
@@ -157,6 +158,47 @@ Les champs d'identifiants sont conservés pour une future API, mais ne sont pas 
 - Si l'EC4 est débranché, le pont ferme les ports disparus et tente une reconnexion toutes les deux secondes.
 
 ## Déployer sur un autre PC
+
+### Fichier `Ec4.ctrl2` (format attendu)
+
+`Ec4.ctrl2` est le fichier de contrôleur Companion que le pont emporte dans l’installation.  
+Il contient les 16 entrées de boutons/rotatifs utilisées pour communiquer avec LiveProfessor.
+
+Le dépôt inclut une version prête à l’emploi à la racine : [Ec4.ctrl2](../Ec4.ctrl2).
+
+Si tu veux en fournir une autre version :
+
+1. Exporter le contrôleur Companion depuis LiveProfessor (`.ctrl2`) ;
+2. Utiliser le réparateur du dépôt si nécessaire :
+
+```powershell
+python .\scripts\repair_ctrl2.py "C:\chemin\source.ctrl2" .\Ec4.ctrl2
+```
+
+3. Recréer l’installateur (les scripts prennent automatiquement `Ec4.ctrl2` à la racine si présent).
+
+### Méthode installateur (recommandée)
+
+1. Sur votre machine de build, exécuter :
+
+```powershell
+pwsh .\scripts\build-installer.ps1
+```
+
+Le script produit un fichier :
+
+`output\installer\windows\EC4-LiveProfessor-Bridge-Setup-vX.Y.Z.exe`
+
+2. Copier cet `.exe` sur le second PC.
+3. Lancer l'installateur, choisir le dossier d'installation (ex. `C:\Program Files\EC4LiveProfessorBridge` ou `%LOCALAPPDATA%\Programs\EC4LiveProfessorBridge`) puis valider.
+4. Cochez si vous voulez les raccourcis, puis lancez l'application.
+
+Si vous n'avez pas Inno Setup 6 sur cette machine, le script ne pourra pas compiler l'exécutable. L'installation locale se fait alors avec les scripts PowerShell (méthode portable ci-dessous).
+Vous pouvez aussi lancer l'installation automatique d'Inno Setup via Winget :
+
+```powershell
+pwsh .\scripts\build-installer.ps1 -AutoInstallInnoSetup
+```
 
 ### Méthode simple (recommandée)
 

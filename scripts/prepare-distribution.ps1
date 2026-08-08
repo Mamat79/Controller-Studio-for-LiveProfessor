@@ -1,6 +1,7 @@
 param(
     [switch]$NoBuild,
-    [string]$OutputRoot = "output\distribution"
+    [string]$OutputRoot = "output\distribution",
+    [string]$ControllerFile = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -44,6 +45,13 @@ Copy-Item -LiteralPath (Join-Path $ProjectRoot "README.md") -Destination $stagin
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "config.example.json") -Destination $staging
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "docs") -Destination (Join-Path $staging "docs") -Recurse -Force
 Copy-Item -LiteralPath (Join-Path $ProjectRoot "profiles") -Destination (Join-Path $staging "profiles") -Recurse -Force
+
+if ($ControllerFile) {
+    if (-not (Test-Path -LiteralPath $ControllerFile)) {
+        throw "Fichier Ec4.ctrl2 introuvable : $ControllerFile"
+    }
+    Copy-Item -LiteralPath (Resolve-Path -LiteralPath $ControllerFile).Path -Destination (Join-Path $staging "Ec4.ctrl2") -Force
+}
 
 if (Test-Path -LiteralPath $zipPath) {
     Remove-Item -LiteralPath $zipPath -Force
