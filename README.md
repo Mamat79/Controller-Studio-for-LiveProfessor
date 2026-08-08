@@ -14,6 +14,13 @@
 
 [Archive portable ZIP](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Notes et fichiers de la dernière version](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
 
+### 📘 Notices en français et en anglais
+
+- 🇫🇷 [Notice complète d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
+- 🇬🇧 [Complete installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
+- 🇫🇷 [Configuration détaillée de l’EC4](docs/CONFIGURATION_EC4.md) · [Cartographie MIDI/SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
+- 🇬🇧 [Detailed EC4 configuration](docs/en/EC4_CONFIGURATION.md) · [MIDI/SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
+
 ## ⭐ Fonction phare : l’auto-mapping des plugins
 
 Le bridge peut préparer automatiquement un projet LiveProfessor qui n’a encore jamais été configuré pour l’EC4. Il analyse le fichier `.rack2`, détecte les plugins et leurs paramètres, ajoute le contrôleur EC4 intégré si nécessaire et construit une Controller Map dynamique.
@@ -518,6 +525,13 @@ Aucun logiciel propriétaire tiers n’est redistribué dans ce dépôt.
 **This is the recommended download.** The installer includes the application, both UniBank/FullBank `CTRL2` controllers, and the English/French documentation.
 
 [Portable ZIP archive](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/EC4-LiveProfessor-Bridge-v2026.1-win64.zip) · [Latest release notes and files](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest)
+
+### 📘 English and French manuals
+
+- 🇬🇧 [Complete installation and user guide](docs/en/INSTALLATION_AND_USER_GUIDE.md)
+- 🇫🇷 [Notice complète d’installation et d’utilisation](docs/GUIDE_INSTALLATION_UTILISATION.md)
+- 🇬🇧 [Detailed EC4 configuration](docs/en/EC4_CONFIGURATION.md) · [MIDI/SysEx mapping](docs/en/MIDI_SYSEX_MAPPING.md)
+- 🇫🇷 [Configuration détaillée de l’EC4](docs/CONFIGURATION_EC4.md) · [Cartographie MIDI/SysEx](docs/CARTOGRAPHIE_MIDI_SYSEX.md)
 
 ## ⭐ Main feature: automatic plugin mapping
 
