@@ -2,7 +2,13 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from ec4lpbridge.config import BridgeConfig, load_config, save_config
+import silemio_control_hub.runtime.config as runtime_config
+from silemio_control_hub.runtime.config import (
+    BridgeConfig,
+    default_data_dir,
+    load_config,
+    save_config,
+)
 
 
 class ConfigTests(unittest.TestCase):
@@ -105,6 +111,45 @@ class ConfigTests(unittest.TestCase):
                 config.enable_processing_command,
                 "/Command/SelectedPlugin/EnableProcessingonselectedplugin",
             )
+
+    def test_product_data_directory_uses_controller_studio_name(self):
+        with tempfile.TemporaryDirectory() as folder:
+            previous = runtime_config.os.environ.get("SILEMIO_LOCAL_APP_DATA")
+            runtime_config.os.environ["SILEMIO_LOCAL_APP_DATA"] = folder
+            try:
+                self.assertEqual(
+                    default_data_dir(),
+                    Path(folder) / "Controller Studio for LiveProfessor",
+                )
+            finally:
+                if previous is None:
+                    runtime_config.os.environ.pop("SILEMIO_LOCAL_APP_DATA", None)
+                else:
+                    runtime_config.os.environ["SILEMIO_LOCAL_APP_DATA"] = previous
+
+    def test_legacy_bridge_config_is_read_only_migration_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            product = root / "runtime-config.json"
+            legacy = root / "legacy-config.json"
+            original = '{"target_setup":9,"target_group":13}\n'
+            legacy.write_text(original, encoding="utf-8")
+            previous_default = runtime_config.default_config_path
+            previous_product = runtime_config.previous_product_config_path
+            previous_legacy = runtime_config.legacy_config_path
+            runtime_config.default_config_path = lambda: product
+            runtime_config.previous_product_config_path = lambda: root / "missing.json"
+            runtime_config.legacy_config_path = lambda: legacy
+            try:
+                config = load_config()
+                save_config(config)
+            finally:
+                runtime_config.default_config_path = previous_default
+                runtime_config.previous_product_config_path = previous_product
+                runtime_config.legacy_config_path = previous_legacy
+            self.assertEqual((config.target_setup, config.target_group), (9, 13))
+            self.assertEqual(legacy.read_text(encoding="utf-8"), original)
+            self.assertTrue(product.is_file())
 
 
 if __name__ == "__main__":

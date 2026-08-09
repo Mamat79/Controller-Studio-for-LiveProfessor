@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:silemio:controller-profile:v1",
+  "title": "SiLeMI/O Controller Profile v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "manufacturer", "model", "bank_size", "controls"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "profile_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$",
+      "default": "1.0.0"
+    },
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "manufacturer": {"type": "string", "minLength": 1},
+    "model": {"type": "string", "minLength": 1},
+    "firmware": {"type": "string", "minLength": 1},
+    "midi_identity": {"$ref": "#/$defs/midiIdentity"},
+    "bank_size": {"type": "integer", "minimum": 1},
+    "bank_count": {"type": "integer", "minimum": 1, "default": 1},
+    "last_bank_size": {"type": "integer", "minimum": 1},
+    "page_count": {"type": "integer", "minimum": 1, "default": 1},
+    "status": {"enum": ["builtin", "verified", "community"]},
+    "capabilities": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "commands",
+          "push",
+          "touch",
+          "led",
+          "labels",
+          "values",
+          "colors",
+          "display",
+          "high_resolution",
+          "motorized",
+          "sysex",
+          "banks",
+          "pages",
+          "modifiers"
+        ]
+      }
+    },
+    "controls": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/control"}
+    },
+    "modifiers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/modifier"}
+    }
+  },
+  "$defs": {
+    "midiIdentity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_name_patterns": {"$ref": "#/$defs/nonEmptyUniqueStrings"},
+        "output_name_patterns": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+      }
+    },
+    "nonEmptyUniqueStrings": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["message"],
+      "properties": {
+        "message": {"enum": ["cc", "note", "nrpn", "pitch_bend", "sysex"]},
+        "channel": {"type": "integer", "minimum": 1, "maximum": 16},
+        "number": {"type": "integer", "minimum": 0, "maximum": 16383},
+        "mode": {"type": "string", "minLength": 1}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"message": {"const": "sysex"}}, "required": ["message"]},
+          "then": {"required": ["mode"], "not": {"anyOf": [{"required": ["channel"]}, {"required": ["number"]}]}},
+          "else": {"required": ["channel"]}
+        },
+        {
+          "if": {"properties": {"message": {"enum": ["cc", "note", "nrpn"]}}, "required": ["message"]},
+          "then": {"required": ["number"]},
+          "else": {"not": {"required": ["number"]}}
+        }
+      ]
+    },
+    "feedback": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "value": {"$ref": "#/$defs/binding"},
+        "led": {"$ref": "#/$defs/binding"},
+        "color": {"$ref": "#/$defs/binding"},
+        "supported_colors": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+      }
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "input"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "kind": {"enum": ["relative_encoder", "absolute_encoder", "fader", "button", "pad"]},
+        "input": {"$ref": "#/$defs/binding"},
+        "push": {"$ref": "#/$defs/binding"},
+        "touch": {"$ref": "#/$defs/binding"},
+        "feedback": {"$ref": "#/$defs/feedback"},
+        "display_cell": {"type": "integer", "minimum": 1},
+        "roles": {"$ref": "#/$defs/nonEmptyUniqueStrings"}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"kind": {"const": "relative_encoder"}}, "required": ["kind"]},
+          "then": {
+            "properties": {
+              "input": {
+                "allOf": [
+                  {"$ref": "#/$defs/binding"},
+                  {
+                    "required": ["mode"],
+                    "properties": {
+                      "mode": {"enum": ["twos_complement", "binary_offset", "signed_bit", "increment_decrement"]}
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "modifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "input"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "input": {"$ref": "#/$defs/binding"},
+        "behavior": {"enum": ["momentary", "toggle"], "default": "momentary"}
+      }
+    }
+  }
+}

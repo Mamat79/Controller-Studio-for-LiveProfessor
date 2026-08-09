@@ -1,6 +1,11 @@
 import unittest
 
-from ec4lpbridge.profiles import PluginProfile, ParameterProfile, profile_names, short_label
+from silemio_control_hub.runtime.plugin_labels import (
+    ParameterProfile,
+    PluginProfile,
+    profile_names,
+    short_label,
+)
 
 
 class ProfileTests(unittest.TestCase):
