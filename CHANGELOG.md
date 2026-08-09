@@ -2,6 +2,11 @@
 
 ## 2026.1
 
+- correction de la collision entre la map dynamique rappelée par les snapshots et le premier preset généré ;
+- ajout de **Réparer les mappings**, qui crée une copie consolidée sans modifier le projet source et donne toujours priorité aux affectations actuellement actives ;
+- synchronisation des presets dynamiques devenus obsolètes afin que le rappel d'un preset ne supprime plus les mappings appris ensuite ;
+- réutilisation prioritaire des ordres de paramètres et des poussoirs déjà appris, instance par instance puis par type de plugin ;
+- jumelage automatique d'un poussoir appris avec le rotatif de même numéro lorsque celui-ci est libre, afin de conserver le label sur l'EC4 ;
 - prise en charge des identifiants JUCE hexadécimaux non complétés à huit chiffres, dont CEDAR StageVox ;
 - lorsqu'un plugin est incompatible avec l'auto-mapping, il est maintenant ignoré avec un avertissement tandis que les autres plugins continuent d'être traités ;
 - ajout de notices PDF complètes en français et en anglais, accessibles depuis le menu Aide et intégrées aux paquets ;
@@ -23,7 +28,7 @@
 - extension optionnelle du Companion Controller à 99 rotatifs en mode FullBank ;
 - validation binaire du projet généré avant son enregistrement et sauvegarde de la destination si elle existe déjà ;
 - fenêtre bilingue accessible depuis la page principale et le menu **Outils** ;
-- les poussoirs, raccourcis Shift et projets originaux restent inchangés.
+- les poussoirs de plugin déjà appris sont conservés ; les raccourcis Shift et projets originaux restent inchangés.
 
 ## 0.5.1
 

@@ -316,9 +316,23 @@ Si le projet ne contient encore aucun contrôleur Companion/OSC, le bridge utili
 6. le bridge propose de l'ouvrir directement dans LiveProfessor et avertit que le projet actuellement ouvert sera remplacé ;
 7. après avoir enregistré le projet en cours, acceptez l'ouverture puis sélectionnez le plugin à contrôler.
 
-Chaque affectation générée utilise **Only If Selected**. Une même map dynamique peut donc contenir plusieurs plugins et plusieurs instances : seuls les paramètres du plugin sélectionné doivent réagir. Les affectations sont fusionnées dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : il n'est plus nécessaire de charger manuellement un preset pour chaque plugin dans LiveProfessor. Les affectations de poussoirs déjà présentes sont conservées.
+Chaque affectation générée utilise **Only If Selected**. Une même map dynamique peut donc contenir plusieurs plugins et plusieurs instances : seuls les paramètres du plugin sélectionné doivent réagir. Les affectations sont fusionnées dans les `HardwareCtrlMaps` réellement rappelés par le projet et ses snapshots : il n'est plus nécessaire de charger manuellement un preset pour chaque plugin dans LiveProfessor.
 
-La version 2026.1 suit l'ordre technique des paramètres exposés par le plugin : 16 paramètres en UniBank ou 99 en FullBank. Elle ne peut pas deviner leur importance musicale, ni créer un paramètre que le plugin n'expose pas à LiveProfessor. Si un identifiant de plugin n'est pas pris en charge, ce plugin est ignoré, la suite du projet est traitée et un avertissement précis est affiché. Les identifiants JUCE non complétés à huit chiffres, notamment celui de CEDAR StageVox, sont reconnus. Les poussoirs et les raccourcis Shift ne sont jamais modifiés. Le projet source reste intact ; si le fichier de destination existe déjà, une sauvegarde horodatée est créée avant son remplacement.
+La version 2026.1 réutilise d'abord les affectations actives et les presets manuels existants. Ton ordre personnalisé devient donc le profil prioritaire du plugin, instance par instance puis par type. Les poussoirs appris sont également réutilisés ; si le rotatif de même numéro est libre, AutoMap lui affecte le même paramètre pour permettre l'affichage du label sur l'EC4. Les raccourcis Shift ne sont jamais modifiés.
+
+Un fichier `.rack2` enregistre les numéros et valeurs des paramètres, mais pas leurs noms. Pour un plugin encore inconnu et sans profil existant, AutoMap conserve donc l'ordre technique au lieu de deviner. Un paramètre de sortie déjà placé sur le rotatif 16 dans un mapping actif ou un preset manuel y restera ; l'outil ne prétend pas identifier automatiquement « Output » sans nom fourni par le plugin.
+
+### Réparer des mappings qui se sont remplacés
+
+Les presets de Controller Map de LiveProfessor mémorisent une map complète. Une ancienne map rappelée après de nouveaux Learn peut donc remplacer des affectations plus récentes. Le correctif 2026.1 empêche la collision créée par l'ancien AutoMap et fournit une réparation fusionnelle :
+
+1. enregistrez le projet LiveProfessor actuel ;
+2. ouvrez **Auto-mapping**, choisissez le `.rack2`, puis cliquez sur **Analyser le projet** ;
+3. cliquez sur **🛠 Réparer les mappings…** et choisissez un nouveau nom ;
+4. les mappings actifs restent prioritaires, les affectations absentes sont récupérées depuis les presets partagés, et le projet source reste intact ;
+5. ouvrez la copie réparée, contrôlez plusieurs plugins, puis remplacez l'ancien projet seulement après validation.
+
+La réparation ne régénère ni les plugins, ni leurs réglages, ni les snapshots, ni le routage audio. Elle modifie uniquement les Controller Maps concernées. Si un identifiant de plugin n'est pas pris en charge, ce plugin est ignoré, la suite du projet est traitée et un avertissement précis est affiché. Les identifiants JUCE non complétés à huit chiffres, notamment celui de CEDAR StageVox, sont reconnus. Si le fichier de destination existe déjà, une sauvegarde horodatée est créée avant son remplacement.
 
 ## Création manuelle d’une Controller Map
 
@@ -814,9 +828,23 @@ If the project does not contain a Companion/OSC controller yet, the bridge autom
 6. the bridge offers to open it directly in LiveProfessor and warns that the currently open project will be replaced;
 7. after saving the current project, confirm the prompt and select the plugin to control.
 
-Every generated assignment uses **Only If Selected**. One dynamic map can therefore contain several plugins and instances while only the selected plugin should react. Assignments are merged into the `HardwareCtrlMaps` actually recalled by the project and its snapshots, so a preset no longer needs to be loaded manually for each plugin in LiveProfessor. Existing push-button assignments are preserved.
+Every generated assignment uses **Only If Selected**. One dynamic map can therefore contain several plugins and instances while only the selected plugin should react. Assignments are merged into the `HardwareCtrlMaps` actually recalled by the project and its snapshots, so a preset no longer needs to be loaded manually for each plugin in LiveProfessor.
 
-Version 2026.1 follows the technical parameter order exposed by the plugin: 16 parameters in UniBank or 99 in FullBank. It cannot infer musical importance or map a parameter that the plugin does not expose to LiveProfessor. If a plugin identifier is unsupported, that plugin is skipped, the rest of the project is processed, and a precise warning is displayed. Unpadded JUCE identifiers, including CEDAR StageVox, are supported. Push buttons and Shift shortcuts are never changed. The source project remains untouched; if the destination already exists, a timestamped backup is created first.
+Version 2026.1 first reuses active assignments and existing manual presets. Your custom order therefore becomes the preferred profile, per instance and then per plugin type. Learned push buttons are reused as well; when the matching rotary is free, AutoMap maps the same parameter to it so the EC4 can display its label. Shift shortcuts are never changed.
+
+A `.rack2` file stores parameter numbers and values, but not their names. For a completely unknown plugin with no existing profile, AutoMap therefore keeps the technical order instead of guessing. An output parameter already assigned to rotary 16 in an active map or manual preset remains there; the tool does not claim to identify “Output” automatically when the plugin name is unavailable.
+
+### Repairing mappings that replaced one another
+
+LiveProfessor Controller Map presets store a complete map. Recalling an older map after additional Learn operations can therefore replace newer assignments. The 2026.1 fix prevents the collision created by the former AutoMap and adds a merge-based repair:
+
+1. save the current LiveProfessor project;
+2. open **Auto-mapping**, select the `.rack2`, then click **Analyze project**;
+3. click **🛠 Repair mappings…** and choose a new filename;
+4. active mappings remain authoritative, missing assignments are recovered from shared presets, and the source project remains untouched;
+5. open the repaired copy, test several plugins, and replace the former project only after validation.
+
+Repair does not regenerate plugins, plugin settings, snapshots or audio routing. It changes only the affected Controller Maps. If a plugin identifier is unsupported, that plugin is skipped, processing continues, and a precise warning is displayed. Unpadded JUCE identifiers, including CEDAR StageVox, are supported. If the destination already exists, a timestamped backup is created first.
 
 ## Creating a Controller Map manually
 

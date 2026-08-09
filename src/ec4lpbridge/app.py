@@ -91,7 +91,13 @@ if sys.platform == "win32":
     _TRAY_MENU_QUIT = 3007
 
 from . import __version__
-from .automap import AutoMapError, ProjectInventory, create_automapped_project, inspect_project
+from .automap import (
+    AutoMapError,
+    ProjectInventory,
+    create_automapped_project,
+    inspect_project,
+    repair_automapped_project,
+)
 from .bridge import BridgeSnapshot, EC4LiveProfessorBridge
 from .config import BridgeConfig, default_config_path, default_data_dir, load_config, save_config
 from .ec4_protocol import main_display_message, parameter_grid_message, total_display_message
@@ -325,9 +331,10 @@ UI_TEXT = {
             "intégré est ajouté automatiquement à la copie."
         ),
         "automap_warning": (
-            "Première version assistée : les paramètres suivent l'ordre technique exposé par le "
-            "plugin (16 en UniBank, 99 en FullBank). Les poussoirs et les raccourcis Shift ne "
-            "sont pas modifiés."
+            "AutoMap réutilise en priorité l'ordre des rotatifs et les poussoirs déjà appris pour "
+            "chaque type de plugin. Sans profil existant, les paramètres suivent l'ordre technique "
+            "exposé par le plugin. Un poussoir appris est jumelé à son rotatif si celui-ci est libre, "
+            "afin de conserver son label. Les raccourcis Shift ne sont jamais modifiés."
         ),
         "automap_project": "Projet LiveProfessor (.rack2)",
         "automap_browse": "Parcourir…",
@@ -340,8 +347,10 @@ UI_TEXT = {
         "automap_unibank": "UniBank — 16 paramètres (recommandé)",
         "automap_fullbank": "FullBank — 99 paramètres",
         "automap_create": "Créer la copie auto-mappée…",
+        "automap_repair": "🛠 Réparer les mappings…",
         "automap_file_type": "Projet LiveProfessor",
         "automap_output_title": "Enregistrer la copie auto-mappée",
+        "automap_repair_output_title": "Enregistrer la copie réparée",
         "automap_error_title": "Auto-mapping impossible",
         "automap_success_title": "Copie auto-mappée créée",
         "automap_status_empty": "Choisissez un projet puis lancez l'analyse.",
@@ -359,6 +368,14 @@ UI_TEXT = {
             "Fichier créé :\n{path}\n\n"
             "{plugins} plugin(s) mappé(s), {mappings} affectation(s), "
             "{rotaries} rotatifs disponibles."
+        ),
+        "automap_repair_success_title": "Mappings consolidés",
+        "automap_repair_success": (
+            "Copie réparée :\n{path}\n\n"
+            "{restored} affectation(s) absente(s) restaurée(s), {presets} preset(s) partagé(s) "
+            "synchronisé(s), {migrated} collision(s) isolée(s).\n"
+            "Les mappings actuels ont été conservés en priorité, y compris dans {conflicts} "
+            "conflit(s). Le projet source n'a pas été modifié."
         ),
         "automap_open_title": "Ouvrir la copie dans LiveProfessor ?",
         "automap_open_question": (
@@ -527,8 +544,10 @@ UI_TEXT = {
             "automatically added to the copy."
         ),
         "automap_warning": (
-            "First assisted version: parameters follow the technical order exposed by the plugin "
-            "(16 in UniBank, 99 in FullBank). Push buttons and Shift shortcuts are not changed."
+            "AutoMap first reuses the rotary order and push buttons already learned for each plugin "
+            "type. Without an existing profile, parameters follow the technical order exposed by "
+            "the plugin. A learned push is mirrored to its rotary when that rotary is free so its "
+            "label remains available. Shift shortcuts are never changed."
         ),
         "automap_project": "LiveProfessor project (.rack2)",
         "automap_browse": "Browse…",
@@ -541,8 +560,10 @@ UI_TEXT = {
         "automap_unibank": "UniBank — 16 parameters (recommended)",
         "automap_fullbank": "FullBank — 99 parameters",
         "automap_create": "Create auto-mapped copy…",
+        "automap_repair": "🛠 Repair mappings…",
         "automap_file_type": "LiveProfessor project",
         "automap_output_title": "Save auto-mapped copy",
+        "automap_repair_output_title": "Save repaired copy",
         "automap_error_title": "Auto-mapping failed",
         "automap_success_title": "Auto-mapped copy created",
         "automap_status_empty": "Choose a project, then analyze it.",
@@ -560,6 +581,14 @@ UI_TEXT = {
             "File created:\n{path}\n\n"
             "{plugins} plugin(s) mapped, {mappings} assignment(s), "
             "{rotaries} rotaries available."
+        ),
+        "automap_repair_success_title": "Mappings consolidated",
+        "automap_repair_success": (
+            "Repaired copy:\n{path}\n\n"
+            "{restored} missing assignment(s) restored, {presets} shared preset(s) synchronized, "
+            "{migrated} collision(s) isolated.\n"
+            "Current mappings remained authoritative, including {conflicts} conflict(s). "
+            "The source project was not modified."
         ),
         "automap_open_title": "Open the copy in LiveProfessor?",
         "automap_open_question": (
@@ -2016,8 +2045,8 @@ class BridgeGUI:
         window = self.tk.Toplevel(self.root)
         self.automap_window = window
         window.title(self._t("automap_title"))
-        window.geometry("760x500")
-        window.minsize(680, 460)
+        window.geometry("760x560")
+        window.minsize(680, 520)
         window.transient(self.root)
         self._set_window_icons()
 
@@ -2119,6 +2148,13 @@ class BridgeGUI:
             state="disabled",
         )
         self.automap_create_button.grid(row=11, column=2, sticky="e")
+        self.automap_repair_button = ttk.Button(
+            frame,
+            text=self._t("automap_repair"),
+            command=self._repair_automap_copy,
+            state="disabled",
+        )
+        self.automap_repair_button.grid(row=11, column=0, sticky="w")
 
         def close_window() -> None:
             self.automap_window = None
@@ -2152,6 +2188,8 @@ class BridgeGUI:
             self._automap_inventory = None
             if hasattr(self, "automap_create_button"):
                 self.automap_create_button.configure(state="disabled")
+            if hasattr(self, "automap_repair_button"):
+                self.automap_repair_button.configure(state="disabled")
             self.messagebox.showerror(self._t("automap_error_title"), str(exc))
             return
 
@@ -2179,6 +2217,7 @@ class BridgeGUI:
         self.automap_plugin_var.set(plugin_labels[0])
         self.automap_controller_var.set(controller_labels[0])
         self.automap_create_button.configure(state="normal")
+        self.automap_repair_button.configure(state="normal")
         self._update_automap_status()
         if inventory.skipped_plugins:
             self.messagebox.showwarning(
@@ -2283,6 +2322,71 @@ class BridgeGUI:
         )
         open_now = self.messagebox.askyesno(
             self._t("automap_open_title"),
+            f"{success_message}\n\n{self._t('automap_open_question')}",
+            parent=self.automap_window or self.root,
+        )
+        if open_now:
+            try:
+                open_liveprofessor_project(result.output_path)
+            except (OSError, ValueError, subprocess.SubprocessError) as exc:
+                self.messagebox.showerror(
+                    self._t("automap_open_error_title"),
+                    self._t("automap_open_error", error=exc, path=result.output_path),
+                    parent=self.automap_window or self.root,
+                )
+
+    def _repair_automap_copy(self) -> None:
+        inventory = getattr(self, "_automap_inventory", None)
+        if inventory is None:
+            self.messagebox.showerror(
+                self._t("automap_error_title"),
+                self._t("automap_status_empty"),
+            )
+            return
+        controller_uid = self._automap_controllers_by_label.get(
+            self.automap_controller_var.get()
+        )
+        if controller_uid is None:
+            self.messagebox.showerror(
+                self._t("automap_error_title"),
+                self._t("automap_status_empty"),
+            )
+            return
+        initial_name = f"{inventory.path.stem}-EC4-Mappings-Repares{inventory.path.suffix}"
+        destination = self.filedialog.asksaveasfilename(
+            parent=self.automap_window or self.root,
+            title=self._t("automap_repair_output_title"),
+            initialdir=str(inventory.path.parent),
+            initialfile=initial_name,
+            defaultextension=".rack2",
+            filetypes=((self._t("automap_file_type"), "*.rack2"),),
+        )
+        if not destination:
+            return
+        try:
+            result = repair_automapped_project(
+                inventory.path,
+                Path(destination),
+                controller_uid=controller_uid,
+            )
+        except (AutoMapError, OSError, ValueError) as exc:
+            self.messagebox.showerror(self._t("automap_error_title"), str(exc))
+            return
+        self._append_log(
+            "AutoMap repair: "
+            f"{result.restored_assignments} restored, "
+            f"{result.synchronized_presets} synchronized -> {result.output_path}"
+        )
+        success_message = self._t(
+            "automap_repair_success",
+            path=result.output_path,
+            restored=result.restored_assignments,
+            presets=result.synchronized_presets,
+            migrated=result.migrated_presets,
+            conflicts=result.conflicts_preserved,
+        )
+        open_now = self.messagebox.askyesno(
+            self._t("automap_repair_success_title"),
             f"{success_message}\n\n{self._t('automap_open_question')}",
             parent=self.automap_window or self.root,
         )
