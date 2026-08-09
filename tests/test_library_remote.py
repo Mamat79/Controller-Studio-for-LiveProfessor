@@ -213,6 +213,17 @@ def test_update_rejects_profiles_that_require_a_newer_hub(tmp_path):
     assert not cache.exists()
 
 
+def test_calendar_version_is_comparable_with_semantic_profile_requirements(tmp_path):
+    result = update_library(
+        _remote(minimum_hub_version="0.1.0"),
+        cache_root=tmp_path / "cache",
+        hub_version="2026.0",
+    )
+
+    assert result.applied is False
+    assert len(result.preview.changes) == 1
+
+
 def test_corrupted_current_cache_is_rejected_before_network_changes_are_applied(tmp_path):
     cache = tmp_path / "cache"
     update_library(_remote(), cache_root=cache, apply=True)

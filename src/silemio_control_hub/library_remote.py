@@ -35,7 +35,7 @@ MAX_MANIFEST_BYTES = 1_000_000
 MAX_PROFILE_BYTES = 4_000_000
 CONTENT_API_OVERHEAD_BYTES = 65_536
 REPOSITORY = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-HUB_VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)")
+HUB_VERSION = re.compile(r"^(\d+)\.(\d+)(?:\.(\d+))?(?:[.-].*)?$")
 
 
 class LibraryRemoteError(ValueError):
@@ -210,7 +210,7 @@ def _hub_version_key(value: str) -> tuple[int, int, int]:
     match = HUB_VERSION.match(value)
     if match is None:
         raise LibraryRemoteError(f"version du Hub non comparable: {value}")
-    return tuple(int(part) for part in match.groups())
+    return tuple(int(part or 0) for part in match.groups())
 
 
 def _installed_hub_version() -> str:
