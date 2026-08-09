@@ -8,6 +8,7 @@ from ec4lpbridge.automap import (
     create_automapped_project,
     inspect_project,
     plugin_map_type_id,
+    repair_automapped_project,
 )
 from scripts.repair_ctrl2 import ValueTree, normalize_rotary_controls, parse_tree, write_tree
 
@@ -551,7 +552,7 @@ class AutoMapTests(unittest.TestCase):
                 sum(assignment.get("ControllableId") == "PluginWindow" for assignment in assignments),
                 1,
             )
-            self.assertNotIn(
+            self.assertIn(
                 ("Processor7956475", 29),
                 {
                     (assignment.get("ControllableId"), assignment.get("ParameterId"))
@@ -559,6 +560,282 @@ class AutoMapTests(unittest.TestCase):
                     if assignment.get("ControllerId") == 23_000_001
                 },
             )
+
+    def test_snapshot_map_id_is_reserved_for_runtime_and_never_reused_by_a_preset(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source.rack2"
+            destination = root / "mapped.rack2"
+            project = controller_project()
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            runtime_map_id = 30_000_050
+            hardware_root.set("ActiveMap", runtime_map_id)
+            project.children.append(node("GlobalSnapshot", ControllerMapId=runtime_map_id))
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            runtime_map = node("HardwareCtrlMap", Name="Default", mapId=runtime_map_id)
+            runtime_map.children = [node("Assignments")]
+            hardware_maps.children.append(runtime_map)
+            source.write_bytes(write_tree(project))
+
+            create_automapped_project(
+                source,
+                destination,
+                plugin_uid=None,
+                controller_uid=12687768,
+                expand_to_fullbank=False,
+            )
+
+            generated = parse_tree(destination.read_bytes())
+            hardware_root = next(
+                child for child in generated.children if child.type_name == "HardwareControllers"
+            )
+            controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            presets_root = next(
+                child for child in controllers.children[0].children if child.type_name == "MapPresets"
+            )
+            presets = next(child for child in presets_root.children if child.type_name == "Presets")
+            generated_preset = next(
+                preset for preset in presets.children if preset.get("Name") == "EC4 AutoMap - Avalon VT-747SP"
+            )
+            self.assertNotEqual(generated_preset.children[0].get("mapId"), runtime_map_id)
+            self.assertEqual(hardware_root.get("ActiveMap"), runtime_map_id)
+
+    def test_existing_manual_profile_prioritizes_rotaries_and_pairs_button_label(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source.rack2"
+            destination = root / "mapped.rack2"
+            project = controller_project()
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            presets_root = next(
+                child for child in controllers.children[0].children if child.type_name == "MapPresets"
+            )
+            presets = next(child for child in presets_root.children if child.type_name == "Presets")
+            manual_preset = node(
+                "MapPreset",
+                Name="Mon ordre essentiel",
+                TypeId="plugin-UID-905003301",
+                ControllerId=12687768,
+            )
+            manual_map = node(
+                "ControllerMapPreset",
+                Name="Mon ordre essentiel",
+                TypeId="plugin-UID-905003301",
+                ControllerId=12687768,
+                SelectMode=True,
+                mapId=7654321,
+            )
+            learned = node("Assignments")
+            learned.children = [
+                node(
+                    "Assignment",
+                    ParentControllerId=12687768,
+                    ControllerId=23_000_001,
+                    ControllableId="Processor7956475",
+                    ParameterId=8,
+                    selectMode=True,
+                ),
+                node(
+                    "Assignment",
+                    ParentControllerId=12687768,
+                    ControllerId=23_000_016,
+                    ControllableId="Processor7956475",
+                    ParameterId=9,
+                    selectMode=True,
+                ),
+                node(
+                    "Assignment",
+                    ParentControllerId=12687768,
+                    ControllerId=22_000_002,
+                    ControllableId="Processor7956475",
+                    ParameterId=5,
+                    selectMode=True,
+                ),
+            ]
+            manual_map.children = [learned, parse_tree(write_tree(learned))]
+            manual_preset.children = [manual_map]
+            presets.children.append(manual_preset)
+            source.write_bytes(write_tree(project))
+
+            create_automapped_project(
+                source,
+                destination,
+                plugin_uid=None,
+                controller_uid=12687768,
+                expand_to_fullbank=False,
+            )
+
+            generated = parse_tree(destination.read_bytes())
+            hardware_root = next(
+                child for child in generated.children if child.type_name == "HardwareControllers"
+            )
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            active_map = next(
+                item for item in hardware_maps.children if item.get("mapId") == hardware_root.get("ActiveMap")
+            )
+            mapped = {
+                assignment.get("ControllerId"): assignment.get("ParameterId")
+                for assignment in active_map.children[0].children
+                if assignment.get("ControllableId") == "Processor7956475"
+            }
+            self.assertEqual(mapped[23_000_001], 8)
+            self.assertEqual(mapped[23_000_002], 5)
+            self.assertEqual(mapped[23_000_016], 9)
+            self.assertEqual(mapped[22_000_002], 5)
+
+    def test_repair_merges_stale_dynamic_presets_and_preserves_active_changes(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "source.rack2"
+            mapped = root / "mapped.rack2"
+            corrupted = root / "corrupted.rack2"
+            repaired = root / "repaired.rack2"
+            project = controller_project()
+            chains = next(child for child in project.children if child.type_name == "Chains")
+            first = chains.children[0].children[0].children[0]
+            second = parse_tree(write_tree(first))
+            second.set("pluginUid", 8_888_888)
+            chains.children[0].children[0].children.append(second)
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            runtime_map_id = 30_000_050
+            hardware_root.set("ActiveMap", runtime_map_id)
+            project.children.append(node("GlobalSnapshot", ControllerMapId=runtime_map_id))
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            runtime_map = node("HardwareCtrlMap", Name="Default", mapId=runtime_map_id)
+            runtime_map.children = [node("Assignments")]
+            hardware_maps.children.append(runtime_map)
+            source.write_bytes(write_tree(project))
+            create_automapped_project(
+                source,
+                mapped,
+                plugin_uid=None,
+                controller_uid=12687768,
+                expand_to_fullbank=False,
+            )
+
+            damaged = parse_tree(mapped.read_bytes())
+            hardware_root = next(
+                child for child in damaged.children if child.type_name == "HardwareControllers"
+            )
+            controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            active_map = next(
+                item for item in hardware_maps.children if item.get("mapId") == runtime_map_id
+            )
+            original_assignments = parse_tree(write_tree(active_map.children[0]))
+            manual_preset = node(
+                "MapPreset",
+                Name="Mapping manuel tardif",
+                TypeId="plugin-UID-905003301",
+                ControllerId=12687768,
+            )
+            manual_map = node(
+                "ControllerMapPreset",
+                Name="EC4 AutoMap - Dynamic",
+                TypeId="plugin-UID-905003301",
+                ControllerId=12687768,
+                SelectMode=True,
+                mapId=runtime_map_id,
+            )
+            manual_map.children = [
+                parse_tree(write_tree(original_assignments)),
+                parse_tree(write_tree(original_assignments)),
+            ]
+            manual_preset.children = [manual_map]
+            presets_root = next(
+                child for child in controllers.children[0].children if child.type_name == "MapPresets"
+            )
+            presets = next(child for child in presets_root.children if child.type_name == "Presets")
+            presets.children.append(manual_preset)
+            active_map.children[0].children = [
+                assignment
+                for assignment in active_map.children[0].children
+                if assignment.get("ControllableId") == "Processor8888888"
+            ]
+            changed = next(
+                assignment
+                for assignment in active_map.children[0].children
+                if assignment.get("ControllerId") == 23_000_001
+            )
+            changed.set("ParameterId", 7)
+            corrupted.write_bytes(write_tree(damaged))
+            source_hash = hashlib.sha256(corrupted.read_bytes()).hexdigest()
+
+            result = repair_automapped_project(
+                corrupted,
+                repaired,
+                controller_uid=12687768,
+            )
+
+            self.assertEqual(hashlib.sha256(corrupted.read_bytes()).hexdigest(), source_hash)
+            self.assertGreaterEqual(result.restored_assignments, 16)
+            self.assertGreaterEqual(result.conflicts_preserved, 1)
+            self.assertGreaterEqual(result.synchronized_presets, 1)
+            fixed = parse_tree(repaired.read_bytes())
+            hardware_root = next(
+                child for child in fixed.children if child.type_name == "HardwareControllers"
+            )
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            active_map = next(
+                item for item in hardware_maps.children if item.get("mapId") == runtime_map_id
+            )
+            active = {
+                (assignment.get("ControllableId"), assignment.get("ControllerId")): assignment.get(
+                    "ParameterId"
+                )
+                for assignment in active_map.children[0].children
+            }
+            self.assertEqual(active[("Processor8888888", 23_000_001)], 7)
+            self.assertIn(("Processor7956475", 23_000_001), active)
+            fixed_controllers = next(
+                child for child in hardware_root.children if child.type_name == "HardwareControllers"
+            )
+            fixed_presets_root = next(
+                child
+                for child in fixed_controllers.children[0].children
+                if child.type_name == "MapPresets"
+            )
+            fixed_presets = next(
+                child for child in fixed_presets_root.children if child.type_name == "Presets"
+            )
+            dynamic_map = next(
+                child
+                for preset in fixed_presets.children
+                for child in preset.children
+                if child.type_name == "ControllerMapPreset"
+                and child.get("Name") == "EC4 AutoMap - Dynamic"
+            )
+            dynamic_values = {
+                (assignment.get("ControllableId"), assignment.get("ControllerId")): assignment.get(
+                    "ParameterId"
+                )
+                for assignment in dynamic_map.children[0].children
+            }
+            self.assertEqual(dynamic_values[("Processor8888888", 23_000_001)], 7)
+            self.assertIn(("Processor7956475", 23_000_001), dynamic_values)
 
 
 if __name__ == "__main__":
