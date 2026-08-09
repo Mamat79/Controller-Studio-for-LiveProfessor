@@ -74,6 +74,21 @@ class BridgeTests(unittest.TestCase):
         bridge._on_osc("/Companion/ControllerValues", ["Rotary1", "-12.0 dB"])
         self.assertEqual((bridge.names[0], bridge.display_values[0]), ("Threshold", "-12.0 dB"))
 
+    def test_push_name_is_visible_without_overriding_a_rotary_label(self):
+        bridge = self.make_bridge()
+        bridge._on_osc("/Companion/ControllerNames", ["Generic Button 1", "Bypass"])
+        bridge._on_osc("/Companion/ControllerValues", ["Generic Button 1", "On"])
+        self.assertEqual((bridge.button_names[0], bridge.button_display_values[0]), ("Bypass", "On"))
+        self.assertEqual(bridge._display_short_label(0, ""), "Bypa")
+
+        bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
+        self.assertEqual(bridge._display_short_label(0, bridge.short_names[0]), "Thre")
+
+        overlays = []
+        bridge._show_overlay = overlays.append
+        bridge._handle_parameter_push(0)
+        self.assertEqual(overlays[-1][:2], ["Bypass", "On"])
+
     def test_companion_reports_missing_first_bank_rotaries(self):
         logs = []
         bridge = EC4LiveProfessorBridge(

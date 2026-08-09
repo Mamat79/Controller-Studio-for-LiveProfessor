@@ -576,47 +576,120 @@ def _normalized_map_type_id(value: object) -> str:
     return f"plugin-UID-{match.group(1)}" if match else str(value)
 
 
+def _mapping_profile_details(
+    assignments: list[ValueTree],
+    *,
+    controller_uid: int,
+    plugin: ProjectPlugin,
+    plugin_uids: set[int],
+    preferred_keys: set[tuple[object, object, object]] | None = None,
+) -> tuple[dict[int, int], dict[int, tuple[int, int, int]]]:
+    """Build one deterministic control layout shared by identical plugins.
+
+    A mapping that is already active wins over a recovered preset mapping. Then
+    the most common value across all instances wins, so four copies of the same
+    plugin cannot slowly acquire four different EC4 layouts.
+    """
+
+    preferred = preferred_keys or set()
+    values: dict[int, list[tuple[int, bool, int]]] = {}
+    for order, assignment in enumerate(assignments):
+        if (
+            assignment.type_name != "Assignment"
+            or assignment.get("ParentControllerId") != controller_uid
+        ):
+            continue
+        controllable = assignment.get("ControllableId")
+        if not isinstance(controllable, str) or not controllable.startswith("Processor"):
+            continue
+        try:
+            target_uid = int(controllable.removeprefix("Processor"))
+            parameter_id = int(assignment.get("ParameterId"))
+            control_id = int(assignment.get("ControllerId"))
+        except (TypeError, ValueError):
+            continue
+        if target_uid not in plugin_uids or not 0 <= parameter_id < plugin.parameter_count:
+            continue
+        key = _assignment_key(assignment)
+        values.setdefault(control_id, []).append(
+            (parameter_id, key in preferred if key is not None else False, order)
+        )
+
+    profile: dict[int, int] = {}
+    priorities: dict[int, tuple[int, int, int]] = {}
+    for control_id, candidates in values.items():
+        parameters = list(dict.fromkeys(item[0] for item in candidates))
+        def score(parameter_id: int) -> tuple[int, int, int]:
+            return (
+                sum(
+                    1
+                    for value, is_preferred, _order in candidates
+                    if value == parameter_id and is_preferred
+                ),
+                sum(
+                    1
+                    for value, _is_preferred, _order in candidates
+                    if value == parameter_id
+                ),
+                max(
+                    order
+                    for value, _is_preferred, order in candidates
+                    if value == parameter_id
+                ),
+            )
+
+        parameter_id = max(parameters, key=score)
+        profile[control_id] = parameter_id
+        priorities[control_id] = score(parameter_id)
+    return profile, priorities
+
+
 def _existing_mapping_profile(
     tree: ValueTree,
     controller_node: ValueTree,
     *,
     plugin: ProjectPlugin,
     plugin_uids: set[int],
-) -> dict[int, int]:
+) -> tuple[
+    dict[int, int],
+    dict[int, tuple[int, int, int]],
+    tuple[int, ...],
+]:
     """Return the best user-defined control-to-parameter layout for a plugin type."""
 
     controller_uid = int(controller_node.get("uID"))
     profile: dict[int, int] = {}
+    priorities: dict[int, tuple[int, int, int]] = {}
+    preserved_parameters: list[int] = []
 
     def merge_group(group: ValueTree) -> None:
-        values: dict[int, list[int]] = {}
         for assignment in group.children:
-            if (
-                assignment.type_name != "Assignment"
-                or assignment.get("ParentControllerId") != controller_uid
-            ):
-                continue
             controllable = assignment.get("ControllableId")
-            if not isinstance(controllable, str) or not controllable.startswith("Processor"):
+            if not isinstance(controllable, str) or not controllable.startswith(
+                "Processor"
+            ):
                 continue
             try:
                 target_uid = int(controllable.removeprefix("Processor"))
                 parameter_id = int(assignment.get("ParameterId"))
-                control_id = int(assignment.get("ControllerId"))
             except (TypeError, ValueError):
                 continue
-            if target_uid not in plugin_uids or not 0 <= parameter_id < plugin.parameter_count:
-                continue
-            values.setdefault(control_id, []).append(parameter_id)
-        for control_id, parameters in values.items():
-            if control_id in profile:
-                continue
-            # Repeated instances normally agree. If they do not, keep the most
-            # common value, then the latest one as a deterministic tie-breaker.
-            profile[control_id] = max(
-                dict.fromkeys(parameters),
-                key=lambda value: (parameters.count(value), parameters[::-1].index(value) * -1),
-            )
+            if (
+                target_uid in plugin_uids
+                and 0 <= parameter_id < plugin.parameter_count
+                and parameter_id not in preserved_parameters
+            ):
+                preserved_parameters.append(parameter_id)
+        candidate, candidate_priorities = _mapping_profile_details(
+            group.children,
+            controller_uid=controller_uid,
+            plugin=plugin,
+            plugin_uids=plugin_uids,
+        )
+        for control_id, parameter_id in candidate.items():
+            if control_id not in profile:
+                profile[control_id] = parameter_id
+                priorities[control_id] = candidate_priorities[control_id]
 
     hardware_root = _child(tree, "HardwareControllers")
     active_map_id = hardware_root.get("ActiveMap")
@@ -641,7 +714,7 @@ def _existing_mapping_profile(
     try:
         presets = _child(_child(controller_node, "MapPresets"), "Presets")
     except AutoMapError:
-        return profile
+        return profile, priorities, tuple(preserved_parameters)
     manual: list[ValueTree] = []
     generated: list[ValueTree] = []
     for preset in presets.children:
@@ -666,7 +739,7 @@ def _existing_mapping_profile(
         if not groups:
             continue
         merge_group(groups[0])
-    return profile
+    return profile, priorities, tuple(preserved_parameters)
 
 
 def _plugin_assignments(
@@ -676,41 +749,105 @@ def _plugin_assignments(
     rotaries: list[tuple[int, ValueTree]],
     buttons: list[tuple[int, ValueTree]],
     profile: dict[int, int],
+    profile_priority: dict[int, tuple[int, int, int]] | None = None,
+    preserve_parameters: list[int] | tuple[int, ...] = (),
+    fill_unassigned: bool = True,
 ) -> tuple[list[ValueTree], int]:
-    """Build a profile-aware layout and keep paired rotary labels for buttons."""
+    """Build one semantic EC4 layout for a plugin instance.
+
+    A parameter learned on a push button is considered discrete and reserves the
+    rotary at the same physical position. This one matched button/rotary pair is
+    intentional: LiveProfessor exposes labels through Rotary feedback, so the
+    mirror keeps the push label permanently visible on the EC4. All other
+    duplicates (two rotaries, two buttons, or unmatched button/rotary positions)
+    are removed.
+    """
 
     rotary_by_number = {number: control for number, control in rotaries}
     button_by_number = {number: control for number, control in buttons}
     rotary_parameters: dict[int, int] = {}
     button_parameters: dict[int, int] = {}
-    for number, control in rotaries:
-        control_id = int(control.get("id"))
-        parameter_id = profile.get(control_id)
-        if parameter_id is not None and 0 <= parameter_id < plugin.parameter_count:
-            rotary_parameters[number] = parameter_id
-    for number, control in buttons:
-        control_id = int(control.get("id"))
-        parameter_id = profile.get(control_id)
-        if parameter_id is not None and 0 <= parameter_id < plugin.parameter_count:
-            button_parameters[number] = parameter_id
-            # EC4 labels are driven by the rotary feedback. If a learned button
-            # has no deliberately assigned rotary, mirror it at the same position.
-            if number in rotary_by_number and number not in rotary_parameters:
-                rotary_parameters[number] = parameter_id
+    used_parameters: set[int] = set()
+    priority = profile_priority or {}
 
-    used_parameters = set(rotary_parameters.values())
-    remaining_parameters = iter(
+    def ranked_controls(
+        controls: list[tuple[int, ValueTree]],
+    ) -> list[tuple[int, ValueTree]]:
+        return sorted(
+            controls,
+            key=lambda item: (
+                priority.get(int(item[1].get("id")), (0, 0, -1)),
+                -item[0],
+            ),
+            reverse=True,
+        )
+
+    # A learned button is the strongest type hint available in a rack2 file:
+    # LiveProfessor stores parameter values, but not the VST3 step count/type.
+    for number, control in ranked_controls(buttons):
+        control_id = int(control.get("id"))
+        parameter_id = profile.get(control_id)
+        if (
+            parameter_id is not None
+            and 0 <= parameter_id < plugin.parameter_count
+            and parameter_id not in used_parameters
+        ):
+            button_parameters[number] = parameter_id
+            used_parameters.add(parameter_id)
+
+    # Reserve the rotary directly under every learned button. Besides making
+    # the function available through both gestures, this is what lets the EC4
+    # show Reset/Bypass-like labels before the user presses the encoder.
+    for number, parameter_id in button_parameters.items():
+        if number in rotary_by_number:
+            rotary_parameters[number] = parameter_id
+
+    for number, control in ranked_controls(rotaries):
+        if number in rotary_parameters:
+            continue
+        control_id = int(control.get("id"))
+        parameter_id = profile.get(control_id)
+        if (
+            parameter_id is not None
+            and 0 <= parameter_id < plugin.parameter_count
+            and parameter_id not in used_parameters
+        ):
+            rotary_parameters[number] = parameter_id
+            used_parameters.add(parameter_id)
+
+    preserved = [
         parameter_id
-        for parameter_id in range(plugin.parameter_count)
-        if parameter_id not in used_parameters
-    )
+        for parameter_id in dict.fromkeys(preserve_parameters)
+        if 0 <= parameter_id < plugin.parameter_count
+        and parameter_id not in used_parameters
+    ]
+    if fill_unassigned:
+        remaining_parameters = iter(
+            [
+                *preserved,
+                *(
+                    parameter_id
+                    for parameter_id in range(plugin.parameter_count)
+                    if parameter_id not in used_parameters
+                    and parameter_id not in preserved
+                ),
+            ]
+        )
+    else:
+        # When several instances of the same plugin contain complementary
+        # manual mappings, keep their union. Conflicting controls still use the
+        # shared majority profile above; minority parameters are moved to free
+        # rotaries instead of being silently discarded.
+        remaining_parameters = iter(preserved)
     for number, _control in rotaries:
         if number in rotary_parameters:
             continue
         try:
-            rotary_parameters[number] = next(remaining_parameters)
+            parameter_id = next(remaining_parameters)
         except StopIteration:
             break
+        rotary_parameters[number] = parameter_id
+        used_parameters.add(parameter_id)
 
     assignments: list[ValueTree] = []
     for number, parameter_id in rotary_parameters.items():
@@ -907,7 +1044,14 @@ def create_automapped_project(
         all_plugins_by_map_type.setdefault(project_plugin.map_type_id, set()).add(
             project_plugin.plugin_uid
         )
-    type_profiles: dict[str, dict[int, int]] = {}
+    type_profiles: dict[
+        str,
+        tuple[
+            dict[int, int],
+            dict[int, tuple[int, int, int]],
+            tuple[int, ...],
+        ],
+    ] = {}
     for project_plugin, _node in selected_plugins:
         if project_plugin.map_type_id in type_profiles:
             continue
@@ -917,24 +1061,21 @@ def create_automapped_project(
             plugin=project_plugin,
             plugin_uids=all_plugins_by_map_type.get(project_plugin.map_type_id, set()),
         )
-    profiles: dict[int, dict[int, int]] = {}
-    for project_plugin, _node in selected_plugins:
-        instance_profile = _existing_mapping_profile(
-            tree,
-            controller_node,
-            plugin=project_plugin,
-            plugin_uids={project_plugin.plugin_uid},
-        )
-        merged_profile = dict(type_profiles.get(project_plugin.map_type_id, {}))
-        merged_profile.update(instance_profile)
-        profiles[project_plugin.plugin_uid] = merged_profile
     for plugin, _plugin_node in selected_plugins:
+        type_profile, type_priority, preserved_parameters = type_profiles.get(
+            plugin.map_type_id,
+            ({}, {}, ()),
+        )
         assignments, mapped_count = _plugin_assignments(
             controller_uid=controller_uid,
             plugin=plugin,
             rotaries=rotaries,
             buttons=buttons,
-            profile=profiles.get(plugin.plugin_uid, {}),
+            # Every instance of one plugin type deliberately shares this exact
+            # profile. Per-instance overrides caused tracks 25-28 to drift.
+            profile=type_profile,
+            profile_priority=type_priority,
+            preserve_parameters=preserved_parameters,
         )
         if mapped_count <= 0:
             continue
@@ -1074,6 +1215,8 @@ def repair_automapped_project(
         raise AutoMapError("le contrôleur choisi n'existe plus dans ce projet")
     controller, controller_node = controller_pair
     controls_node = _child(controller_node, "Controls")
+    rotaries = _rotary_controls(controller_node)
+    buttons = _button_controls(controller_node)
     control_ids = {
         int(control.get("id"))
         for control in controls_node.children
@@ -1100,6 +1243,18 @@ def repair_automapped_project(
     if hardware_maps is None:
         raise AutoMapError("aucune Controller Map enregistrée n'a été trouvée")
     presets = _ensure_presets(controller_node)
+    plugin_pairs, _skipped_plugins = _project_plugins(tree)
+    plugins_by_type: dict[str, list[ProjectPlugin]] = {}
+    for plugin, _plugin_node in plugin_pairs:
+        plugins_by_type.setdefault(plugin.map_type_id, []).append(plugin)
+    known_plugin_uids = {plugin.plugin_uid for plugin, _plugin_node in plugin_pairs}
+    current_plugin_uids = {
+        int(node.get("pluginUid"))
+        for node in _walk(tree)
+        if node.get("pluginUid") is not None and node.get("pluginTypeName") is not None
+    }
+    rotary_number_by_id = {int(control.get("id")): number for number, control in rotaries}
+    button_number_by_id = {int(control.get("id")): number for number, control in buttons}
 
     def is_plugin_control_assignment(assignment: ValueTree) -> bool:
         controllable = assignment.get("ControllableId")
@@ -1174,7 +1329,106 @@ def repair_automapped_project(
         conflict_keys.update(
             key for key, values in parameter_values.items() if len(values) > 1
         )
-        consolidated = list(selected.values())
+        raw_consolidated = list(selected.values())
+        consolidated: list[ValueTree] = []
+
+        # Drop stale Processor targets that no longer exist in the project.
+        # Current but unsupported/opaque processors are kept with the same
+        # duplicate rule as supported plugins.
+        # Supported plugin instances are rebuilt from one shared type profile:
+        # a button may share only its matching rotary for permanent labelling;
+        # every other duplicate is removed.
+        opaque_by_uid: dict[int, list[ValueTree]] = {}
+        for assignment in raw_consolidated:
+            controllable = str(assignment.get("ControllableId", ""))
+            try:
+                target_uid = int(controllable.removeprefix("Processor"))
+            except (TypeError, ValueError):
+                target_uid = -1
+            if target_uid in current_plugin_uids and target_uid not in known_plugin_uids:
+                opaque_by_uid.setdefault(target_uid, []).append(assignment)
+
+        for opaque_assignments in opaque_by_uid.values():
+            used_parameters: set[object] = set()
+            kept_buttons: dict[int, ValueTree] = {}
+            for assignment in sorted(
+                opaque_assignments,
+                key=lambda item: button_number_by_id.get(
+                    int(item.get("ControllerId", -1)), 10_000
+                ),
+            ):
+                control_id = int(assignment.get("ControllerId", -1))
+                if control_id not in button_number_by_id:
+                    continue
+                parameter_id = assignment.get("ParameterId")
+                if parameter_id in used_parameters:
+                    continue
+                kept_buttons[button_number_by_id[control_id]] = assignment
+                used_parameters.add(parameter_id)
+                consolidated.append(copy.deepcopy(assignment))
+            for assignment in sorted(
+                opaque_assignments,
+                key=lambda item: rotary_number_by_id.get(
+                    int(item.get("ControllerId", -1)), 10_000
+                ),
+            ):
+                control_id = int(assignment.get("ControllerId", -1))
+                if control_id not in rotary_number_by_id:
+                    continue
+                number = rotary_number_by_id[control_id]
+                parameter_id = assignment.get("ParameterId")
+                paired_button = kept_buttons.get(number)
+                if parameter_id in used_parameters and (
+                    paired_button is None or paired_button.get("ParameterId") != parameter_id
+                ):
+                    continue
+                consolidated.append(copy.deepcopy(assignment))
+                used_parameters.add(parameter_id)
+
+        for same_type_plugins in plugins_by_type.values():
+            reference = same_type_plugins[0]
+            plugin_uids = {plugin.plugin_uid for plugin in same_type_plugins}
+            preserved_parameters: list[int] = []
+            for assignment in raw_consolidated:
+                controllable = assignment.get("ControllableId")
+                if not isinstance(controllable, str) or not controllable.startswith(
+                    "Processor"
+                ):
+                    continue
+                try:
+                    target_uid = int(controllable.removeprefix("Processor"))
+                    parameter_id = int(assignment.get("ParameterId"))
+                except (TypeError, ValueError):
+                    continue
+                if (
+                    target_uid in plugin_uids
+                    and 0 <= parameter_id < reference.parameter_count
+                    and parameter_id not in preserved_parameters
+                ):
+                    preserved_parameters.append(parameter_id)
+            profile, profile_priority = _mapping_profile_details(
+                raw_consolidated,
+                controller_uid=controller_uid,
+                plugin=reference,
+                plugin_uids=plugin_uids,
+                # A control changed in the active map compared with an older
+                # preset is an explicit manual edit and must beat a technical
+                # duplicate elsewhere in the layout.
+                preferred_keys=active_keys & conflict_keys,
+            )
+            for plugin in same_type_plugins:
+                normalized, _mapped_count = _plugin_assignments(
+                    controller_uid=controller_uid,
+                    plugin=plugin,
+                    rotaries=rotaries,
+                    buttons=buttons,
+                    profile=profile,
+                    profile_priority=profile_priority,
+                    preserve_parameters=preserved_parameters,
+                    fill_unassigned=False,
+                )
+                consolidated.extend(normalized)
+
         restored_total += sum(key not in active_keys for key in selected)
 
         _replace_plugin_control_assignments(

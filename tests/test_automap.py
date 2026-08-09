@@ -606,7 +606,7 @@ class AutoMapTests(unittest.TestCase):
             self.assertNotEqual(generated_preset.children[0].get("mapId"), runtime_map_id)
             self.assertEqual(hardware_root.get("ActiveMap"), runtime_map_id)
 
-    def test_existing_manual_profile_prioritizes_rotaries_and_pairs_button_label(self):
+    def test_existing_manual_profile_keeps_only_matched_button_label_pair(self):
         with TemporaryDirectory() as temporary:
             root = Path(temporary)
             source = root / "source.rack2"
@@ -657,6 +657,14 @@ class AutoMapTests(unittest.TestCase):
                 node(
                     "Assignment",
                     ParentControllerId=12687768,
+                    ControllerId=23_000_003,
+                    ControllableId="Processor7956475",
+                    ParameterId=8,
+                    selectMode=True,
+                ),
+                node(
+                    "Assignment",
+                    ParentControllerId=12687768,
                     ControllerId=22_000_002,
                     ControllableId="Processor7956475",
                     ParameterId=5,
@@ -691,10 +699,104 @@ class AutoMapTests(unittest.TestCase):
                 for assignment in active_map.children[0].children
                 if assignment.get("ControllableId") == "Processor7956475"
             }
-            self.assertEqual(mapped[23_000_001], 8)
             self.assertEqual(mapped[23_000_002], 5)
             self.assertEqual(mapped[23_000_016], 9)
             self.assertEqual(mapped[22_000_002], 5)
+            rotary_values = [
+                parameter_id
+                for control_id, parameter_id in mapped.items()
+                if 23_000_001 <= control_id <= 23_000_016
+            ]
+            self.assertEqual(rotary_values.count(8), 1)
+            self.assertEqual(len(rotary_values), len(set(rotary_values)))
+            duplicate_places = {
+                parameter_id: sorted(control_id for control_id, value in mapped.items() if value == parameter_id)
+                for parameter_id in set(mapped.values())
+                if list(mapped.values()).count(parameter_id) > 1
+            }
+            self.assertEqual(duplicate_places, {5: [22_000_002, 23_000_002]})
+
+    def test_automap_keeps_complementary_manual_parameters_once(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "manual.rack2"
+            mapped = root / "mapped.rack2"
+            project = controller_project(parameter_count=30)
+            chains = next(child for child in project.children if child.type_name == "Chains")
+            plugins = next(
+                child
+                for child in chains.children[0].children
+                if child.type_name == "ChainPlugins"
+            )
+            second = parse_tree(write_tree(plugins.children[0]))
+            second.set("pluginUid", 8_888_888)
+            plugins.children.append(second)
+
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            runtime_map_id = 30_000_050
+            hardware_root.set("ActiveMap", runtime_map_id)
+            project.children.append(node("GlobalSnapshot", ControllerMapId=runtime_map_id))
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            assignments = node("Assignments")
+            for plugin_uid, values in (
+                (7_956_475, (0, 1, 2)),
+                (8_888_888, (0, 28)),
+            ):
+                for number, parameter_id in enumerate(values, 1):
+                    assignments.children.append(
+                        node(
+                            "Assignment",
+                            ParentControllerId=12_687_768,
+                            ControllerId=23_000_000 + number,
+                            ControllableId=f"Processor{plugin_uid}",
+                            ParameterId=parameter_id,
+                        )
+                    )
+            runtime_map = node("HardwareCtrlMap", Name="Dynamic", mapId=runtime_map_id)
+            runtime_map.children = [assignments, parse_tree(write_tree(assignments))]
+            hardware_maps.children.append(runtime_map)
+            source.write_bytes(write_tree(project))
+
+            create_automapped_project(
+                source,
+                mapped,
+                plugin_uid=None,
+                controller_uid=12_687_768,
+                expand_to_fullbank=False,
+            )
+
+            generated = parse_tree(mapped.read_bytes())
+            generated_hardware = next(
+                child
+                for child in generated.children
+                if child.type_name == "HardwareControllers"
+            )
+            generated_maps = next(
+                child
+                for child in generated_hardware.children
+                if child.type_name == "HardwareCtrlMaps"
+            )
+            generated_map = next(
+                item for item in generated_maps.children if item.get("mapId") == runtime_map_id
+            )
+            layouts = {}
+            for plugin_uid in (7_956_475, 8_888_888):
+                layouts[plugin_uid] = {
+                    assignment.get("ControllerId"): assignment.get("ParameterId")
+                    for assignment in generated_map.children[0].children
+                    if assignment.get("ControllableId") == f"Processor{plugin_uid}"
+                }
+            self.assertEqual(layouts[7_956_475], layouts[8_888_888])
+            self.assertIn(1, layouts[7_956_475].values())
+            self.assertIn(28, layouts[7_956_475].values())
+            self.assertEqual(
+                len(layouts[7_956_475].values()),
+                len(set(layouts[7_956_475].values())),
+            )
 
     def test_repair_merges_stale_dynamic_presets_and_preserves_active_changes(self):
         with TemporaryDirectory() as temporary:
@@ -810,6 +912,18 @@ class AutoMapTests(unittest.TestCase):
             }
             self.assertEqual(active[("Processor8888888", 23_000_001)], 7)
             self.assertIn(("Processor7956475", 23_000_001), active)
+            first_layout = {
+                control_id: parameter_id
+                for (processor, control_id), parameter_id in active.items()
+                if processor == "Processor7956475"
+            }
+            second_layout = {
+                control_id: parameter_id
+                for (processor, control_id), parameter_id in active.items()
+                if processor == "Processor8888888"
+            }
+            self.assertEqual(first_layout, second_layout)
+            self.assertEqual(len(first_layout.values()), len(set(first_layout.values())))
             fixed_controllers = next(
                 child for child in hardware_root.children if child.type_name == "HardwareControllers"
             )
@@ -836,6 +950,79 @@ class AutoMapTests(unittest.TestCase):
             }
             self.assertEqual(dynamic_values[("Processor8888888", 23_000_001)], 7)
             self.assertIn(("Processor7956475", 23_000_001), dynamic_values)
+
+    def test_repair_unifies_instances_without_losing_unique_manual_parameters(self):
+        with TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            source = root / "manual.rack2"
+            repaired = root / "repaired.rack2"
+            project = controller_project(parameter_count=30)
+            chains = next(child for child in project.children if child.type_name == "Chains")
+            plugins = next(
+                child
+                for child in chains.children[0].children
+                if child.type_name == "ChainPlugins"
+            )
+            second = parse_tree(write_tree(plugins.children[0]))
+            second.set("pluginUid", 8_888_888)
+            plugins.children.append(second)
+
+            hardware_root = next(
+                child for child in project.children if child.type_name == "HardwareControllers"
+            )
+            runtime_map_id = 30_000_050
+            hardware_root.set("ActiveMap", runtime_map_id)
+            project.children.append(node("GlobalSnapshot", ControllerMapId=runtime_map_id))
+            hardware_maps = next(
+                child for child in hardware_root.children if child.type_name == "HardwareCtrlMaps"
+            )
+            assignments = node("Assignments")
+            for plugin_uid, values in (
+                (7_956_475, (0, 1, 2)),
+                (8_888_888, (0, 3)),
+            ):
+                for number, parameter_id in enumerate(values, 1):
+                    assignments.children.append(
+                        node(
+                            "Assignment",
+                            ParentControllerId=12_687_768,
+                            ControllerId=23_000_000 + number,
+                            ControllableId=f"Processor{plugin_uid}",
+                            ParameterId=parameter_id,
+                        )
+                    )
+            runtime_map = node("HardwareCtrlMap", Name="Dynamic", mapId=runtime_map_id)
+            runtime_map.children = [assignments, parse_tree(write_tree(assignments))]
+            hardware_maps.children.append(runtime_map)
+            source.write_bytes(write_tree(project))
+
+            repair_automapped_project(source, repaired, controller_uid=12_687_768)
+
+            fixed = parse_tree(repaired.read_bytes())
+            fixed_hardware = next(
+                child for child in fixed.children if child.type_name == "HardwareControllers"
+            )
+            fixed_maps = next(
+                child
+                for child in fixed_hardware.children
+                if child.type_name == "HardwareCtrlMaps"
+            )
+            fixed_map = next(
+                item for item in fixed_maps.children if item.get("mapId") == runtime_map_id
+            )
+            layouts = {}
+            for plugin_uid in (7_956_475, 8_888_888):
+                layouts[plugin_uid] = {
+                    assignment.get("ControllerId"): assignment.get("ParameterId")
+                    for assignment in fixed_map.children[0].children
+                    if assignment.get("ControllableId") == f"Processor{plugin_uid}"
+                }
+            self.assertEqual(layouts[7_956_475], layouts[8_888_888])
+            self.assertEqual(set(layouts[7_956_475].values()), {0, 1, 2, 3})
+            self.assertEqual(
+                len(layouts[7_956_475].values()),
+                len(set(layouts[7_956_475].values())),
+            )
 
 
 if __name__ == "__main__":

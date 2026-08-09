@@ -112,7 +112,7 @@ If the Companion Controller type is not available, the installed LiveProfessor v
 
 Auto-mapping therefore works even when no CTRL2 was imported into the source project: the embedded controller is added to the copy only, never to the original file.
 
-The `EC4 AutoMap - Dynamic` map contains several assignments per rotary, all using **Only If Selected**. They can therefore coexist while only the selected plugin instance should respond. When several identical instances existed during generation, every instance is included. The generator also populates the `HardwareCtrlMaps` referenced by the project and its snapshots because LiveProfessor can recall one of those maps after loading. Presets therefore no longer have to be loaded manually plugin by plugin. Existing push-button assignments are preserved.
+The `EC4 AutoMap - Dynamic` map contains several assignments per rotary, all using **Only If Selected**. They can therefore coexist while only the selected plugin instance should respond. Every instance of the same plugin type receives the exact same profile, built from active assignments and the majority choice. Complementary manual functions are placed on remaining free rotaries, within the capacity of the selected bank; a function already present is not mapped somewhere else. The only allowed repetition is a matched `push N + rotary N` pair carrying the same parameter, which is required to show the push label before it is pressed. The generator also populates the `HardwareCtrlMaps` referenced by the project and its snapshots because LiveProfessor can recall one of those maps after loading. Presets therefore no longer have to be loaded manually plugin by plugin.
 
 The source project is never rewritten. If the selected destination already exists, the tool first creates a timestamped backup. The generated file is parsed and serialized again before it is accepted.
 
@@ -121,7 +121,8 @@ Current limitations:
 - controls follow the automation parameter order exposed by the plugin, not yet a custom musical ranking;
 - 16 parameters are mapped in UniBank, or up to 99 in FullBank;
 - parameters that LiveProfessor cannot see cannot be created;
-- push buttons and Shift shortcuts remain unchanged;
+- existing pushes are kept and paired only with the same-number rotary for their label;
+- Shift shortcuts remain unchanged;
 - a plugin added after generation requires a new auto-mapped copy.
 
 ### Create one Controller Map per plugin type manually

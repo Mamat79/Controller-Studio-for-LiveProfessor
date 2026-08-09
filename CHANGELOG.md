@@ -5,8 +5,12 @@
 - correction de la collision entre la map dynamique rappelée par les snapshots et le premier preset généré ;
 - ajout de **Réparer les mappings**, qui crée une copie consolidée sans modifier le projet source et donne toujours priorité aux affectations actuellement actives ;
 - synchronisation des presets dynamiques devenus obsolètes afin que le rappel d'un preset ne supprime plus les mappings appris ensuite ;
-- réutilisation prioritaire des ordres de paramètres et des poussoirs déjà appris, instance par instance puis par type de plugin ;
-- jumelage automatique d'un poussoir appris avec le rotatif de même numéro lorsque celui-ci est libre, afin de conserver le label sur l'EC4 ;
+- profil unique et déterministe pour toutes les instances d'un même type de plugin ;
+- fusion des fonctions manuelles complémentaires dans les rotatifs encore libres, sans remapper une fonction déjà présente ailleurs ;
+- suppression des doublons entre deux rotatifs, deux poussoirs ou deux emplacements physiques différents ;
+- conservation du seul doublon intentionnel `poussoir N + rotatif N`, avec le même paramètre, afin que le label du poussoir reste visible en permanence sur l'EC4 ;
+- priorité d'affichage : label du rotatif quand il existe, sinon label du poussoir seul, avec nom et valeur du poussoir lors de l'appui ;
+- suppression pendant la réparation des affectations obsolètes visant des instances de plugins qui ne sont plus présentes dans le projet ;
 - prise en charge des identifiants JUCE hexadécimaux non complétés à huit chiffres, dont CEDAR StageVox ;
 - lorsqu'un plugin est incompatible avec l'auto-mapping, il est maintenant ignoré avec un avertissement tandis que les autres plugins continuent d'être traités ;
 - ajout de notices PDF complètes en français et en anglais, accessibles depuis le menu Aide et intégrées aux paquets ;

@@ -111,7 +111,7 @@ Si le type Companion Controller n’existe pas, la version installée de LivePro
 
 L'auto-mapping fonctionne donc même si aucun CTRL2 n'avait encore été importé dans le projet source : le contrôleur intégré est ajouté à la copie seulement, jamais au fichier original.
 
-La map `EC4 AutoMap - Dynamic` contient plusieurs affectations par rotatif, toutes en mode **Only If Selected**. Elles peuvent donc cohabiter : seule l'instance de plugin sélectionnée doit répondre. Si plusieurs instances identiques étaient présentes lors de la génération, elles sont toutes incluses. Le générateur peuple aussi les `HardwareCtrlMaps` référencés par le projet et ses snapshots, car LiveProfessor peut rappeler l'une de ces maps après le chargement. Il n'est donc plus nécessaire de charger manuellement un preset plugin par plugin. Les affectations existantes des poussoirs sont conservées.
+La map `EC4 AutoMap - Dynamic` contient plusieurs affectations par rotatif, toutes en mode **Only If Selected**. Elles peuvent donc cohabiter : seule l'instance de plugin sélectionnée doit répondre. Toutes les instances d'un même type de plugin reçoivent exactement le même profil, construit à partir des affectations actives et du choix majoritaire. Les fonctions manuelles complémentaires sont placées sur les rotatifs encore libres, dans la limite de la banque choisie ; une fonction déjà présente n'est pas remappée ailleurs. La seule répétition autorisée est le couple `poussoir N + rotatif N` avec le même paramètre, nécessaire pour que le label du poussoir soit visible avant l'appui. Le générateur peuple aussi les `HardwareCtrlMaps` référencés par le projet et ses snapshots, car LiveProfessor peut rappeler l'une de ces maps après le chargement. Il n'est donc plus nécessaire de charger manuellement un preset plugin par plugin.
 
 Le projet source n'est jamais réécrit. Si la destination choisie existe, l'outil en crée d'abord une sauvegarde horodatée. Le fichier généré est relu et re-sérialisé avant d'être accepté.
 
@@ -120,7 +120,8 @@ Limites actuelles :
 - l'ordre est celui des paramètres d'automation exposés par le plugin, pas encore un classement musical personnalisé ;
 - 16 paramètres sont mappés en UniBank, ou 99 maximum en FullBank ;
 - les paramètres non exposés à LiveProfessor ne peuvent pas être créés ;
-- les poussoirs et les raccourcis Shift restent inchangés ;
+- les poussoirs existants sont conservés et jumelés uniquement avec le rotatif de même numéro pour leur label ;
+- les raccourcis Shift restent inchangés ;
 - un plugin ajouté au projet après la génération nécessite une nouvelle copie auto-mappée.
 
 ### Créer manuellement une Controller Map par type de plugin

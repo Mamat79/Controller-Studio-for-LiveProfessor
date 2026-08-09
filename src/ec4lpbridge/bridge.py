@@ -87,6 +87,9 @@ class EC4LiveProfessorBridge:
         if self.config.mode == "companion":
             self.names, self.short_names = self._sanitize_profile_labels(self.names)
         self.display_values = ["-"] * config.max_controls
+        self.button_names = [""] * config.bank_size
+        self.button_short_names = [""] * config.bank_size
+        self.button_display_values = ["-"] * config.bank_size
         self.values = [0.0] * config.max_controls
         self.active_bank = min(config.start_bank, self.bank_count - 1)
         self.setup_state: EC4SetupState | None = None
@@ -647,6 +650,17 @@ class EC4LiveProfessorBridge:
             )
         if not pressed:
             return
+        button_name = self._button_display_name(physical_index)
+        if button_name:
+            button_value = self._normalize_companion_value(
+                self.button_display_values[physical_index]
+            )
+            lines = [button_name]
+            if button_value not in {"", "-"}:
+                lines.append(button_value)
+            lines.append(self.profile.plugin_label)
+            self._show_overlay(lines)
+            return
         global_index = self._global_index(physical_index)
         if global_index is not None:
             self._show_parameter(global_index)
@@ -1126,6 +1140,18 @@ class EC4LiveProfessorBridge:
         number = int(match.group(1))
         return number if number >= 1 else None
 
+    @staticmethod
+    def _button_number(value: Any) -> int | None:
+        match = re.search(
+            r"(?:Generic\s*Button|GenericButton|Button)\s*(\d+)",
+            str(value),
+            flags=re.IGNORECASE,
+        )
+        if not match:
+            return None
+        number = int(match.group(1))
+        return number if number >= 1 else None
+
     def _on_osc(self, address: str, args: list[Any]) -> None:
         try:
             LOGGER.debug("OSC <- %s %r", address, args)
@@ -1149,6 +1175,10 @@ class EC4LiveProfessorBridge:
                 self._received_control_numbers.add(number)
                 self._update_name(number - 1, str(args[1]))
                 self._schedule_companion_inventory_report()
+            else:
+                button_number = self._button_number(args[0])
+                if button_number:
+                    self._update_button_name(button_number - 1, str(args[1]))
             return
         if address.casefold().endswith("/controllervalues") and len(args) >= 2:
             number = self._control_number(args[0])
@@ -1156,6 +1186,12 @@ class EC4LiveProfessorBridge:
                 self.display_values[number - 1] = self._normalize_companion_value(args[1])
                 if self._overlay_parameter_index == number - 1:
                     self._schedule_parameter_overlay(number - 1)
+            else:
+                button_number = self._button_number(args[0])
+                if button_number and button_number <= len(self.button_display_values):
+                    self.button_display_values[button_number - 1] = self._normalize_companion_value(
+                        args[1]
+                    )
             return
         if address.casefold().endswith("/viewsets/recall") and args:
             value = self._viewset_index_from_arguments(args)
@@ -1196,6 +1232,19 @@ class EC4LiveProfessorBridge:
         if changed and index // self.config.bank_size == self.active_bank:
             self._schedule_name_refresh()
 
+    def _update_button_name(self, index: int, name: str) -> None:
+        if not 0 <= index < len(self.button_names):
+            return
+        name = self._coerce_companion_name(index, name)
+        self.button_names[index] = name
+        self.button_short_names[index] = "" if not name else short_label(name, index)
+
+    def _button_display_name(self, index: int) -> str:
+        if not 0 <= index < len(self.button_names):
+            return ""
+        name = self.button_names[index].strip()
+        return "" if self._is_default_label(name) else name
+
     def _display_name(self, index: int) -> str:
         name = self.names[index]
         if self.config.mode == "companion" and self._is_default_label(name):
@@ -1205,9 +1254,14 @@ class EC4LiveProfessorBridge:
     def _display_short_label(self, index: int, label: str) -> str:
         if self.config.mode != "companion":
             return label
-        if not self._is_control_mapped(index):
-            return ""
-        return label
+        if self._is_control_mapped(index):
+            return label
+        # A push-only mapping still deserves a permanent label. Reuse the
+        # otherwise empty encoder cell without creating a fake rotary mapping.
+        physical_index = index % self.config.bank_size
+        if 0 <= physical_index < len(self.button_short_names):
+            return self.button_short_names[physical_index]
+        return ""
 
     @staticmethod
     def _normalize_default_token(name: str) -> str:
