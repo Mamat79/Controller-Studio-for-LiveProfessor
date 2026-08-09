@@ -1,6 +1,6 @@
 import unittest
 
-from ec4lpbridge.osc_codec import OSCError, decode_message, encode_message
+from silemio_control_hub.transports.osc import OSCError, decode_message, encode_message
 
 
 class OSCCodecTests(unittest.TestCase):

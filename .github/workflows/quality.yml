@@ -1,0 +1,52 @@
+name: Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests-and-independent-wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install
+        run: python -m pip install --upgrade pip build pytest && python -m pip install -e .
+      - name: Tests
+        run: python -m pytest -q
+      - name: Build independent wheel
+        run: python -m build --wheel
+      - name: Reject historical package leakage
+        run: python scripts/check_wheel_contents.py dist/*.whl
+
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-build.txt
+      - name: Install build dependencies
+        run: python -m pip install -r requirements-build.txt
+      - name: Build independent Windows executable
+        shell: pwsh
+        run: ./packaging/windows/build.ps1
+      - name: Reject historical package leakage
+        shell: pwsh
+        run: ./scripts/check_exe_contents.ps1 ./dist/Controller-Studio-for-LiveProfessor.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Controller-Studio-for-LiveProfessor-Windows
+          path: dist/Controller-Studio-for-LiveProfessor.exe
+          if-no-files-found: error

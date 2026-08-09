@@ -1,12 +1,15 @@
 import unittest
 from types import SimpleNamespace
 
-from ec4lpbridge.bridge import EC4LiveProfessorBridge
-from ec4lpbridge.config import BridgeConfig
-from ec4lpbridge.ec4_protocol import (
+from silemio_control_hub.runtime.config import BridgeConfig
+from silemio_control_hub.runtime.ec4_liveprofessor import (
+    EC4LiveProfessorRuntime as EC4LiveProfessorBridge,
+)
+from silemio_control_hub.adapters.devices.ec4_protocol import (
     EC4SetupState,
     main_display_message,
     parameter_grid_message,
+    total_display_message,
 )
 
 
@@ -431,7 +434,18 @@ class BridgeTests(unittest.TestCase):
         bridge._startup_banner_shown = False
         bridge.show_startup_banner()
         self.assertTrue(bridge._startup_banner_shown)
-        self.assertTrue(len(bridge._midi.sysex) > 0)
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            total_display_message(
+                [
+                    "Connexion OK",
+                    "SiLeMI/O CtrlStudio",
+                    "By Mamat",
+                    "-----[]---",
+                ],
+                alignments=["center", "center", "right", "right"],
+            ),
+        )
         banner_count = len(bridge._midi.sysex)
         bridge.show_startup_banner()
         self.assertEqual(len(bridge._midi.sysex), banner_count)

@@ -370,7 +370,7 @@ class AutoMapTests(unittest.TestCase):
             presets = next(child for child in presets_root.children if child.type_name == "Presets")
             self.assertEqual(
                 {preset.get("Name") for preset in presets.children},
-                {"Mon mapping manuel", "EC4 AutoMap - Avalon VT-747SP"},
+                {"Mon mapping manuel", "SiLeMI/O AutoMap - Avalon VT-747SP"},
             )
             self.assertEqual(
                 next(p for p in presets.children if p.get("Name") == "Mon mapping manuel")
@@ -413,7 +413,7 @@ class AutoMapTests(unittest.TestCase):
                 for child in hardware_maps.children
                 if child.get("mapId") == hardware_root.get("ActiveMap")
             )
-            self.assertEqual(active_map.get("Name"), "EC4 AutoMap - Dynamic")
+            self.assertEqual(active_map.get("Name"), "SiLeMI/O AutoMap - Dynamic")
             assignments = active_map.children[0].children
             self.assertEqual(len(assignments), 60)
             self.assertEqual(
@@ -461,7 +461,7 @@ class AutoMapTests(unittest.TestCase):
             )
             presets = next(child for child in presets_root.children if child.type_name == "Presets")
             self.assertEqual(len(presets.children), 2)
-            self.assertEqual(presets.children[0].get("Name"), "EC4 AutoMap - Dynamic")
+            self.assertEqual(presets.children[0].get("Name"), "SiLeMI/O AutoMap - Dynamic")
             self.assertEqual(
                 len(presets.children[0].children[0].children[0].children),
                 60,
@@ -471,7 +471,7 @@ class AutoMapTests(unittest.TestCase):
             )
             self.assertEqual(
                 {hardware_map.get("Name") for hardware_map in hardware_maps.children},
-                {"EC4 AutoMap - Dynamic", "EC4 AutoMap - ValhallaPlate"},
+                {"SiLeMI/O AutoMap - Dynamic", "SiLeMI/O AutoMap - ValhallaPlate"},
             )
 
     def test_snapshot_recalled_runtime_map_receives_combined_assignments(self):
@@ -546,7 +546,7 @@ class AutoMapTests(unittest.TestCase):
                 child for child in hardware_maps.children if child.get("mapId") == 7_777_777
             )
             assignments = runtime_map.children[0].children
-            self.assertEqual(runtime_map.get("Name"), "EC4 AutoMap - Dynamic")
+            self.assertEqual(runtime_map.get("Name"), "SiLeMI/O AutoMap - Dynamic")
             self.assertEqual(len(assignments), 61)
             self.assertEqual(
                 sum(assignment.get("ControllableId") == "PluginWindow" for assignment in assignments),
@@ -601,7 +601,9 @@ class AutoMapTests(unittest.TestCase):
             )
             presets = next(child for child in presets_root.children if child.type_name == "Presets")
             generated_preset = next(
-                preset for preset in presets.children if preset.get("Name") == "EC4 AutoMap - Avalon VT-747SP"
+                preset
+                for preset in presets.children
+                if preset.get("Name") == "SiLeMI/O AutoMap - Avalon VT-747SP"
             )
             self.assertNotEqual(generated_preset.children[0].get("mapId"), runtime_map_id)
             self.assertEqual(hardware_root.get("ActiveMap"), runtime_map_id)

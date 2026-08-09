@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:silemio:controller-library-manifest:v1",
+  "title": "SiLeMI/O Controller Library Manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "generated_at", "profiles"],
+  "properties": {
+    "manifest_version": {"const": 1},
+    "generated_at": {"type": "string", "minLength": 1},
+    "profiles": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/profileEntry"}
+    },
+    "plugin_profiles": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/profileEntry"}
+    }
+  },
+  "$defs": {
+    "profileEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "status", "path", "sha256"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        "version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"},
+        "status": {"enum": ["builtin", "verified", "community"]},
+        "path": {"type": "string", "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\).+\\.json$"},
+        "sha256": {"type": "string", "pattern": "^[0-9A-Fa-f]{64}$"},
+        "minimum_hub_version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"}
+      }
+    }
+  }
+}
