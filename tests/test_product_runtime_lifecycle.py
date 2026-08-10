@@ -84,7 +84,7 @@ def test_runtime_connects_reconnects_and_repeats_the_product_banner(monkeypatch)
     midi = FakeMidiConnection.instances[-1]
 
     runtime.start()
-    wait_until(lambda: midi.open_count == 1)
+    wait_until(lambda: midi.open_count == 1 and midi.sysex and midi.sysex[-1] == SETUP_REQUEST)
     first_banner = midi.sysex[0]
     assert midi.sysex[-1] == SETUP_REQUEST
     assert runtime.snapshot().midi_connected is True
