@@ -48,6 +48,29 @@ The interface is available in French and English, minimizes to the notification 
 
 Controller Studio reloads the generated copy before presenting it. Existing manual assignments remain authoritative.
 
+## AutoMap: the central feature
+
+AutoMap avoids permanently tying every physical MIDI control to every parameter of every plug-in. Controller Studio separates both sides of the mapping:
+
+- the **controller profile** describes the hardware's encoders, faders, buttons, banks and MIDI messages once;
+- the **plug-in profile** describes its real parameters, order, priority and inclusion choices once;
+- **AutoMap combines both** in LiveProfessor Controller Maps for every selected instance.
+
+As a result, one properly described controller can work with every prepared plug-in, while one plug-in profile can be reused with every controller that provides enough logical controls. Changing controller no longer means manually remapping every plug-in; adding another instance of an already recognized plug-in no longer means repeating its MIDI Learn setup.
+
+| Need | Direct MIDI Learn in LiveProfessor | Controller Studio + AutoMap |
+|---|---|---|
+| Initial setup | Learn every physical control, one parameter at a time | Describe or select the controller once, then let AutoMap create the assignments |
+| Several plug-ins | Repeat the mapping plug-in by plug-in | Process every plug-in, or only the checked ones, in one operation |
+| Several instances of one plug-in | Repeat the work for every instance | Automatically reuse the same parameter order on all selected instances |
+| Change MIDI controller | Relearn the new hardware's CC/Note messages for the plug-ins | Select or build its profile and export its `.ctrl2`; the logical AutoMap slots remain reusable |
+| Select useful parameters | Manually browse every exposed parameter | Select, exclude, prioritize and name them once in Plugin Studio |
+| Banks and parameter-rich plug-ins | Manual organization that often differs between plug-ins | UniBank for a simple layout or FullBank for up to 99 logical controls |
+| Labels and feedback | Depend on the mappings built by hand | Short names, values and Companion feedback follow the same order as the controls |
+| Project safety | Mapping is performed inside the open project | AutoMap creates and validates a new `.rack2` copy; the source project remains untouched |
+
+Existing manual mappings are never overwritten: they remain authoritative and AutoMap fills only the available slots. The result is a reusable system that maintains one controller bank and one plug-in bank instead of many **controller × plug-in × instance** mappings.
+
 ## Plugin Studio
 
 A `.rack2` file stores parameter order and identifiers, but not always their human-readable labels. Plugin Studio retrieves that data directly from installed VST3 plug-ins, each in an isolated process. A result is accepted only when its parameter count exactly matches the LiveProfessor project.
