@@ -571,6 +571,10 @@ CONTENT = {
                         "p",
                         "Le sélecteur de la page Live reste synchronisé avec la banque. Configurer / apprentissage MIDI ouvre l'éditeur pour le contrôleur actif. Lorsqu'un pilote temps réel est disponible, les boutons Démarrer, Arrêter, les banques et les réglages adaptés deviennent accessibles. Le setup et le groupe affichés avec l'EC4 sont propres à ce matériel. Sinon, le profil reste immédiatement utilisable pour l'export et AutoMap.",
                     ),
+                    (
+                        "p",
+                        "L'option de connexion automatique réutilise toujours le contrôleur sélectionné. Avec l'EC4, le message de connexion suit la langue de l'application. Si LiveProfessor n'a pas encore démarré, l'écran reste sur Attente démarrage / LiveProfessor ou Waiting for / LiveProfessor, puis revient automatiquement aux paramètres dès le premier retour OSC.",
+                    ),
                     ("h2", "Exporter vers LiveProfessor"),
                     (
                         "steps",
@@ -666,6 +670,11 @@ CONTENT = {
                         "p",
                         "Réglages retrouve la petite fenêtre avancée d'EC4 Bridge : cadence et durée de l'Overlay, rafraîchissement Companion et des labels, délai maximal du retour LiveProfessor et affichage persistant. Ces temporisations sont communes aux contrôleurs compatibles ; les commandes setup/groupe et SysEx restent propres à l'EC4.",
                     ),
+                    ("h2", "Démarrage automatique d'un serveur"),
+                    (
+                        "p",
+                        "Deux cases indépendantes sont disponibles sur la page Live et dans Options. Lancer Controller Studio avec Windows ouvre l'application directement dans la zone de notification. Démarrer automatiquement la connexion du contrôleur sélectionné lance ensuite le moteur sans clic manuel. Si Windows n'a pas encore rendu les ports MIDI disponibles, Controller Studio réessaie silencieusement plusieurs fois. Laissez aussi LiveProfessor configuré pour démarrer avec Windows si le serveur doit devenir autonome.",
+                    ),
                     ("h2", "Langue et zone de notification"),
                     (
                         "p",
@@ -746,6 +755,7 @@ CONTENT = {
                     ("p", "Edit / duplicate creates a personal copy of a built-in profile without changing the original. Import a profile installs validated JSON. Every personal replacement keeps a backup."),
                     ("h2", "Active controller"),
                     ("p", "The Live page selector stays synchronized with the bank. Configure / MIDI Learn opens the editor for the active controller. When a real-time driver is available, Start, Stop, bank, and matching settings become available. The setup and group shown with the EC4 are specific to that hardware. Otherwise, the profile remains ready for export and AutoMap."),
+                    ("p", "Automatic connection always reuses the selected controller. On the EC4, the connection message follows the application language. If LiveProfessor has not started yet, the screen remains on Attente demarrage / LiveProfessor or Waiting for / LiveProfessor, then automatically restores the parameter display on the first OSC feedback."),
                     ("h2", "Export to LiveProfessor"),
                     ("steps", [("1", "Select the controller in the bank."), ("2", "Click Export controller .ctrl2."), ("3", "In LiveProfessor, open Hardware Controllers Setup, then Load from file.")]),
                 ],
@@ -787,6 +797,8 @@ CONTENT = {
                     ("p", "The Live page keeps only the active controller, essential actions, status, and last event. MIDI/OSC connections are under Settings, and the complete log opens in a separate window."),
                     ("h2", "Responsiveness, feedback, and Overlay"),
                     ("p", "Settings restores EC4 Bridge's compact advanced window: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are shared by compatible controllers; setup/group and SysEx commands remain EC4-only."),
+                    ("h2", "Automatic server startup"),
+                    ("p", "Two independent checkboxes are available on the Live page and under Options. Launch Controller Studio with Windows opens the application directly in the notification area. Connect the selected controller automatically then starts the engine without a manual click. If Windows has not exposed the MIDI ports yet, Controller Studio retries silently several times. Configure LiveProfessor to start with Windows as well when the server must become autonomous."),
                     ("h2", "Language and notification area"),
                     ("p", "Options > Language switches immediately between French and English. Minimizing to the notification area hides the window without stopping an active engine; Quit actually stops the application."),
                     ("h2", "Manual, updates, and support"),

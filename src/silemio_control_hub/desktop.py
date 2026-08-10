@@ -8,6 +8,7 @@ import hashlib
 import os
 import queue
 import re
+import sys
 import threading
 import time
 import tkinter as tk
@@ -98,11 +99,13 @@ from .runtime.config import default_config_path, legacy_config_path
 from .transports.midi import input_names, output_names
 from .transports.osc import decode_message, encode_message
 from .windows_tray import TrayCommand, WindowsTray
+from .windows_startup import set_start_with_windows, starts_with_windows
 from .workflow import prepare_liveprofessor_project
 
 
 PRODUCT_ICON_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.ico"
 DISPLAY_VERSION = f"V.{__version__}"
+AUTO_START_RETRY_DELAYS_MS = (1200, 3000, 6000, 12000, 20000)
 
 
 UI_TEXT = {
@@ -302,6 +305,19 @@ UI_TEXT = {
         "minimize": "Réduire dans la zone de notification",
         "quit": "Quitter",
         "close_to_tray": "Réduire dans la zone de notification à la fermeture",
+        "start_with_windows": "Lancer Controller Studio avec Windows",
+        "auto_start_runtime": (
+            "Démarrer automatiquement la connexion du contrôleur sélectionné"
+        ),
+        "startup_windows_enabled": (
+            "Controller Studio démarrera avec Windows dans la zone de notification."
+        ),
+        "startup_windows_disabled": "Démarrage avec Windows désactivé.",
+        "startup_registration_error": "Démarrage avec Windows impossible : {error}",
+        "runtime_auto_start_attempt": "Connexion automatique à {controller}…",
+        "runtime_auto_start_retry": (
+            "Connexion automatique impossible ; nouvel essai dans {seconds} s."
+        ),
         "language": "Langue",
         "french": "Français",
         "english": "English",
@@ -823,6 +839,17 @@ UI_TEXT = {
         "minimize": "Minimize to notification area",
         "quit": "Quit",
         "close_to_tray": "Minimize to notification area when closing",
+        "start_with_windows": "Launch Controller Studio with Windows",
+        "auto_start_runtime": "Connect the selected controller automatically on startup",
+        "startup_windows_enabled": (
+            "Controller Studio will start with Windows in the notification area."
+        ),
+        "startup_windows_disabled": "Windows startup disabled.",
+        "startup_registration_error": "Could not configure Windows startup: {error}",
+        "runtime_auto_start_attempt": "Connecting automatically to {controller}…",
+        "runtime_auto_start_retry": (
+            "Automatic connection failed; trying again in {seconds} s."
+        ),
         "language": "Language",
         "french": "Français",
         "english": "English",
@@ -1210,12 +1237,19 @@ def live_runtime_supported(profile_id: str | None) -> bool:
 
 
 class ControlHubDesktop:
-    def __init__(self, root: tk.Tk) -> None:
+    def __init__(self, root: tk.Tk, *, start_minimized: bool = False) -> None:
         self.root = root
         self.settings_path = default_desktop_settings_path()
         self.settings = load_desktop_settings(self.settings_path)
         self.language_var = tk.StringVar(value=self.settings.language)
         self.close_to_tray_var = tk.BooleanVar(value=self.settings.close_to_tray)
+        self.start_with_windows_var = tk.BooleanVar(value=starts_with_windows())
+        self.auto_start_runtime_var = tk.BooleanVar(
+            value=self.settings.auto_start_runtime
+        )
+        self._start_minimized = bool(start_minimized)
+        self._auto_start_after_id = None
+        self._auto_start_retry_index = 0
         self.runtime_config_path = default_config_path()
         self._configuration_load_error: str | None = None
         try:
@@ -1333,6 +1367,7 @@ class ControlHubDesktop:
             self._append_runtime_log(
                 f"Configuration par defaut utilisee: {self._configuration_load_error}"
             )
+        self.root.after_idle(self._apply_initial_startup_preferences)
 
     def _t(self, key: str, **values: object) -> str:
         return translated_text(self.language_var.get(), key, **values)
@@ -1463,6 +1498,17 @@ class ControlHubDesktop:
             variable=self.close_to_tray_var,
             command=self._save_close_to_tray,
         )
+        options_menu.add_checkbutton(
+            label=self._t("start_with_windows"),
+            variable=self.start_with_windows_var,
+            command=self._save_start_with_windows,
+        )
+        options_menu.add_checkbutton(
+            label=self._t("auto_start_runtime"),
+            variable=self.auto_start_runtime_var,
+            command=self._save_auto_start_runtime,
+        )
+        options_menu.add_separator()
         language_menu = tk.Menu(options_menu, tearoff=0)
         language_menu.add_radiobutton(
             label=self._t("french"),
@@ -1558,6 +1604,23 @@ class ControlHubDesktop:
         self.live_driver_note.grid(
             row=1, column=0, columnspan=3, sticky="ew", pady=(7, 0)
         )
+        startup_options = ttk.Frame(controller)
+        startup_options.grid(
+            row=2, column=0, columnspan=3, sticky="ew", pady=(8, 0)
+        )
+        ttk.Checkbutton(
+            startup_options,
+            text=self._t("start_with_windows"),
+            variable=self.start_with_windows_var,
+            command=self._save_start_with_windows,
+        ).pack(side="left")
+        self.auto_start_runtime_check = ttk.Checkbutton(
+            startup_options,
+            text=self._t("auto_start_runtime"),
+            variable=self.auto_start_runtime_var,
+            command=self._save_auto_start_runtime,
+        )
+        self.auto_start_runtime_check.pack(side="left", padx=(18, 0))
 
         actions = ttk.Frame(parent)
         actions.grid(row=3, column=0, sticky="ew", pady=(9, 5))
@@ -3025,7 +3088,7 @@ class ControlHubDesktop:
                 self.live_settings_window
             ):
                 self.live_settings_window.geometry(
-                    f"920x{560 if supported else 500}"
+                    f"920x{640 if supported else 500}"
                 )
         if not supported and not (self.runtime and self.runtime.running):
             self.runtime_status.set(
@@ -3991,19 +4054,23 @@ class ControlHubDesktop:
         self.previous_bank_button.configure(state=state)
         self.next_bank_button.configure(state=state)
 
-    def start_runtime(self) -> None:
+    def start_runtime(self, *, interactive: bool = True) -> bool:
         if self.runtime and self.runtime.running:
-            return
+            return True
         if not live_runtime_supported(self.selected_profile_id):
-            messagebox.showinfo(
-                self._t("live_title"),
-                self._t(
-                    "runtime_driver_unavailable",
-                    controller=self._active_controller_label(),
-                ),
-                parent=self.root,
+            details = self._t(
+                "runtime_driver_unavailable",
+                controller=self._active_controller_label(),
             )
-            return
+            self.runtime_status.set(details)
+            self._append_runtime_log(details)
+            if interactive:
+                messagebox.showinfo(
+                    self._t("live_title"),
+                    details,
+                    parent=self.root,
+                )
+            return False
         self.runtime_status.set(self._t("runtime_starting"))
         try:
             config = self._runtime_config_from_form()
@@ -4019,6 +4086,7 @@ class ControlHubDesktop:
             runtime.start()
             self._apply_runtime_snapshot(runtime.snapshot())
             self.status.set(self._t("runtime_running"))
+            return True
         except Exception as exc:
             runtime = self.runtime
             self.runtime = None
@@ -4030,7 +4098,9 @@ class ControlHubDesktop:
             self.runtime_status.set(str(exc))
             self._append_runtime_log(f"Demarrage impossible: {exc}")
             self._set_runtime_widget_states()
-            messagebox.showerror(self._t("runtime_error"), str(exc), parent=self.root)
+            if interactive:
+                messagebox.showerror(self._t("runtime_error"), str(exc), parent=self.root)
+            return False
 
     def stop_runtime(self) -> None:
         runtime = self.runtime
@@ -4308,7 +4378,7 @@ class ControlHubDesktop:
         self.live_settings_window = window
         window.title(self._t("live_settings_title"))
         supported = live_runtime_supported(self.selected_profile_id)
-        window.geometry(f"920x{560 if supported else 500}")
+        window.geometry(f"920x{640 if supported else 500}")
         window.minsize(800, 470)
         window.transient(self.root)
         if PRODUCT_ICON_PATH.is_file():
@@ -4416,27 +4486,36 @@ class ControlHubDesktop:
             frame, text=self._t("ec4_tools"), padding=10
         )
         self.live_settings_ec4_frame.grid(row=3, column=0, sticky="ew", pady=(10, 0))
+        self.live_settings_ec4_frame.columnconfigure(0, weight=1)
+        self.live_settings_ec4_frame.columnconfigure(1, weight=1)
         ttk.Checkbutton(
             self.live_settings_ec4_frame,
             text=self._t("display_enabled"),
             variable=self.display_enabled_var,
-        ).pack(side="left")
-        ttk.Button(
-            self.live_settings_ec4_frame,
-            text=self._t("import_legacy_config"),
-            command=self.import_legacy_runtime_config,
-        ).pack(side="left", padx=(8, 0))
-        for label, command in (
+        ).grid(row=0, column=0, columnspan=2, sticky="w", pady=(0, 7))
+        ec4_actions = (
+            (self._t("import_legacy_config"), self.import_legacy_runtime_config),
             (self._t("reconnect_ec4"), self.reconnect_ec4),
             (self._t("request_setup"), self.request_setup_state),
             (self._t("refresh_companion"), self.refresh_companion),
             (self._t("test_display"), self.test_ec4_display),
-        ):
+        )
+        for index, (label, command) in enumerate(ec4_actions):
             button = ttk.Button(
                 self.live_settings_ec4_frame, text=label, command=command
             )
-            button.pack(side="left", padx=(8, 0))
-            self.runtime_settings_action_buttons.append(button)
+            row = 1 + index // 2
+            column = index % 2
+            button.grid(
+                row=row,
+                column=column,
+                columnspan=2 if index == len(ec4_actions) - 1 else 1,
+                sticky="ew",
+                padx=(0 if column == 0 else 5, 5 if column == 0 else 0),
+                pady=3,
+            )
+            if index > 0:
+                self.runtime_settings_action_buttons.append(button)
 
         footer = ttk.Frame(frame)
         footer.grid(row=4, column=0, sticky="ew", pady=(14, 0))
@@ -4572,6 +4651,72 @@ class ControlHubDesktop:
         )
         self._save_settings()
 
+    def _save_start_with_windows(self) -> None:
+        enabled = bool(self.start_with_windows_var.get())
+        try:
+            set_start_with_windows(enabled)
+        except OSError as exc:
+            self.start_with_windows_var.set(not enabled)
+            details = self._t("startup_registration_error", error=exc)
+            self.status.set(details)
+            messagebox.showerror(self._t("menu_options"), details, parent=self.root)
+            return
+        self.status.set(
+            self._t("startup_windows_enabled" if enabled else "startup_windows_disabled")
+        )
+
+    def _save_auto_start_runtime(self) -> None:
+        enabled = bool(self.auto_start_runtime_var.get())
+        self.settings = replace(self.settings, auto_start_runtime=enabled)
+        self._save_settings()
+        if not enabled and self._auto_start_after_id is not None:
+            try:
+                self.root.after_cancel(self._auto_start_after_id)
+            except Exception:
+                pass
+            self._auto_start_after_id = None
+
+    def _apply_initial_startup_preferences(self) -> None:
+        if self._start_minimized:
+            self.minimize_to_tray()
+        if not self.settings.auto_start_runtime:
+            return
+        self._auto_start_retry_index = 0
+        self._schedule_automatic_runtime_start(AUTO_START_RETRY_DELAYS_MS[0])
+
+    def _schedule_automatic_runtime_start(self, delay_ms: int) -> None:
+        if self._closing or not self.settings.auto_start_runtime:
+            return
+        self._auto_start_after_id = self.root.after(
+            max(0, int(delay_ms)), self._attempt_automatic_runtime_start
+        )
+
+    def _attempt_automatic_runtime_start(self) -> None:
+        self._auto_start_after_id = None
+        if self._closing or not self.settings.auto_start_runtime:
+            return
+        controller = self._active_controller_label()
+        self.status.set(self._t("runtime_auto_start_attempt", controller=controller))
+        self._append_runtime_log(
+            self._t("runtime_auto_start_attempt", controller=controller)
+        )
+        if not live_runtime_supported(self.selected_profile_id):
+            self.start_runtime(interactive=False)
+            return
+        if self.start_runtime(interactive=False):
+            return
+        self._auto_start_retry_index += 1
+        if self._auto_start_retry_index >= len(AUTO_START_RETRY_DELAYS_MS):
+            return
+        delay = AUTO_START_RETRY_DELAYS_MS[self._auto_start_retry_index]
+        details = self._t(
+            "runtime_auto_start_retry",
+            seconds=max(1, round(delay / 1000)),
+        )
+        self.status.set(details)
+        self._append_runtime_log(details)
+        self._schedule_automatic_runtime_start(delay)
+
     def change_language(self) -> None:
         selected = self.selected_profile_id
         self.settings = replace(self.settings, language=self.language_var.get())
@@ -4635,6 +4780,12 @@ class ControlHubDesktop:
         if self._closing:
             return
         self._closing = True
+        if self._auto_start_after_id is not None:
+            try:
+                self.root.after_cancel(self._auto_start_after_id)
+            except Exception:
+                pass
+            self._auto_start_after_id = None
         if self._runtime_poll_after_id is not None:
             try:
                 self.root.after_cancel(self._runtime_poll_after_id)
@@ -4847,9 +4998,14 @@ class ControlHubDesktop:
         )
 
 
-def main() -> int:
+def start_minimized_requested(arguments: list[str] | None = None) -> bool:
+    values = sys.argv[1:] if arguments is None else arguments
+    return "--minimized" in values
+
+
+def main(arguments: list[str] | None = None) -> int:
     root = tk.Tk()
-    ControlHubDesktop(root)
+    ControlHubDesktop(root, start_minimized=start_minimized_requested(arguments))
     root.mainloop()
     return 0
 

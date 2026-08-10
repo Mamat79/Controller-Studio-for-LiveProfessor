@@ -7,6 +7,7 @@ from silemio_control_hub.desktop import (
     _safe_filename,
     controller_table_rows,
     live_runtime_supported,
+    start_minimized_requested,
     translated_text,
 )
 from silemio_control_hub.registry import ControllerRegistry
@@ -39,6 +40,11 @@ def test_live_runtime_is_enabled_only_for_profiles_with_a_native_driver():
     assert live_runtime_supported("faderfox.ec4")
     assert not live_runtime_supported("generic.midi.16")
     assert not live_runtime_supported(None)
+
+
+def test_windows_startup_argument_requests_a_notification_area_launch():
+    assert start_minimized_requested(["--minimized"])
+    assert not start_minimized_requested([])
 
 
 def test_destroyed_widgets_are_not_reused_after_language_rebuild():

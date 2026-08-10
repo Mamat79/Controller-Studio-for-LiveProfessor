@@ -23,6 +23,7 @@ class DesktopSettings:
     language: str = "fr"
     close_to_tray: bool = True
     active_controller_id: str | None = None
+    auto_start_runtime: bool = False
 
 
 def default_desktop_settings_path() -> Path:
@@ -58,16 +59,20 @@ def load_desktop_settings(path: Path | None = None) -> DesktopSettings:
     language = raw.get("language", "fr")
     close_to_tray = raw.get("close_to_tray", True)
     active_controller_id = raw.get("active_controller_id")
+    auto_start_runtime = raw.get("auto_start_runtime", False)
     if language not in SUPPORTED_LANGUAGES:
         language = "fr"
     if not isinstance(close_to_tray, bool):
         close_to_tray = True
     if not isinstance(active_controller_id, str) or not active_controller_id.strip():
         active_controller_id = None
+    if not isinstance(auto_start_runtime, bool):
+        auto_start_runtime = False
     return DesktopSettings(
         language=language,
         close_to_tray=close_to_tray,
         active_controller_id=active_controller_id,
+        auto_start_runtime=auto_start_runtime,
     )
 
 

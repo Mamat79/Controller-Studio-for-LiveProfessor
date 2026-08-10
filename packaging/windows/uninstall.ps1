@@ -19,6 +19,7 @@ $shortcutPaths = @(
 foreach ($shortcut in $shortcutPaths) {
     Remove-Item -LiteralPath $shortcut -Force -ErrorAction SilentlyContinue
 }
+Remove-ItemProperty -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'Controller Studio for LiveProfessor' -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\SiLeMIOControllerStudio' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath (Join-Path $installRoot 'Controller-Studio-for-LiveProfessor.exe') -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath (Join-Path $installRoot 'SiLeMIO-Controller-Studio.exe') -Force -ErrorAction SilentlyContinue
