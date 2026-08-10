@@ -10,25 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3"><img alt="Version V.2026.3" src="https://img.shields.io/badge/version-V.2026.3-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4"><img alt="Version V.2026.4" src="https://img.shields.io/badge/version-V.2026.4-0b9fc6"></a>
   <img alt="Windows 10 et 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
   <img alt="Français et anglais" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Dernière version (accès rapide)
 
-**Version stable : [Controller Studio V.2026.3](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3)**<br>
+**Version stable : [Controller Studio V.2026.4](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4)**<br>
 Téléchargement direct :
 
-- [Installer Controller Studio pour Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Setup-v2026.3.exe)
-- [Version portable Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor.exe)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Sommes de contrôle SHA-256](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/SHA256SUMS.txt)
+- [Installer Controller Studio pour Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Setup-v2026.4.exe)
+- [Version portable Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor.exe)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Sommes de contrôle SHA-256](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/SHA256SUMS.txt)
 
 [Lire cette présentation en anglais](README_EN.md)
 
-> **Version publique V.2026.3 pour Windows.** Controller Studio travaille sur une copie AutoMap et conserve le projet `.rack2` source intact.
+> **Version publique V.2026.4 pour Windows.** Controller Studio travaille sur une copie AutoMap et conserve le projet `.rack2` source intact.
 
 ## À quoi sert Controller Studio ?
 
@@ -68,10 +68,12 @@ VST est une marque déposée de Steinberg Media Technologies GmbH. Les mentions 
 
 ## Banque de contrôleurs intégrée
 
-V.2026.3 fournit dix profils déclaratifs prêts à exporter :
+V.2026.4 fournit douze profils déclaratifs prêts à exporter et permet d’en fabriquer d’autres directement dans l’application :
 
+- Akai Professional LPD8 MK2 (Program 1 documenté) ;
 - Faderfox EC4, PC4, UC4 et PC12 ;
 - Behringer X-Touch Compact, X-Touch Mini et X-Touch One ;
+- Korg nanoKONTROL2 (mode CC, réglages d’usine des potentiomètres et faders) ;
 - Novation Launch Control XL 3 ;
 - DJ TechTools MIDI Fighter Twister ;
 - contrôleur MIDI générique à 16 commandes.
@@ -80,15 +82,21 @@ Les modes matériels et les sources constructeur utilisés sont regroupés dans 
 
 ## Créer et partager un contrôleur
 
-L’éditeur intégré permet de décrire les encodeurs, faders, boutons, canaux MIDI, messages CC/Note et retours disponibles, puis de vérifier le profil avant export.
+Cliquez sur **Créer un contrôleur…** pour partir d’un modèle de huit encodeurs, puis ajoutez, supprimez ou réordonnez encodeurs absolus ou relatifs, faders et boutons. Chaque commande accepte CC, Note, NRPN ou Pitch Bend, son canal et son numéro. **Apprendre le mouvement** et **Apprendre l’appui** capturent directement les messages reçus sur l’entrée MIDI choisie. Vous pouvez aussi **Modifier / dupliquer…** un modèle existant ou **Importer un profil…**.
+
+**Enregistrer dans ma banque** valide le profil et le rend disponible hors ligne. **Enregistrer + créer .ctrl2** produit aussitôt le fichier LiveProfessor. Le remplacement d’un profil personnel conserve une sauvegarde de la version précédente. La page Live donne aussi accès à **Configurer / apprentissage MIDI…** pour le contrôleur actif ; le setup/groupe visible avec l’EC4 reste une fonction spécifique à ce matériel.
+
+La fenêtre **Réglages** de la page Live retrouve les paramètres avancés d’EC4 Bridge : cadence de l’Overlay, durée d’affichage, rafraîchissement Companion et des labels, délai de confirmation LiveProfessor et affichage persistant. Ces temporisations sont disponibles pour tous les contrôleurs compatibles ; les outils setup/groupe et SysEx restent affichés uniquement pour l’EC4.
 
 Pour proposer un contrôleur à la bibliothèque commune :
 
 1. créez ou sélectionnez le profil dans **Banque de contrôleurs** ;
 2. cliquez sur **Proposer à la bibliothèque…** ;
-3. Controller Studio valide et prépare le JSON ;
-4. le formulaire GitHub prérempli s’ouvre ;
-5. joignez la documentation constructeur ou vos résultats d’essai puis envoyez la proposition.
+3. Controller Studio valide le profil et place automatiquement tout son contenu dans le formulaire ;
+4. GitHub s’ouvre pour identifier l’auteur et demander la confirmation finale ;
+5. ajoutez si possible la documentation constructeur ou vos résultats d’essai puis envoyez la proposition.
+
+Cette dernière confirmation reste volontairement chez GitHub : aucun mot de passe ni jeton d’accès n’est demandé ou conservé par Controller Studio.
 
 La bibliothèque publique fait partie de ce dépôt dans [`library/`](library/). Elle contient uniquement des profils JSON déclaratifs, jamais de code téléchargé et exécuté.
 

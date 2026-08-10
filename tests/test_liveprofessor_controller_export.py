@@ -69,6 +69,28 @@ def test_generic_profile_export_contains_only_its_sixteen_rotaries(tmp_path):
     assert tree.get("OSCOutPort") == 9011
 
 
+@pytest.mark.parametrize(
+    ("profile_id", "expected_counts"),
+    [
+        ("korg.nanokontrol2.cc-factory", (16, 0)),
+        ("akai.lpd8-mk2.program-1-mpc", (8, 8)),
+    ],
+)
+def test_common_controller_profiles_export_expected_liveprofessor_controls(
+    tmp_path,
+    profile_id,
+    expected_counts,
+):
+    destination = tmp_path / f"{profile_id}.ctrl2"
+
+    export_liveprofessor_controller(
+        ControllerRegistry().get(profile_id),
+        destination,
+    )
+
+    assert _counts(parse_tree(destination.read_bytes())) == expected_counts
+
+
 def test_ec4_profile_can_export_the_recommended_sixteen_rotary_unibank(tmp_path):
     destination = tmp_path / "Faderfox-EC4-UniBank.ctrl2"
 

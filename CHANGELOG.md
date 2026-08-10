@@ -1,5 +1,18 @@
 # Historique des versions
 
+## V.2026 (2026.4) — 2026-08-10
+
+- Ajoute un véritable fabricant de contrôleurs dans la Banque : encodeurs absolus ou relatifs, faders, boutons, ordre physique, banques et pages.
+- Ajoute l'apprentissage direct des mouvements et appuis depuis l'entrée MIDI choisie, avec prise en charge CC, Note, NRPN et Pitch Bend.
+- Ajoute sur la page Live un accès universel à la configuration et à l'apprentissage MIDI du contrôleur actif ; le setup/groupe reste clairement identifié comme spécifique à l'EC4.
+- Affiche le numéro complet de la release dans le bandeau, le titre de fenêtre et la fenêtre À propos, par exemple `V.2026.4`.
+- Permet de créer, modifier, dupliquer ou importer un profil sans manipuler de JSON, puis de l'enregistrer localement avec sauvegarde atomique.
+- Relie directement le profil créé à l'export LiveProfessor `.ctrl2` et à AutoMap.
+- Préremplit la contribution GitHub avec le profil validé complet ; GitHub ne sert plus qu'à identifier l'auteur et confirmer l'envoi, sans jeton stocké dans l'application.
+- Restaure dans Réglages la fenêtre de réactivité d'EC4 Bridge : cadence et durée d'Overlay, rafraîchissement Companion/labels, timeout du retour et affichage persistant, pour tous les contrôleurs compatibles.
+- Étend la banque intégrée à douze profils avec le Korg nanoKONTROL2 en mode CC et l'Akai LPD8 MK2 Program 1 documenté.
+- Agrandit les polices des notices française et anglaise pour une lecture plus confortable.
+
 ## V.2026 (2026.3) — 2026-08-10
 
 - Lit directement les vrais noms, unités et types des paramètres exposés par les plug-ins VST3 installés, dans un processus isolé par plug-in.

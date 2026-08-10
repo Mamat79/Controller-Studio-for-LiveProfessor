@@ -12,7 +12,7 @@ Fabricant et modèle / Manufacturer and model:
 
 ## Profil JSON / JSON profile
 
-Collez ici le JSON copié par Controller Studio. / Paste the JSON copied by Controller Studio here.
+Controller Studio préremplit normalement cette zone. Pour un très grand profil, collez ici le JSON placé dans le presse-papiers. / Controller Studio normally pre-fills this section. For a very large profile, paste the JSON placed on the clipboard here.
 
 ```json
 

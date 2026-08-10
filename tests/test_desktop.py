@@ -18,6 +18,7 @@ def test_desktop_controller_table_uses_the_registry_without_legacy_dependencies(
     )
 
     assert {row.profile_id for row in rows} == {
+        "akai.lpd8-mk2.program-1-mpc",
         "behringer.x-touch-compact.layer-a",
         "behringer.x-touch-mini.preset-a",
         "behringer.x-touch-one.midi",
@@ -27,6 +28,7 @@ def test_desktop_controller_table_uses_the_registry_without_legacy_dependencies(
         "faderfox.pc4.setup-1",
         "faderfox.uc4.setup-1-group-1",
         "generic.midi.16",
+        "korg.nanokontrol2.cc-factory",
         "novation.launch-control-xl3.mode-16",
     }
     assert all(row.controls > 0 for row in rows)

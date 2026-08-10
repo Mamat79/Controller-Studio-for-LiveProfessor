@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "akai.lpd8-mk2.program-1-mpc",
+  "manufacturer": "Akai Professional",
+  "model": "LPD8 MK2 — Program 1 (MPC layout)",
+  "midi_identity": {
+    "input_name_patterns": ["LPD8 mk2", "LPD8 MK2"],
+    "output_name_patterns": ["LPD8 mk2", "LPD8 MK2"]
+  },
+  "bank_size": 16,
+  "status": "community",
+  "capabilities": ["push"],
+  "controls": [
+    {"id": "knob_01", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 36}},
+    {"id": "knob_02", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 37}},
+    {"id": "knob_03", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 38}},
+    {"id": "knob_04", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 39}},
+    {"id": "knob_05", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 40}},
+    {"id": "knob_06", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 41}},
+    {"id": "knob_07", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 42}},
+    {"id": "knob_08", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 43}},
+    {"id": "pad_01", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 36}},
+    {"id": "pad_02", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 37}},
+    {"id": "pad_03", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 38}},
+    {"id": "pad_04", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 39}},
+    {"id": "pad_05", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 40}},
+    {"id": "pad_06", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 41}},
+    {"id": "pad_07", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 42}},
+    {"id": "pad_08", "kind": "pad", "input": {"message": "note", "channel": 1, "number": 43}}
+  ]
+}

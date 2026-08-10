@@ -48,6 +48,12 @@ from .controller_contribution import (
     controller_submission_url,
     validated_controller_payload,
 )
+from .controller_editor import ControllerEditorDialog
+from .controller_studio import (
+    default_controller_payload,
+    editable_controller_payload,
+    save_user_controller_profile,
+)
 from .identity import BRAND_NAME, FULL_PRODUCT_NAME, PRODUCT_NAME
 from .help_resources import (
     PAYPAL_QR_PATH,
@@ -78,7 +84,7 @@ from .plugin_studio import (
     retrieve_installed_parameter_names,
     save_user_profile,
 )
-from .registry import ControllerRegistry
+from .registry import ControllerRegistry, default_user_profile_dir
 from .runtime import (
     BridgeConfig,
     BridgeSnapshot,
@@ -96,7 +102,7 @@ from .workflow import prepare_liveprofessor_project
 
 
 PRODUCT_ICON_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.ico"
-DISPLAY_VERSION = "V.2026"
+DISPLAY_VERSION = f"V.{__version__}"
 
 
 UI_TEXT = {
@@ -135,7 +141,19 @@ UI_TEXT = {
             "Connexions du moteur temps réel. Les outils propres au pilote actif "
             "apparaissent uniquement lorsqu’ils sont disponibles."
         ),
-        "ec4_zone": "Zone et apprentissage EC4",
+        "responsiveness_settings": "Réactivité, feedback et Overlay (ms)",
+        "responsiveness_intro": (
+            "Réglages communs aux contrôleurs compatibles. Les valeurs d’origine "
+            "conviennent dans la majorité des cas."
+        ),
+        "persistent_parameter_display": "Conserver les paramètres visibles après l’Overlay",
+        "parameter_overlay_interval": "Mise à jour de l’Overlay (1–2000)",
+        "companion_refresh_delay": "Rafraîchissement Companion après commande (1–2000)",
+        "name_refresh_delay": "Rafraîchissement des noms / labels (1–2000)",
+        "feedback_confirm_timeout": "Délai maximal du retour LiveProfessor (100–10000)",
+        "overlay_display_duration": "Durée d’affichage de l’Overlay (200–5000)",
+        "ec4_zone": "Fonctions spécifiques EC4 (setup / groupe)",
+        "configure_active_controller": "Configurer / apprentissage MIDI…",
         "ec4_tools": "Outils EC4",
         "state_frame": "État",
         "last_event": "Dernier événement",
@@ -333,14 +351,87 @@ UI_TEXT = {
         "controls": "Contrôles",
         "layout": "Banques / pages",
         "refresh": "Actualiser",
+        "controller_create": "Créer un contrôleur…",
+        "controller_edit": "Modifier / dupliquer…",
+        "controller_import": "Importer un profil…",
+        "controller_import_title": "Importer un profil de contrôleur JSON",
+        "all_files": "Tous les fichiers",
+        "controller_imported_title": "Contrôleur importé",
+        "controller_imported_body": "{controller} est maintenant disponible dans votre banque.\n\n{path}",
         "contribute_controller": "Proposer à la bibliothèque…",
         "contribute_controller_title": "Proposer ce contrôleur",
         "contribute_controller_ready": (
-            "Le profil validé de {controller} a été copié dans le presse-papiers.\n\n"
-            "GitHub va ouvrir le formulaire de contribution. Collez le JSON dans la zone "
-            "« Profil JSON », ajoutez les références ou tests disponibles, puis envoyez."
+            "Le profil validé de {controller} a été placé automatiquement dans le formulaire.\n\n"
+            "GitHub va s’ouvrir uniquement pour identifier l’auteur, ajouter si possible la "
+            "documentation ou les tests matériels, puis confirmer l’envoi."
+        ),
+        "contribute_controller_ready_clipboard": (
+            "Le profil de {controller} est trop grand pour être placé dans le lien. Il a été "
+            "copié dans le presse-papiers : collez-le dans la zone « Profil JSON » puis confirmez."
         ),
         "contribute_controller_error": "Contribution impossible",
+        "controller_editor_title": "Fabriquer un contrôleur",
+        "controller_editor_intro": (
+            "Décrivez le contrôleur, ajoutez ses commandes ou apprenez-les directement en MIDI. "
+            "Le profil est validé avant d’entrer dans votre banque et peut créer immédiatement "
+            "le fichier .ctrl2 pour LiveProfessor."
+        ),
+        "controller_identity": "Identité et organisation",
+        "controller_profile_id": "Identifiant",
+        "controller_input_pattern": "Nom(s) entrée MIDI",
+        "controller_output_pattern": "Nom(s) sortie MIDI",
+        "controller_firmware": "Firmware (facultatif)",
+        "controller_bank_size": "Contrôles / banque",
+        "controller_bank_count": "Banques",
+        "controller_page_count": "Pages",
+        "controller_generate_id": "Générer l’identifiant",
+        "controller_selected_control": "Commande sélectionnée",
+        "controller_control_id": "Nom technique",
+        "controller_control_kind": "Type",
+        "controller_message": "Message",
+        "controller_channel": "Canal",
+        "controller_number": "N° MIDI",
+        "controller_push": "Appui",
+        "controller_kind_absolute": "Encodeur absolu",
+        "controller_kind_relative": "Encodeur relatif",
+        "controller_kind_fader": "Fader",
+        "controller_kind_button": "Bouton",
+        "controller_kind_pad": "Pad",
+        "controller_message_note": "Note",
+        "controller_message_pitch": "Pitch Bend",
+        "controller_relative_mode": "Mode relatif",
+        "controller_input_message": "Mouvement / entrée",
+        "controller_push_enable": "Appui d’encodeur",
+        "controller_midi_port": "Entrée MIDI à écouter",
+        "controller_learn_input": "Apprendre le mouvement",
+        "controller_learn_push": "Apprendre l’appui",
+        "controller_learn_idle": "Sélectionnez une ligne puis lancez l’apprentissage MIDI.",
+        "controller_learn_wait": "En écoute : actionnez {target} sur le contrôleur…",
+        "controller_learn_target_input": "la commande",
+        "controller_learn_target_push": "son appui",
+        "controller_learn_received": "Reçu : {binding}",
+        "controller_add_encoder": "+ Encodeur",
+        "controller_add_relative": "+ Encodeur relatif",
+        "controller_add_fader": "+ Fader",
+        "controller_add_button": "+ Bouton",
+        "controller_delete_control": "Supprimer",
+        "controller_apply_control": "Appliquer à la ligne",
+        "controller_close": "Fermer",
+        "controller_submit": "Proposer à la bibliothèque",
+        "controller_save_export": "Enregistrer + créer .ctrl2",
+        "controller_save_local": "Enregistrer dans ma banque",
+        "controller_invalid_title": "Profil de contrôleur invalide",
+        "controller_need_one_control": "Un profil doit conserver au moins une commande.",
+        "controller_select_control": "Sélectionnez d’abord une commande dans la liste.",
+        "controller_midi_error": "Apprentissage MIDI impossible",
+        "controller_fix_selected": "Corrigez la commande sélectionnée.",
+        "controller_replace_title": "Remplacer ce profil personnel ?",
+        "controller_replace_body": (
+            "{name} existe déjà dans votre banque. Le remplacer ? Une sauvegarde sera conservée."
+        ),
+        "controller_backup": "Sauvegarde précédente : {path}",
+        "controller_saved_title": "Contrôleur enregistré",
+        "controller_saved_body": "{name} est disponible dans votre banque.\n\n{path}",
         "plugin_studio_title": "Plugin Studio",
         "plugin_studio_badge": "LOCAL • SÛR",
         "plugin_intro": (
@@ -578,7 +669,18 @@ UI_TEXT = {
             "Real-time engine connections. Driver-specific tools only appear when "
             "they are available."
         ),
-        "ec4_zone": "EC4 zone and MIDI learn",
+        "responsiveness_settings": "Responsiveness, feedback and Overlay (ms)",
+        "responsiveness_intro": (
+            "Shared settings for compatible controllers. The defaults suit most setups."
+        ),
+        "persistent_parameter_display": "Keep parameters visible after the Overlay",
+        "parameter_overlay_interval": "Overlay update interval (1–2000)",
+        "companion_refresh_delay": "Companion refresh after a command (1–2000)",
+        "name_refresh_delay": "Name / label refresh delay (1–2000)",
+        "feedback_confirm_timeout": "LiveProfessor feedback timeout (100–10000)",
+        "overlay_display_duration": "Overlay display duration (200–5000)",
+        "ec4_zone": "EC4-specific functions (setup / group)",
+        "configure_active_controller": "Configure / MIDI Learn…",
         "ec4_tools": "EC4 tools",
         "state_frame": "Status",
         "last_event": "Last event",
@@ -770,14 +872,87 @@ UI_TEXT = {
         "controls": "Controls",
         "layout": "Banks / pages",
         "refresh": "Refresh",
+        "controller_create": "Create a controller…",
+        "controller_edit": "Edit / duplicate…",
+        "controller_import": "Import a profile…",
+        "controller_import_title": "Import a JSON controller profile",
+        "all_files": "All files",
+        "controller_imported_title": "Controller imported",
+        "controller_imported_body": "{controller} is now available in your bank.\n\n{path}",
         "contribute_controller": "Submit to the library…",
         "contribute_controller_title": "Submit this controller",
         "contribute_controller_ready": (
-            "The validated {controller} profile was copied to the clipboard.\n\n"
-            "GitHub will open the contribution form. Paste the JSON into “Profile JSON”, "
-            "add any available references or test results, then submit it."
+            "The validated {controller} profile was inserted into the form automatically.\n\n"
+            "GitHub will open only to identify the author, add hardware documentation or test "
+            "details when available, and confirm the submission."
+        ),
+        "contribute_controller_ready_clipboard": (
+            "The {controller} profile is too large for a pre-filled link. It was copied to the "
+            "clipboard: paste it into “JSON profile”, then confirm the submission."
         ),
         "contribute_controller_error": "Unable to prepare contribution",
+        "controller_editor_title": "Build a controller",
+        "controller_editor_intro": (
+            "Describe the controller, add its controls, or learn them directly from MIDI. "
+            "The profile is validated before entering your bank and can immediately create "
+            "the LiveProfessor .ctrl2 file."
+        ),
+        "controller_identity": "Identity and layout",
+        "controller_profile_id": "Identifier",
+        "controller_input_pattern": "MIDI input name(s)",
+        "controller_output_pattern": "MIDI output name(s)",
+        "controller_firmware": "Firmware (optional)",
+        "controller_bank_size": "Controls / bank",
+        "controller_bank_count": "Banks",
+        "controller_page_count": "Pages",
+        "controller_generate_id": "Generate identifier",
+        "controller_selected_control": "Selected control",
+        "controller_control_id": "Technical name",
+        "controller_control_kind": "Type",
+        "controller_message": "Message",
+        "controller_channel": "Channel",
+        "controller_number": "MIDI no.",
+        "controller_push": "Push",
+        "controller_kind_absolute": "Absolute encoder",
+        "controller_kind_relative": "Relative encoder",
+        "controller_kind_fader": "Fader",
+        "controller_kind_button": "Button",
+        "controller_kind_pad": "Pad",
+        "controller_message_note": "Note",
+        "controller_message_pitch": "Pitch Bend",
+        "controller_relative_mode": "Relative mode",
+        "controller_input_message": "Movement / input",
+        "controller_push_enable": "Encoder push",
+        "controller_midi_port": "MIDI input to listen to",
+        "controller_learn_input": "Learn movement",
+        "controller_learn_push": "Learn push",
+        "controller_learn_idle": "Select a row, then start MIDI Learn.",
+        "controller_learn_wait": "Listening: operate {target} on the controller…",
+        "controller_learn_target_input": "the control",
+        "controller_learn_target_push": "its push",
+        "controller_learn_received": "Received: {binding}",
+        "controller_add_encoder": "+ Encoder",
+        "controller_add_relative": "+ Relative encoder",
+        "controller_add_fader": "+ Fader",
+        "controller_add_button": "+ Button",
+        "controller_delete_control": "Delete",
+        "controller_apply_control": "Apply to row",
+        "controller_close": "Close",
+        "controller_submit": "Submit to the library",
+        "controller_save_export": "Save + create .ctrl2",
+        "controller_save_local": "Save to my bank",
+        "controller_invalid_title": "Invalid controller profile",
+        "controller_need_one_control": "A profile must keep at least one control.",
+        "controller_select_control": "Select a control in the list first.",
+        "controller_midi_error": "MIDI Learn failed",
+        "controller_fix_selected": "Fix the selected control.",
+        "controller_replace_title": "Replace this personal profile?",
+        "controller_replace_body": (
+            "{name} already exists in your bank. Replace it? A backup will be kept."
+        ),
+        "controller_backup": "Previous backup: {path}",
+        "controller_saved_title": "Controller saved",
+        "controller_saved_body": "{name} is available in your bank.\n\n{path}",
         "plugin_studio_title": "Plugin Studio",
         "plugin_studio_badge": "LOCAL • SAFE",
         "plugin_intro": (
@@ -1078,6 +1253,24 @@ class ControlHubDesktop:
         self.target_setup_var = tk.StringVar(value=str(self.runtime_config.target_setup))
         self.target_group_var = tk.StringVar(value=str(self.runtime_config.target_group))
         self.display_enabled_var = tk.BooleanVar(value=self.runtime_config.display_enabled)
+        self.persistent_display_var = tk.BooleanVar(
+            value=self.runtime_config.persistent_parameter_display
+        )
+        self.parameter_overlay_interval_var = tk.StringVar(
+            value=str(self.runtime_config.parameter_overlay_interval_ms)
+        )
+        self.companion_refresh_delay_var = tk.StringVar(
+            value=str(self.runtime_config.companion_refresh_delay_ms)
+        )
+        self.name_refresh_delay_var = tk.StringVar(
+            value=str(self.runtime_config.name_refresh_delay_ms)
+        )
+        self.feedback_timeout_var = tk.StringVar(
+            value=str(self.runtime_config.feedback_confirm_timeout_ms)
+        )
+        self.overlay_display_duration_var = tk.StringVar(
+            value=str(self.runtime_config.overlay_display_duration_ms)
+        )
         self.runtime_status = tk.StringVar(value=self._t("runtime_not_started"))
         self.runtime_last_event = tk.StringVar(value="—")
         self.runtime_bank = tk.StringVar(value="1 / 1")
@@ -1342,6 +1535,11 @@ class ControlHubDesktop:
         self.live_controller_combo.bind(
             "<<ComboboxSelected>>", self._select_live_controller
         )
+        ttk.Button(
+            controller,
+            text=self._t("configure_active_controller"),
+            command=self.edit_controller,
+        ).grid(row=0, column=1, sticky="e", padx=(0, 8))
         self.live_driver_badge = tk.Label(
             controller,
             bg="#dff5fb",
@@ -1350,7 +1548,7 @@ class ControlHubDesktop:
             padx=9,
             pady=3,
         )
-        self.live_driver_badge.grid(row=0, column=1, sticky="e")
+        self.live_driver_badge.grid(row=0, column=2, sticky="e")
         self.live_driver_note = ttk.Label(
             controller,
             style="Subtitle.TLabel",
@@ -1358,7 +1556,7 @@ class ControlHubDesktop:
             justify="left",
         )
         self.live_driver_note.grid(
-            row=1, column=0, columnspan=2, sticky="ew", pady=(7, 0)
+            row=1, column=0, columnspan=3, sticky="ew", pady=(7, 0)
         )
 
         actions = ttk.Frame(parent)
@@ -1534,29 +1732,39 @@ class ControlHubDesktop:
         self.controller_tree.grid(row=0, column=0, sticky="nsew")
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.controller_tree.bind("<<TreeviewSelect>>", self._select_controller)
+        self.controller_tree.bind("<Double-1>", lambda _event: self.edit_controller())
 
         actions = ttk.Frame(parent, padding=(0, 12, 0, 0))
         actions.grid(row=1, column=0, columnspan=2, sticky="ew")
-        ttk.Button(actions, text=self._t("refresh"), command=self.reload_catalog).pack(
-            side="left"
-        )
+        primary = ttk.Frame(actions)
+        primary.pack(fill="x")
+        tk.Button(
+            primary,
+            text=self._t("controller_create"),
+            command=self.create_controller,
+            bg="#087d9d",
+            fg="#ffffff",
+            activebackground="#0aa1c9",
+            activeforeground="#ffffff",
+            relief="flat",
+            borderwidth=0,
+            padx=14,
+            pady=5,
+            font=("Segoe UI Semibold", 10),
+            cursor="hand2",
+        ).pack(side="left")
         ttk.Button(
-            actions,
-            text=self._t("export_controller"),
-            command=self.export_controller,
+            primary,
+            text=self._t("controller_edit"),
+            command=self.edit_controller,
         ).pack(side="left", padx=(8, 0))
         ttk.Button(
-            actions,
-            text=self._t("contribute_controller"),
-            command=self.contribute_controller,
-        ).pack(side="left", padx=(8, 0))
-        ttk.Button(
-            actions,
-            text=self._t("minimize"),
-            command=self.minimize_to_tray,
+            primary,
+            text=self._t("controller_import"),
+            command=self.import_controller,
         ).pack(side="left", padx=(8, 0))
         tk.Button(
-            actions,
+            primary,
             text=self._t("prepare_automap"),
             command=self.prepare_automap,
             bg="#087d9d",
@@ -1570,6 +1778,27 @@ class ControlHubDesktop:
             font=("Segoe UI Semibold", 10),
             cursor="hand2",
         ).pack(side="right")
+
+        secondary = ttk.Frame(actions)
+        secondary.pack(fill="x", pady=(7, 0))
+        ttk.Button(secondary, text=self._t("refresh"), command=self.reload_catalog).pack(
+            side="left"
+        )
+        ttk.Button(
+            secondary,
+            text=self._t("export_controller"),
+            command=self.export_controller,
+        ).pack(side="left", padx=(8, 0))
+        ttk.Button(
+            secondary,
+            text=self._t("contribute_controller"),
+            command=self.contribute_controller,
+        ).pack(side="left", padx=(8, 0))
+        ttk.Button(
+            secondary,
+            text=self._t("minimize"),
+            command=self.minimize_to_tray,
+        ).pack(side="left", padx=(8, 0))
 
     def _build_plugins_tab(self, parent: ttk.Frame) -> None:
         parent.columnconfigure(0, weight=1)
@@ -2792,6 +3021,12 @@ class ControlHubDesktop:
                 self.live_settings_ec4_frame.grid()
             else:
                 self.live_settings_ec4_frame.grid_remove()
+            if self.live_settings_window is not None and _widget_exists(
+                self.live_settings_window
+            ):
+                self.live_settings_window.geometry(
+                    f"920x{560 if supported else 500}"
+                )
         if not supported and not (self.runtime and self.runtime.running):
             self.runtime_status.set(
                 self._t(
@@ -2814,20 +3049,105 @@ class ControlHubDesktop:
             return None
         return self.registry.get(self.selected_profile_id)
 
-    def contribute_controller(self) -> None:
+    def create_controller(self) -> None:
+        self._show_controller_editor(default_controller_payload())
+
+    def edit_controller(self) -> None:
         profile = self._selected_profile()
         if profile is None:
             return
+        source = self.registry.source(profile.id).resolve()
+        user_root = default_user_profile_dir().resolve()
+        try:
+            is_personal = source.is_relative_to(user_root)
+        except ValueError:
+            is_personal = False
+        self._show_controller_editor(
+            editable_controller_payload(profile, duplicate=not is_personal)
+        )
+
+    def _show_controller_editor(self, payload: dict[str, object]) -> None:
+        current = getattr(self, "controller_editor", None)
+        try:
+            if current is not None and current.window.winfo_exists():
+                current.window.destroy()
+        except tk.TclError:
+            pass
+
+        def saved(profile_id: str) -> None:
+            self.registry = ControllerRegistry()
+            self.reload_catalog(preferred_profile_id=profile_id)
+
+        def contribute(profile_id: str) -> None:
+            saved(profile_id)
+            self.root.after_idle(lambda: self.contribute_controller(profile_id))
+
+        self.controller_editor = ControllerEditorDialog(
+            self.root,
+            translator=self._t,
+            payload=payload,
+            on_saved=saved,
+            on_contribute=contribute,
+            icon_path=PRODUCT_ICON_PATH,
+        )
+
+    def import_controller(self) -> None:
+        source = filedialog.askopenfilename(
+            parent=self.root,
+            title=self._t("controller_import_title"),
+            filetypes=(("JSON", "*.json"), (self._t("all_files"), "*.*")),
+        )
+        if not source:
+            return
+        try:
+            profile = ControllerRegistry.load_file(Path(source))
+            payload = editable_controller_payload(profile, duplicate=False)
+            destination = default_user_profile_dir() / f"{profile.id}.json"
+            replace_file = destination.exists() and messagebox.askyesno(
+                self._t("controller_replace_title"),
+                self._t("controller_replace_body", name=destination.name),
+                parent=self.root,
+            )
+            if destination.exists() and not replace_file:
+                return
+            result = save_user_controller_profile(payload, replace=replace_file)
+            self.registry = ControllerRegistry()
+            self.reload_catalog(preferred_profile_id=result.profile.id)
+        except Exception as exc:
+            messagebox.showerror(
+                self._t("controller_invalid_title"), str(exc), parent=self.root
+            )
+            return
+        messagebox.showinfo(
+            self._t("controller_imported_title"),
+            self._t(
+                "controller_imported_body",
+                controller=result.profile.display_name,
+                path=result.path,
+            ),
+            parent=self.root,
+        )
+
+    def contribute_controller(self, profile_id: str | None = None) -> None:
+        if profile_id is not None:
+            self.selected_profile_id = profile_id
+        profile = self._selected_profile()
+        if profile is None:
+            return
+        clipboard_fallback = False
         try:
             source = self.registry.source(profile.id)
             contribution, payload = validated_controller_payload(
                 source,
                 expected_profile_id=profile.id,
             )
-            self.root.clipboard_clear()
-            self.root.clipboard_append(payload)
-            self.root.update_idletasks()
-            url = controller_submission_url(contribution)
+            url = controller_submission_url(contribution, payload=payload)
+            if len(url) > 30_000:
+                clipboard_fallback = True
+                self.root.clipboard_clear()
+                self.root.clipboard_append(payload)
+                self.root.update_idletasks()
+                url = controller_submission_url(contribution)
             if not webbrowser.open(url):
                 raise OSError("le navigateur n’a pas accepté le lien GitHub")
         except Exception as exc:
@@ -2840,7 +3160,11 @@ class ControlHubDesktop:
         messagebox.showinfo(
             self._t("contribute_controller_title"),
             self._t(
-                "contribute_controller_ready",
+                (
+                    "contribute_controller_ready_clipboard"
+                    if clipboard_fallback
+                    else "contribute_controller_ready"
+                ),
                 controller=contribution.display_name,
             ),
             parent=self.root,
@@ -3445,6 +3769,18 @@ class ControlHubDesktop:
             target_setup=int(self.target_setup_var.get().strip()),
             target_group=int(self.target_group_var.get().strip()),
             display_enabled=bool(self.display_enabled_var.get()),
+            persistent_parameter_display=bool(self.persistent_display_var.get()),
+            parameter_overlay_interval_ms=int(
+                self.parameter_overlay_interval_var.get().strip()
+            ),
+            companion_refresh_delay_ms=int(
+                self.companion_refresh_delay_var.get().strip()
+            ),
+            name_refresh_delay_ms=int(self.name_refresh_delay_var.get().strip()),
+            feedback_confirm_timeout_ms=int(self.feedback_timeout_var.get().strip()),
+            overlay_display_duration_ms=int(
+                self.overlay_display_duration_var.get().strip()
+            ),
             ui_language=self.language_var.get(),
         )
         config.validate()
@@ -3460,6 +3796,12 @@ class ControlHubDesktop:
         self.target_setup_var.set(str(config.target_setup))
         self.target_group_var.set(str(config.target_group))
         self.display_enabled_var.set(config.display_enabled)
+        self.persistent_display_var.set(config.persistent_parameter_display)
+        self.parameter_overlay_interval_var.set(str(config.parameter_overlay_interval_ms))
+        self.companion_refresh_delay_var.set(str(config.companion_refresh_delay_ms))
+        self.name_refresh_delay_var.set(str(config.name_refresh_delay_ms))
+        self.feedback_timeout_var.set(str(config.feedback_confirm_timeout_ms))
+        self.overlay_display_duration_var.set(str(config.overlay_display_duration_ms))
 
     def refresh_midi_ports(self) -> None:
         try:
@@ -3965,8 +4307,9 @@ class ControlHubDesktop:
         window = tk.Toplevel(self.root)
         self.live_settings_window = window
         window.title(self._t("live_settings_title"))
-        window.geometry("900x420")
-        window.minsize(760, 360)
+        supported = live_runtime_supported(self.selected_profile_id)
+        window.geometry(f"920x{560 if supported else 500}")
+        window.minsize(800, 470)
         window.transient(self.root)
         if PRODUCT_ICON_PATH.is_file():
             try:
@@ -4031,10 +4374,48 @@ class ControlHubDesktop:
             command=self.refresh_midi_ports,
         ).grid(row=2, column=3, sticky="e", pady=(7, 0))
 
+        responsiveness = ttk.LabelFrame(
+            frame, text=self._t("responsiveness_settings"), padding=10
+        )
+        responsiveness.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        responsiveness.columnconfigure(1, weight=1)
+        responsiveness.columnconfigure(3, weight=1)
+        ttk.Label(
+            responsiveness,
+            text=self._t("responsiveness_intro"),
+            wraplength=840,
+            justify="left",
+        ).grid(row=0, column=0, columnspan=4, sticky="ew", pady=(0, 6))
+        timing_fields = (
+            ("parameter_overlay_interval", self.parameter_overlay_interval_var, 1, 2000),
+            ("companion_refresh_delay", self.companion_refresh_delay_var, 1, 2000),
+            ("name_refresh_delay", self.name_refresh_delay_var, 1, 2000),
+            ("feedback_confirm_timeout", self.feedback_timeout_var, 100, 10000),
+            ("overlay_display_duration", self.overlay_display_duration_var, 200, 5000),
+        )
+        for index, (label_key, variable, minimum, maximum) in enumerate(timing_fields):
+            row = 1 + index // 2
+            column = (index % 2) * 2
+            ttk.Label(responsiveness, text=self._t(label_key)).grid(
+                row=row, column=column, sticky="w", padx=(0, 6), pady=3
+            )
+            ttk.Spinbox(
+                responsiveness,
+                from_=minimum,
+                to=maximum,
+                textvariable=variable,
+                width=9,
+            ).grid(row=row, column=column + 1, sticky="w", padx=(0, 16), pady=3)
+        ttk.Checkbutton(
+            responsiveness,
+            text=self._t("persistent_parameter_display"),
+            variable=self.persistent_display_var,
+        ).grid(row=4, column=0, columnspan=4, sticky="w", pady=(7, 0))
+
         self.live_settings_ec4_frame = ttk.LabelFrame(
             frame, text=self._t("ec4_tools"), padding=10
         )
-        self.live_settings_ec4_frame.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        self.live_settings_ec4_frame.grid(row=3, column=0, sticky="ew", pady=(10, 0))
         ttk.Checkbutton(
             self.live_settings_ec4_frame,
             text=self._t("display_enabled"),
@@ -4058,7 +4439,7 @@ class ControlHubDesktop:
             self.runtime_settings_action_buttons.append(button)
 
         footer = ttk.Frame(frame)
-        footer.grid(row=3, column=0, sticky="ew", pady=(14, 0))
+        footer.grid(row=4, column=0, sticky="ew", pady=(14, 0))
         ttk.Button(
             footer,
             text=self._t("save"),

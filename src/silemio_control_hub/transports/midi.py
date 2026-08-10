@@ -122,3 +122,38 @@ class MidiConnection:
             except Exception as exc:
                 self.close()
                 raise MidiBackendError(f"envoi MIDI impossible: {exc}") from exc
+
+
+class MidiInputListener:
+    """Small input-only connection used by Controller Studio's MIDI Learn UI."""
+
+    def __init__(self, callback: Callable[[Any], None]) -> None:
+        self.callback = callback
+        self.input_port: Any | None = None
+        self.input_name = ""
+        self._lock = threading.RLock()
+
+    @property
+    def is_open(self) -> bool:
+        return bool(self.input_port and not self.input_port.closed)
+
+    def open(self, requested_input: str) -> str:
+        mido = _mido()
+        with self._lock:
+            self.close()
+            self.input_name = resolve_port(requested_input, list(mido.get_input_names()))
+            try:
+                self.input_port = mido.open_input(self.input_name, callback=self.callback)
+            except Exception as exc:
+                self.close()
+                raise MidiBackendError(f"ouverture de l’entrée MIDI impossible: {exc}") from exc
+            return self.input_name
+
+    def close(self) -> None:
+        with self._lock:
+            if self.input_port is not None:
+                try:
+                    self.input_port.close()
+                except Exception:
+                    pass
+            self.input_port = None
