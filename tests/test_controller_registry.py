@@ -15,6 +15,15 @@ def test_builtin_profiles_are_valid_and_distinct():
     profiles = registry.all()
     assert {profile.id for profile in profiles} == {
         "akai.lpd8-mk2.program-1-mpc",
+        "akai.apc-mini-mk2.port-0",
+        "akai.midimix.factory",
+        "akai.mpk-mini-iv.user-program",
+        "akai.mpk-mini-mk3.program-1",
+        "akai.mpk-mini-plus.program-1",
+        "arturia.beatstep.user-preset",
+        "arturia.keylab-essential-mk3.user-program",
+        "arturia.minilab-3.user",
+        "behringer.x-touch.mcu",
         "behringer.x-touch-compact.layer-a",
         "behringer.x-touch-mini.preset-a",
         "behringer.x-touch-one.midi",
@@ -26,6 +35,18 @@ def test_builtin_profiles_are_valid_and_distinct():
         "generic.midi.16",
         "korg.nanokontrol2.cc-factory",
         "novation.launch-control-xl3.mode-16",
+        "novation.launch-control-xl2.user-template",
+        "novation.launchkey-mk3.49-61-88-custom",
+        "novation.launchkey-mk3.compact-custom",
+        "novation.launchkey-mk4.49-61-88-custom",
+        "novation.launchkey-mk4.compact-custom",
+        "novation.launchpad-mini-mk3.custom-faders",
+        "novation.launchpad-x.custom-faders",
+        "presonus.faderport-16.mcu",
+        "presonus.faderport-8.mcu",
+        "presonus.faderport-v2.mcu",
+        "ssl.uf1.mcu",
+        "ssl.uf8.mcu",
     }
     ec4 = registry.get("faderfox.ec4")
     assert ec4.bank_size == 16

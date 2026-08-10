@@ -68,13 +68,16 @@ VST est une marque déposée de Steinberg Media Technologies GmbH. Les mentions 
 
 ## Banque de contrôleurs intégrée
 
-V.2026.4 fournit douze profils déclaratifs prêts à exporter et permet d’en fabriquer d’autres directement dans l’application :
+V.2026.4 fournit 33 profils déclaratifs prêts à exporter et permet d’en fabriquer d’autres directement dans l’application :
 
-- Akai Professional LPD8 MK2 (Program 1 documenté) ;
+- Akai Professional LPD8 MK2, MIDImix, APC Mini MK2, MPK Mini MK3, MPK Mini IV et MPK Mini Plus ;
+- Arturia MiniLab 3, KeyLab Essential MK3 et BeatStep ;
 - Faderfox EC4, PC4, UC4 et PC12 ;
-- Behringer X-Touch Compact, X-Touch Mini et X-Touch One ;
+- Behringer X-Touch, X-Touch Compact, X-Touch Mini et X-Touch One ;
 - Korg nanoKONTROL2 (mode CC, réglages d’usine des potentiomètres et faders) ;
-- Novation Launch Control XL 3 ;
+- Novation Launch Control XL MK2/XL 3, Launchkey MK3/MK4 et Launchpad X/Mini MK3 ;
+- PreSonus FaderPort V2, 8 et 16 ;
+- Solid State Logic UF1 et UF8 ;
 - DJ TechTools MIDI Fighter Twister ;
 - contrôleur MIDI générique à 16 commandes.
 

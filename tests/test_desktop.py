@@ -17,20 +17,17 @@ def test_desktop_controller_table_uses_the_registry_without_legacy_dependencies(
         ControllerRegistry(profile_directories=[], library_cache_root=tmp_path / "cache")
     )
 
-    assert {row.profile_id for row in rows} == {
-        "akai.lpd8-mk2.program-1-mpc",
-        "behringer.x-touch-compact.layer-a",
-        "behringer.x-touch-mini.preset-a",
-        "behringer.x-touch-one.midi",
-        "dj-techtools.midi-fighter-twister.factory-banks-1-4",
+    profile_ids = {row.profile_id for row in rows}
+    assert len(profile_ids) == 33
+    assert {
         "faderfox.ec4",
-        "faderfox.pc12.setup-1",
-        "faderfox.pc4.setup-1",
-        "faderfox.uc4.setup-1-group-1",
-        "generic.midi.16",
-        "korg.nanokontrol2.cc-factory",
-        "novation.launch-control-xl3.mode-16",
-    }
+        "akai.midimix.factory",
+        "arturia.minilab-3.user",
+        "behringer.x-touch.mcu",
+        "novation.launchkey-mk4.49-61-88-custom",
+        "presonus.faderport-16.mcu",
+        "ssl.uf8.mcu",
+    } <= profile_ids
     assert all(row.controls > 0 for row in rows)
 
 

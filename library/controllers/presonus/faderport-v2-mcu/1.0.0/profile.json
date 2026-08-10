@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "presonus.faderport-v2.mcu",
+  "manufacturer": "PreSonus",
+  "model": "FaderPort V2 — MCU",
+  "midi_identity": {
+    "input_name_patterns": [
+      "PreSonus FP2",
+      "FaderPort"
+    ],
+    "output_name_patterns": [
+      "PreSonus FP2",
+      "FaderPort"
+    ]
+  },
+  "bank_size": 2,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "touch",
+    "led",
+    "values",
+    "motorized",
+    "high_resolution"
+  ],
+  "controls": [
+    {
+      "id": "channel_01_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 1
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 104
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 1
+        }
+      }
+    },
+    {
+      "id": "channel_01_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 32
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 16,
+          "mode": "signed_bit"
+        }
+      }
+    }
+  ]
+}
