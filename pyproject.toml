@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "silemio-control-hub"
-version = "2026.2"
+version = "2026.3"
 description = "Controller Studio for LiveProfessor by SiLeMI/O"
 requires-python = ">=3.11"
 dependencies = [

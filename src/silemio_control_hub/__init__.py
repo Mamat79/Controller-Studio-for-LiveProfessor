@@ -48,4 +48,4 @@ __all__ = [
     "prepare_liveprofessor_project",
 ]
 
-__version__ = "2026.2"
+__version__ = "2026.3"

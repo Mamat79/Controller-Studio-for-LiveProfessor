@@ -28,6 +28,10 @@ def packaged_smoke_test() -> int:
 if __name__ == "__main__":
     if "--smoke-test" in sys.argv[1:]:
         raise SystemExit(packaged_smoke_test())
+    if "--vst3-scan-worker" in sys.argv[1:]:
+        from silemio_control_hub.vst3_scanner import worker_main
+
+        raise SystemExit(worker_main(sys.argv[1:]))
     from silemio_control_hub.desktop import main
 
     raise SystemExit(main())

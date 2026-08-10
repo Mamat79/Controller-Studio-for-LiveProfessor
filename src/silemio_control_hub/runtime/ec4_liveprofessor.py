@@ -8,7 +8,7 @@ import unicodedata
 import re
 import threading
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from typing import Any
 
@@ -99,6 +99,7 @@ class EC4LiveProfessorBridge:
         self._running = False
         self._stop = threading.Event()
         self._lock = threading.RLock()
+        self._last_companion_name_update = 0.0
         self._midi = MidiConnection(self._on_midi)
         self._osc_client = OSCClient(config.liveprofessor_host, config.liveprofessor_port)
         self._osc_server = OSCServer(
@@ -301,6 +302,74 @@ class EC4LiveProfessorBridge:
             self.short_names[:] = [""] * len(self.short_names)
             self._received_control_numbers.clear()
             self._received_companion_names = False
+
+    def companion_names_snapshot(self) -> tuple[str, ...]:
+        """Return the latest labels intercepted from LiveProfessor."""
+
+        with self._lock:
+            return tuple(self.names)
+
+    def capture_companion_names(
+        self,
+        *,
+        required_indices: Iterable[int] = (),
+        timeout: float = 30.0,
+        quiet_period: float = 0.35,
+        retry_interval: float = 2.0,
+    ) -> tuple[str, ...]:
+        """Capture labels for Plugin Studio without discarding live feedback.
+
+        Controller-name feedback is continuously received by the running
+        bridge.  When the selected plug-in already appears on the hardware,
+        the cached labels are the most reliable and fastest source.  If no
+        useful mapped label is cached, refresh requests are retried while the
+        existing OSC listener keeps collecting the replies.
+        """
+
+        required = tuple(
+            sorted(
+                {
+                    int(index)
+                    for index in required_indices
+                    if 0 <= int(index) < len(self.names)
+                }
+            )
+        )
+
+        def useful_count(snapshot: tuple[str, ...]) -> int:
+            indices = required or tuple(range(len(snapshot)))
+            return sum(bool(snapshot[index].strip()) for index in indices)
+
+        retry_after = max(0.05, retry_interval)
+        settle_after = max(0.0, quiet_period)
+        snapshot = self.companion_names_snapshot()
+        with self._lock:
+            cached_quiet_for = time.monotonic() - self._last_companion_name_update
+        if useful_count(snapshot) and cached_quiet_for >= settle_after:
+            self._log("Noms Companion deja recus: capture directe du controleur actif")
+            return snapshot
+
+        deadline = time.monotonic() + max(0.05, timeout)
+        next_request = 0.0
+        while time.monotonic() < deadline:
+            now = time.monotonic()
+            if now >= next_request:
+                self.refresh_companion(log_request=next_request == 0.0)
+                next_request = now + retry_after
+
+            snapshot = self.companion_names_snapshot()
+            if useful_count(snapshot):
+                with self._lock:
+                    quiet_for = time.monotonic() - self._last_companion_name_update
+                if quiet_for >= settle_after:
+                    return snapshot
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            time.sleep(min(0.02, max(0.001, remaining)))
+
+        return self.companion_names_snapshot()
 
     def _schedule_companion_refresh(self, delay: float | None = None) -> None:
         if self.config.mode != "companion":
@@ -1240,9 +1309,11 @@ class EC4LiveProfessorBridge:
         if not 0 <= index < self.config.max_controls:
             return
         name = self._coerce_companion_name(index, name)
-        changed = name != self.names[index]
-        self.names[index] = name
-        self.short_names[index] = "" if not name else short_label(name, index)
+        with self._lock:
+            changed = name != self.names[index]
+            self.names[index] = name
+            self.short_names[index] = "" if not name else short_label(name, index)
+            self._last_companion_name_update = time.monotonic()
         if changed and index // self.config.bank_size == self.active_bank:
             self._schedule_name_refresh()
 

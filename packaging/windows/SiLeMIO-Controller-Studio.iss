@@ -1,5 +1,5 @@
 #define MyAppName "Controller Studio for LiveProfessor"
-#define MyAppVersion "2026.2"
+#define MyAppVersion "2026.3"
 #define MyAppPublisher "Mamat"
 #define MyAppExeName "Controller-Studio-for-LiveProfessor.exe"
 #define MyShortcutName "Controller Studio for LiveProfessor"
@@ -23,7 +23,7 @@ ArchitecturesAllowed=x64compatible
 PrivilegesRequired=lowest
 UsedUserAreasWarning=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
-VersionInfoVersion=2026.2.0.0
+VersionInfoVersion=2026.3.0.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} installer
 VersionInfoProductName={#MyAppName}
@@ -42,6 +42,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "{#ProjectRoot}\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#ProjectRoot}\THIRD_PARTY_NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [InstallDelete]
 Type: files; Name: "{app}\Uninstall-SiLeMIO-Controller-Studio.ps1"

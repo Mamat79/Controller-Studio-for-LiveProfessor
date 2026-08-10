@@ -1,4 +1,5 @@
 import hashlib
+import threading
 
 import pytest
 
@@ -23,10 +24,13 @@ from silemio_control_hub.plugin_studio import (
     capture_liveprofessor_parameter_names,
     default_user_profile_id,
     editable_parameters,
+    merge_scanned_parameter_names,
     next_user_profile_version,
     request_liveprofessor_companion_names,
+    retrieve_installed_parameter_names,
     save_user_profile,
 )
+from silemio_control_hub.vst3_scanner import ScannedParameter, VST3ScanResult
 
 
 def _observation(*, stable_id="VST3-Test-1234", parameter_count=3):
@@ -238,6 +242,73 @@ def test_liveprofessor_names_follow_saved_slot_mapping_not_parameter_order(
     assert updated[2].enabled is False
 
 
+def test_scanned_names_preserve_user_choices_and_classify_discrete_parameters(tmp_path):
+    observation = _observation()
+    original = _parameters(observation)
+    scan = VST3ScanResult(
+        plugin_name=observation.name,
+        class_name=observation.name,
+        module_path=tmp_path / "test.vst3",
+        parameters=(
+            ScannedParameter(0, 100, "Input Gain", "Input", "dB", 0, 1),
+            ScannedParameter(1, 101, "Mode", "Mode", "", 3, 1),
+            ScannedParameter(2, 102, "Bypass", "Bypass", "", 1, 1),
+        ),
+    )
+
+    updated = merge_scanned_parameter_names(original, scan)
+
+    assert [parameter.name for parameter in updated] == ["Input Gain", "Mode", "Bypass"]
+    assert updated[0].unit == "dB"
+    assert updated[0].importance == 90
+    assert updated[0].role == "input_gain"
+    assert updated[1].kind == PluginParameterKind.ENUM
+    assert updated[2].kind == PluginParameterKind.TOGGLE
+    assert updated[2].enabled is False
+
+
+def test_scanned_names_reject_a_parameter_count_mismatch(tmp_path):
+    observation = _observation()
+    scan = VST3ScanResult(
+        plugin_name=observation.name,
+        class_name=observation.name,
+        module_path=tmp_path / "test.vst3",
+        parameters=(
+            ScannedParameter(0, 100, "Input", "Input", "", 0, 1),
+        ),
+    )
+
+    with pytest.raises(PluginProfileError, match="inventaire incompatible"):
+        merge_scanned_parameter_names(_parameters(observation), scan)
+
+
+def test_retrieve_installed_names_uses_exact_project_identity(monkeypatch):
+    observation = _observation(parameter_count=3)
+    summary = type(
+        "Summary",
+        (),
+        {"observation": observation},
+    )()
+    received = {}
+    sentinel = object()
+
+    def fake_scan(name, **kwargs):
+        received["name"] = name
+        received.update(kwargs)
+        return sentinel
+
+    monkeypatch.setattr("silemio_control_hub.plugin_studio.scan_installed_vst3", fake_scan)
+
+    assert retrieve_installed_parameter_names(summary, timeout=7) is sentinel
+    assert received == {
+        "name": observation.name,
+        "expected_parameter_count": 3,
+        "plugin_format": "VST3",
+        "database": None,
+        "timeout": 7,
+    }
+
+
 def test_companion_name_request_works_without_hardware_runtime(monkeypatch):
     state = {}
 
@@ -285,3 +356,52 @@ def test_companion_name_request_works_without_hardware_runtime(monkeypatch):
     assert names == ("Input Gain", "", "Output Gain")
     assert state["requests"] == ["/init", "/refresh", "/ViewSets/Refresh"]
     assert state["started"] and state["stopped"] and state["closed"]
+
+
+def test_companion_name_request_retries_until_delayed_inventory(monkeypatch):
+    state = {"refreshes": 0}
+
+    class FakeServer:
+        def __init__(self, host, port, callback, error_callback):
+            state["callback"] = callback
+
+        def start(self):
+            pass
+
+        def stop(self):
+            pass
+
+    class FakeClient:
+        def __init__(self, host, port):
+            pass
+
+        def send(self, address, *args):
+            if address != "/refresh":
+                return
+            state["refreshes"] += 1
+            if state["refreshes"] == 2:
+                threading.Timer(
+                    0.02,
+                    lambda: state["callback"](
+                        "/Companion/ControllerNames", ["Rotary1", "Brightness"]
+                    ),
+                ).start()
+
+        def close(self):
+            pass
+
+    monkeypatch.setattr("silemio_control_hub.plugin_studio.OSCServer", FakeServer)
+    monkeypatch.setattr("silemio_control_hub.plugin_studio.OSCClient", FakeClient)
+
+    names = request_liveprofessor_companion_names(
+        host="127.0.0.1",
+        request_port=8010,
+        feedback_host="127.0.0.1",
+        feedback_port=8011,
+        timeout=0.5,
+        quiet_period=0.01,
+        retry_interval=0.05,
+    )
+
+    assert names == ("Brightness",)
+    assert state["refreshes"] >= 2
