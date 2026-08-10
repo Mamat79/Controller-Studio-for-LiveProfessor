@@ -1,6 +1,6 @@
 {
   "manifest_version": 1,
-  "generated_at": "2026-08-10T00:54:51Z",
+  "generated_at": "2026-08-10T01:49:57Z",
   "profiles": [
     {
       "id": "behringer.x-touch-compact.layer-a",
@@ -39,7 +39,7 @@
       "version": "1.0.0",
       "status": "verified",
       "path": "controllers/faderfox/ec4/1.0.0/profile.json",
-      "sha256": "6AFAC803BB7F85BFCB2F519AA96477A41FC069CDBEEA462C515226CBBB0C93EC",
+      "sha256": "946DB721DC66B49AA061AF8353C207E5B363074A84BDAAF4DFCC4E82177BF73A",
       "minimum_hub_version": "0.1.0"
     },
     {
@@ -71,7 +71,7 @@
       "version": "1.0.0",
       "status": "builtin",
       "path": "controllers/generic/midi-16/1.0.0/profile.json",
-      "sha256": "46CC0B0EDB4319F26D4B5E4EEA0098AEE4C2E32CD54BCA99FE8515C27E2DBA6F",
+      "sha256": "7C9FD78766FE40164DA7327471DCF945E34FFE19E4DC8682E5DF4A37A9A5AF59",
       "minimum_hub_version": "0.1.0"
     },
     {
@@ -89,7 +89,7 @@
       "version": "1.0.0",
       "status": "community",
       "path": "plugin-profiles/example/plugin/1.0.0/profile.json",
-      "sha256": "3535C813D66718B88C017DA560EE2FDCB0C88D575983435760A6356839950AEC",
+      "sha256": "B6BA1222444DC466702F3EA9596B9B04B799D6D739C479CE9C46B3F624B509B1",
       "minimum_hub_version": "0.1.0"
     }
   ]

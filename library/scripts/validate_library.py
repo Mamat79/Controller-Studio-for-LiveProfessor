@@ -33,6 +33,11 @@ class ValidationError(ValueError):
     pass
 
 
+def _portable_payload(source: Path) -> bytes:
+    """Match the LF-normalized bytes stored and served by GitHub."""
+    return source.read_bytes().replace(b"\r\n", b"\n")
+
+
 def _reject_forbidden(value: object, *, location: str) -> None:
     if isinstance(value, dict):
         forbidden = sorted(set(value) & FORBIDDEN_PROFILE_KEYS)
@@ -82,7 +87,7 @@ def _entry(raw: object, *, collection: str, index: int) -> tuple[str, PurePosixP
         raise ValidationError(f"{location}.path sort de la bibliothèque") from exc
     if not source.is_file():
         raise ValidationError(f"{location}.path est introuvable: {path}")
-    payload = source.read_bytes()
+    payload = _portable_payload(source)
     actual = hashlib.sha256(payload).hexdigest().upper()
     if actual != digest.upper():
         raise ValidationError(f"{location}.sha256 ne correspond pas à {path}")

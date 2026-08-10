@@ -14,10 +14,15 @@ ROOT = Path(__file__).parents[1]
 MANIFEST = ROOT / "manifest-v1.json"
 
 
+def _portable_payload(source: Path) -> bytes:
+    """Hash repository text exactly as Git stores and serves it."""
+    return source.read_bytes().replace(b"\r\n", b"\n")
+
+
 def _entries(folder: str) -> list[dict[str, str]]:
     entries: list[dict[str, str]] = []
     for source in sorted((ROOT / folder).glob("**/profile.json")):
-        payload = source.read_bytes()
+        payload = _portable_payload(source)
         raw = json.loads(payload.decode("utf-8"))
         entries.append(
             {
