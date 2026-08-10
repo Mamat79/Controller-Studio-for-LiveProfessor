@@ -2,6 +2,8 @@
 
 ## V.2026 (2026.4) — 2026-08-10
 
+- Corrige la création d'une copie AutoMap lorsqu'aucun contrôleur Companion/OSC n'existe encore et que l'utilisateur choisit **Créer un nouveau contrôleur depuis le profil choisi**.
+- Valide la sélection personnalisée sur un projet réel de 41 instances : tous les plug-ins peuvent être mappés, ou un type/une instance peut être exclu avec les cases sans modifier le projet source.
 - Ajoute un véritable fabricant de contrôleurs dans la Banque : encodeurs absolus ou relatifs, faders, boutons, ordre physique, banques et pages.
 - Ajoute l'apprentissage direct des mouvements et appuis depuis l'entrée MIDI choisie, avec prise en charge CC, Note, NRPN et Pitch Bend.
 - Ajoute sur la page Live un accès universel à la configuration et à l'apprentissage MIDI du contrôleur actif ; le setup/groupe reste clairement identifié comme spécifique à l'EC4.

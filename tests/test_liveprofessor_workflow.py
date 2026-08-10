@@ -167,6 +167,29 @@ def test_prepare_workflow_creates_ctrl2_and_automapped_copy_without_touching_sou
     assert all(not name.startswith("EC4 AutoMap -") for name in generated_names)
 
 
+def test_prepare_workflow_can_explicitly_embed_a_new_controller(tmp_path):
+    source = tmp_path / "source.rack2"
+    destination = tmp_path / "source-new-controller.rack2"
+    controller = tmp_path / "Faderfox-EC4.ctrl2"
+    source.write_bytes(write_tree(_controllerless_project()))
+    source_hash = hashlib.sha256(source.read_bytes()).hexdigest().upper()
+
+    result = prepare_liveprofessor_project(
+        ControllerRegistry().get("faderfox.ec4"),
+        source,
+        destination,
+        controller,
+        embed_new_controller=True,
+        target_rotary_count=16,
+    )
+
+    assert hashlib.sha256(source.read_bytes()).hexdigest().upper() == source_hash
+    inventory = inspect_project(destination)
+    assert len(inventory.controllers) == 1
+    assert inventory.controllers[0].controller_uid == result.controller.controller_uid
+    assert inventory.controllers[0].rotary_count == 16
+
+
 def test_prepare_workflow_supports_profiles_smaller_than_sixteen_rotaries(tmp_path):
     source = tmp_path / "source.rack2"
     destination = tmp_path / "mapped.rack2"
