@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "generic.midi.16",
+  "manufacturer": "Generic",
+  "model": "MIDI 16 controls",
+  "bank_size": 16,
+  "bank_count": 1,
+  "page_count": 1,
+  "status": "builtin",
+  "capabilities": ["commands"],
+  "controls": [
+    {"id": "control_01", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 0}},
+    {"id": "control_02", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 1}},
+    {"id": "control_03", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 2}},
+    {"id": "control_04", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 3}},
+    {"id": "control_05", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 4}},
+    {"id": "control_06", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 5}},
+    {"id": "control_07", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 6}},
+    {"id": "control_08", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 7}},
+    {"id": "control_09", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 8}},
+    {"id": "control_10", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 9}},
+    {"id": "control_11", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 10}},
+    {"id": "control_12", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 11}},
+    {"id": "control_13", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 12}},
+    {"id": "control_14", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 13}},
+    {"id": "control_15", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 14}},
+    {"id": "control_16", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 15}, "roles": ["output"]}
+  ]
+}

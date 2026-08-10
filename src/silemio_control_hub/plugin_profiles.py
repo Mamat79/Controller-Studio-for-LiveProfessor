@@ -264,6 +264,7 @@ class PluginParameterProfile:
     role: str | None = None
     kind: PluginParameterKind = PluginParameterKind.CONTINUOUS
     importance: int = 50
+    enabled: bool = True
 
     @classmethod
     def from_dict(
@@ -277,7 +278,16 @@ class PluginParameterProfile:
             raise PluginProfileError(f"{location} doit être un objet")
         _reject_unknown(
             raw,
-            {"stable_id", "name", "short_label", "unit", "role", "kind", "importance"},
+            {
+                "stable_id",
+                "name",
+                "short_label",
+                "unit",
+                "role",
+                "kind",
+                "importance",
+                "enabled",
+            },
             location=location,
         )
         stable_id = _required_text(raw.get("stable_id"), location=f"{location}.stable_id")
@@ -306,7 +316,10 @@ class PluginParameterProfile:
         importance = raw.get("importance", 50)
         if not isinstance(importance, int) or not 0 <= importance <= 100:
             raise PluginProfileError(f"{location}.importance doit être comprise entre 0 et 100")
-        return cls(stable_id, name, short_label, unit_raw, role, kind, importance)
+        enabled = raw.get("enabled", True)
+        if not isinstance(enabled, bool):
+            raise PluginProfileError(f"{location}.enabled doit être un booléen")
+        return cls(stable_id, name, short_label, unit_raw, role, kind, importance, enabled)
 
     def to_dict(self) -> dict[str, object]:
         payload: dict[str, object] = {
@@ -316,6 +329,7 @@ class PluginParameterProfile:
             "unit": self.unit,
             "kind": self.kind.value,
             "importance": self.importance,
+            "enabled": self.enabled,
         }
         if self.role is not None:
             payload["role"] = self.role
@@ -436,6 +450,7 @@ class EffectivePluginParameter:
     role: str | None
     kind: PluginParameterKind
     importance: int
+    enabled: bool
     source_layer: PluginProfileLayer
 
 
@@ -497,6 +512,7 @@ class PluginProfileResolver:
                 role=None,
                 kind=PluginParameterKind.CONTINUOUS,
                 importance=50,
+                enabled=True,
                 source_layer=PluginProfileLayer.RAW,
             )
             for parameter in observation.parameters
@@ -527,6 +543,7 @@ class PluginProfileResolver:
                     role=parameter.role,
                     kind=parameter.kind,
                     importance=parameter.importance,
+                    enabled=parameter.enabled,
                     source_layer=layer,
                 )
             applied.append(profile.id)

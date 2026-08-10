@@ -44,8 +44,8 @@ $uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\SiLeM
 $hostExe = (Get-Process -Id $PID).Path
 $null = New-Item -Path $uninstallKey -Force
 Set-ItemProperty -Path $uninstallKey -Name DisplayName -Value 'Controller Studio for LiveProfessor'
-Set-ItemProperty -Path $uninstallKey -Name DisplayVersion -Value '2026.0'
-Set-ItemProperty -Path $uninstallKey -Name Publisher -Value 'SiLeMI/O'
+Set-ItemProperty -Path $uninstallKey -Name DisplayVersion -Value '2026.2'
+Set-ItemProperty -Path $uninstallKey -Name Publisher -Value 'Mamat'
 Set-ItemProperty -Path $uninstallKey -Name InstallLocation -Value $InstallRoot
 Set-ItemProperty -Path $uninstallKey -Name DisplayIcon -Value $targetExe
 Set-ItemProperty -Path $uninstallKey -Name UninstallString -Value "`"$hostExe`" -NoProfile -ExecutionPolicy Bypass -File `"$uninstaller`""

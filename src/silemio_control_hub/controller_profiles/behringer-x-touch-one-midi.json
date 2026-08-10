@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "behringer.x-touch-one.midi",
+  "manufacturer": "Behringer",
+  "model": "X-Touch One — MIDI Mode (Channel 1)",
+  "midi_identity": {
+    "input_name_patterns": ["X-TOUCH ONE"],
+    "output_name_patterns": ["X-TOUCH ONE"]
+  },
+  "bank_size": 2,
+  "status": "community",
+  "capabilities": ["commands", "touch", "led", "values", "display", "motorized", "sysex"],
+  "controls": [
+    {"id": "encoder", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 80}, "feedback": {"value": {"message": "cc", "channel": 1, "number": 80}}},
+    {"id": "fader", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 70}, "touch": {"message": "note", "channel": 1, "number": 110}, "feedback": {"value": {"message": "cc", "channel": 1, "number": 70}}, "roles": ["output"]}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "example.plugin",
+  "status": "community",
+  "layer": "suggested",
+  "plugin_name": "Plugin exemple",
+  "manufacturer": "Fabricant",
+  "identity": {
+    "format": "VST3",
+    "stable_id": "identifiant-classe-vst3-si-connu",
+    "parameter_fingerprint": "40AFAD67817A1C60E6685813B5D7E635E8E8C7677015BAD09E2DDEE5838E7873"
+  },
+  "parameters": [
+    {"stable_id": "param-id-1", "name": "Threshold", "short_label": "Thrs", "unit": "dB", "role": "threshold", "importance": 100},
+    {"stable_id": "param-id-2", "name": "Ratio", "short_label": "Rati", "role": "ratio", "importance": 90},
+    {"stable_id": "param-id-3", "name": "Attack", "short_label": "Attk", "unit": "ms", "role": "attack", "importance": 80},
+    {"stable_id": "param-id-4", "name": "Release", "short_label": "Rels", "unit": "ms", "role": "release", "importance": 70}
+  ]
+}

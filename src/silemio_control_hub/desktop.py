@@ -10,6 +10,7 @@ import re
 import threading
 import time
 import tkinter as tk
+import webbrowser
 from tkinter import filedialog, messagebox, ttk
 
 from . import __version__
@@ -38,7 +39,11 @@ from .desktop_settings import (
     load_desktop_settings,
     save_desktop_settings,
 )
-from .identity import FULL_PRODUCT_NAME, PRODUCT_NAME
+from .controller_contribution import (
+    controller_submission_url,
+    validated_controller_payload,
+)
+from .identity import BRAND_NAME, FULL_PRODUCT_NAME, PRODUCT_NAME
 from .help_resources import (
     PAYPAL_QR_PATH,
     PAYPAL_SUPPORT_URL,
@@ -47,16 +52,23 @@ from .help_resources import (
     open_paypal_support,
 )
 from .library_remote import GitHubLibraryClient, update_library
-from .plugin_profiles import PluginParameterKind, PluginParameterProfile, PluginProfileLayer
+from .plugin_profiles import (
+    PluginParameterKind,
+    PluginParameterProfile,
+    PluginProfileError,
+    PluginProfileLayer,
+)
 from .plugin_registry import PluginProfileRegistry, default_user_plugin_profile_dir
 from .plugin_studio import (
     PluginProjectAnalysis,
     PluginTypeSummary,
     analyze_plugin_project,
     build_user_profile,
+    capture_liveprofessor_parameter_names,
     compatible_user_profile,
     editable_parameters,
     next_user_profile_version,
+    request_liveprofessor_companion_names,
     save_user_profile,
 )
 from .registry import ControllerRegistry
@@ -107,8 +119,8 @@ UI_TEXT = {
         "driver_ready": "PILOTE TEMPS RÉEL PRÊT",
         "driver_profile_only": "PROFIL AUTOMAP / EXPORT",
         "driver_profile_only_body": (
-            "Ce profil peut déjà servir à l’export et à AutoMap. Son pilote temps réel "
-            "n’est pas encore installé."
+            "Ce profil est prêt pour l’export .ctrl2 et AutoMap. La page Live affiche "
+            "son parcours compatible."
         ),
         "live_settings": "Réglages",
         "live_settings_title": "Réglages Live / MIDI / OSC",
@@ -194,8 +206,8 @@ UI_TEXT = {
         "runtime_stopped": "Moteur arrêté.",
         "runtime_starting": "Démarrage du moteur temps réel…",
         "runtime_driver_unavailable": (
-            "Le pilotage temps réel n’est pas encore disponible pour {controller}. "
-            "Utilisez Export ou AutoMap."
+            "{controller} est prêt pour Export et AutoMap. Le moteur Live direct "
+            "s’active pour les profils disposant d’un pilote."
         ),
         "runtime_error": "Erreur du moteur temps réel",
         "runtime_config_file_type": "Configuration JSON EC4 Bridge",
@@ -292,7 +304,7 @@ UI_TEXT = {
             "Suivez ses instructions pour terminer la mise à jour."
         ),
         "app_update_error_title": "Mise à jour impossible",
-        "support": "Soutenir SiLeMI/O…",
+        "support": "Soutenir Controller Studio…",
         "support_title": "Soutenir Controller Studio",
         "support_intro": (
             "Controller Studio est développé indépendamment pour faciliter le contrôle de "
@@ -314,6 +326,14 @@ UI_TEXT = {
         "controls": "Contrôles",
         "layout": "Banques / pages",
         "refresh": "Actualiser",
+        "contribute_controller": "Proposer à la bibliothèque…",
+        "contribute_controller_title": "Proposer ce contrôleur",
+        "contribute_controller_ready": (
+            "Le profil validé de {controller} a été copié dans le presse-papiers.\n\n"
+            "GitHub va ouvrir le formulaire de contribution. Collez le JSON dans la zone "
+            "« Profil JSON », ajoutez les références ou tests disponibles, puis envoyez."
+        ),
+        "contribute_controller_error": "Contribution impossible",
         "plugin_studio_title": "Plugin Studio",
         "plugin_studio_badge": "LOCAL • SÛR",
         "plugin_intro": (
@@ -353,10 +373,35 @@ UI_TEXT = {
         "plugin_kind_meter": "Mesure",
         "plugin_editor_title": "Profil de plug-in — {name}",
         "plugin_editor_intro": (
-            "Le .rack2 expose les numéros, mais pas les vrais noms des paramètres. "
-            "Renseignez-les puis donnez une importance élevée aux fonctions à placer en premier."
+            "Récupérez automatiquement les vrais noms depuis LiveProfessor, puis choisissez "
+            "précisément les paramètres à inclure dans AutoMap."
         ),
         "plugin_editor_instances": "{instances} instance(s) • {parameters} paramètre(s)",
+        "plugin_parameter_enabled": "AutoMap",
+        "plugin_parameter_enabled_editor": "Inclure ce paramètre dans AutoMap",
+        "plugin_select_all": "Tout cocher",
+        "plugin_select_none": "Tout décocher",
+        "plugin_enabled_count": "{enabled}/{total} paramètre(s) inclus",
+        "plugin_capture_names": "Récupérer automatiquement les vrais noms",
+        "plugin_capture_names_title": "Récupérer les noms depuis LiveProfessor",
+        "plugin_capture_names_ready": (
+            "Dans LiveProfessor, sélectionnez une instance de « {name} ». Dans la barre "
+            "du haut, cliquez sur le nom de la map et choisissez exactement "
+            "« SiLeMI/O AutoMap - {name} » — pas la map Dynamic. Cliquez ensuite sur OK : "
+            "Controller Studio demandera les noms sans modifier le projet."
+        ),
+        "plugin_capture_busy": "Récupération en cours…",
+        "plugin_capture_error": "Récupération impossible : {error}",
+        "plugin_capture_missing": (
+            "Aucun vrai nom n’a été reçu. Vérifiez que la bonne instance est sélectionnée "
+            "et que « SiLeMI/O AutoMap - {name} » est la map active dans LiveProfessor "
+            "(la map Dynamic ne convient pas à cette capture), puis réessayez."
+        ),
+        "plugin_capture_no_map": (
+            "Le projet analysé ne contient pas encore de Controller Map exploitable pour "
+            "ce plug-in. Créez ou ouvrez d’abord sa copie AutoMap."
+        ),
+        "plugin_capture_success": "{count} vrai(s) nom(s) récupéré(s). Vérifiez-les avant d’enregistrer.",
         "plugin_parameter_number": "N°",
         "plugin_parameter_name": "Nom",
         "plugin_short_label": "Libellé court",
@@ -445,10 +490,9 @@ UI_TEXT = {
         "about_title": "À propos de Controller Studio",
         "about_body": (
             "Controller Studio for LiveProfessor {version}\n"
-            "Une création SiLeMI/O.\n\n"
+            "SiLeMI/O — By Mamat  -------[]--\n\n"
             "Produit indépendant qui reprend les comportements éprouvés d’EC4 Bridge.\n"
-            "LiveProfessor est le premier hôte ; le X-Touch Compact sera le prochain "
-            "contrôleur testé sur matériel réel."
+            "Interface française/anglaise, banque de contrôleurs, Plugin Studio et AutoMap."
         ),
         "tray_open": "Ouvrir Controller Studio",
         "tray_quit": "Quitter",
@@ -486,8 +530,8 @@ UI_TEXT = {
         "driver_ready": "REAL-TIME DRIVER READY",
         "driver_profile_only": "AUTOMAP / EXPORT PROFILE",
         "driver_profile_only_body": (
-            "This profile is already available for export and AutoMap. Its real-time "
-            "driver is not installed yet."
+            "This profile is ready for .ctrl2 export and AutoMap. The Live page shows "
+            "its compatible workflow."
         ),
         "live_settings": "Settings",
         "live_settings_title": "Live / MIDI / OSC settings",
@@ -567,8 +611,8 @@ UI_TEXT = {
         "runtime_stopped": "Engine stopped.",
         "runtime_starting": "Starting the real-time engine…",
         "runtime_driver_unavailable": (
-            "Real-time control is not available yet for {controller}. "
-            "Use Export or AutoMap."
+            "{controller} is ready for Export and AutoMap. The direct Live engine "
+            "activates for profiles that provide a driver."
         ),
         "runtime_error": "Real-time engine error",
         "runtime_config_file_type": "EC4 Bridge JSON configuration",
@@ -665,7 +709,7 @@ UI_TEXT = {
             "Follow its instructions to complete the update."
         ),
         "app_update_error_title": "Update failed",
-        "support": "Support SiLeMI/O…",
+        "support": "Support Controller Studio…",
         "support_title": "Support Controller Studio",
         "support_intro": (
             "Controller Studio is independently developed to make LiveProfessor control easier. "
@@ -687,6 +731,14 @@ UI_TEXT = {
         "controls": "Controls",
         "layout": "Banks / pages",
         "refresh": "Refresh",
+        "contribute_controller": "Submit to the library…",
+        "contribute_controller_title": "Submit this controller",
+        "contribute_controller_ready": (
+            "The validated {controller} profile was copied to the clipboard.\n\n"
+            "GitHub will open the contribution form. Paste the JSON into “Profile JSON”, "
+            "add any available references or test results, then submit it."
+        ),
+        "contribute_controller_error": "Unable to prepare contribution",
         "plugin_studio_title": "Plugin Studio",
         "plugin_studio_badge": "LOCAL • SAFE",
         "plugin_intro": (
@@ -725,10 +777,35 @@ UI_TEXT = {
         "plugin_kind_meter": "Meter",
         "plugin_editor_title": "Plug-in profile — {name}",
         "plugin_editor_intro": (
-            "The .rack2 exposes parameter numbers, but not their real names. Enter them, "
-            "then give a high priority to functions that should be placed first."
+            "Automatically retrieve the real names from LiveProfessor, then choose exactly "
+            "which parameters AutoMap should include."
         ),
         "plugin_editor_instances": "{instances} instance(s) • {parameters} parameter(s)",
+        "plugin_parameter_enabled": "AutoMap",
+        "plugin_parameter_enabled_editor": "Include this parameter in AutoMap",
+        "plugin_select_all": "Select all",
+        "plugin_select_none": "Select none",
+        "plugin_enabled_count": "{enabled}/{total} parameter(s) included",
+        "plugin_capture_names": "Automatically retrieve real names",
+        "plugin_capture_names_title": "Get names from LiveProfessor",
+        "plugin_capture_names_ready": (
+            "In LiveProfessor, select an instance of “{name}”. In the top bar, click the "
+            "map name and choose exactly “SiLeMI/O AutoMap - {name}” — not the Dynamic "
+            "map. Then click OK: Controller Studio will request the names without changing "
+            "the project."
+        ),
+        "plugin_capture_busy": "Retrieving names…",
+        "plugin_capture_error": "Could not retrieve names: {error}",
+        "plugin_capture_missing": (
+            "No real name was received. Check that the correct instance is selected and "
+            "“SiLeMI/O AutoMap - {name}” is the active map in LiveProfessor (the Dynamic "
+            "map cannot be used for this capture), then try again."
+        ),
+        "plugin_capture_no_map": (
+            "The analyzed project does not yet contain a usable Controller Map for this "
+            "plug-in. Create or open its AutoMap copy first."
+        ),
+        "plugin_capture_success": "{count} real name(s) captured. Review them before saving.",
         "plugin_parameter_number": "No.",
         "plugin_parameter_name": "Name",
         "plugin_short_label": "Short label",
@@ -815,10 +892,9 @@ UI_TEXT = {
         "about_title": "About Controller Studio",
         "about_body": (
             "Controller Studio for LiveProfessor {version}\n"
-            "A SiLeMI/O creation.\n\n"
+            "SiLeMI/O — By Mamat  -------[]--\n\n"
             "An independent product that carries forward proven EC4 Bridge behavior.\n"
-            "LiveProfessor is the first host; the X-Touch Compact will be the next "
-            "controller tested on real hardware."
+            "French/English interface, controller bank, Plugin Studio, and AutoMap."
         ),
         "tray_open": "Open Controller Studio",
         "tray_quit": "Quit",
@@ -943,7 +1019,7 @@ class ControlHubDesktop:
         self.registry = ControllerRegistry()
         self.plugin_registry = PluginProfileRegistry()
         self.status = tk.StringVar(value=self._t("loading"))
-        self.selected_profile_id: str | None = None
+        self.selected_profile_id: str | None = self.settings.active_controller_id
         self.live_profile_var = tk.StringVar()
         self._live_profile_id_by_label: dict[str, str] = {}
         self._live_profile_label_by_id: dict[str, str] = {}
@@ -1040,14 +1116,14 @@ class ControlHubDesktop:
         signature.pack(side="right", padx=16)
         tk.Label(
             signature,
-            text="SiLeMI/O",
+            text=BRAND_NAME,
             bg="#111820",
-            fg="#43d6ff",
+            fg="#12c9e8",
             font=("Segoe UI Semibold", 14),
-        ).pack(side="left", padx=(0, 10))
+        ).pack(side="left", padx=(0, 12))
         tk.Label(
             signature,
-            text="By Mamat\n-----[]---",
+            text="By Mamat\n-------[]--",
             bg="#111820",
             fg="#91a9b5",
             font=("Segoe UI", 9),
@@ -1265,8 +1341,13 @@ class ControlHubDesktop:
         state_frame = ttk.LabelFrame(parent, text=self._t("state_frame"), padding=10)
         state_frame.grid(row=4, column=0, sticky="ew", pady=(4, 6))
         state_frame.columnconfigure(0, weight=1)
-        ttk.Label(state_frame, textvariable=self.runtime_status).grid(
-            row=0, column=0, sticky="w"
+        ttk.Label(
+            state_frame,
+            textvariable=self.runtime_status,
+            wraplength=500,
+            justify="left",
+        ).grid(
+            row=0, column=0, sticky="ew"
         )
         self.previous_bank_button = ttk.Button(
             state_frame,
@@ -1392,6 +1473,11 @@ class ControlHubDesktop:
             actions,
             text=self._t("export_controller"),
             command=self.export_controller,
+        ).pack(side="left", padx=(8, 0))
+        ttk.Button(
+            actions,
+            text=self._t("contribute_controller"),
+            command=self.contribute_controller,
         ).pack(side="left", padx=(8, 0))
         ttk.Button(
             actions,
@@ -1797,11 +1883,12 @@ class ControlHubDesktop:
         table.rowconfigure(0, weight=1)
         parameter_tree = ttk.Treeview(
             table,
-            columns=("number", "name", "short", "kind", "role", "importance"),
+            columns=("enabled", "number", "name", "short", "kind", "role", "importance"),
             show="headings",
             selectmode="browse",
         )
         for column, label, width in (
+            ("enabled", self._t("plugin_parameter_enabled"), 72),
             ("number", self._t("plugin_parameter_number"), 48),
             ("name", self._t("plugin_parameter_name"), 260),
             ("short", self._t("plugin_short_label"), 110),
@@ -1823,6 +1910,7 @@ class ControlHubDesktop:
             parameter_tree.item(
                 f"parameter-{index}",
                 values=(
+                    "☑" if parameter.enabled else "☐",
                     index + 1,
                     parameter.name,
                     parameter.short_label,
@@ -1838,6 +1926,7 @@ class ControlHubDesktop:
                 "end",
                 iid=f"parameter-{index}",
                 values=(
+                    "☑" if parameter.enabled else "☐",
                     index + 1,
                     parameter.name,
                     parameter.short_label,
@@ -1846,6 +1935,177 @@ class ControlHubDesktop:
                     parameter.importance,
                 ),
             )
+
+        included_var = tk.StringVar()
+
+        def refresh_included_count() -> None:
+            included_var.set(
+                self._t(
+                    "plugin_enabled_count",
+                    enabled=sum(parameter.enabled for parameter in parameters),
+                    total=len(parameters),
+                )
+            )
+
+        def set_all_parameters(enabled: bool) -> None:
+            for index, parameter in enumerate(parameters):
+                parameters[index] = replace(parameter, enabled=enabled)
+                refresh_parameter_row(index)
+            refresh_included_count()
+            load_parameter()
+
+        def toggle_parameter(index: int) -> None:
+            parameters[index] = replace(
+                parameters[index], enabled=not parameters[index].enabled
+            )
+            refresh_parameter_row(index)
+            refresh_included_count()
+            load_parameter()
+
+        def toggle_parameter_from_pointer(event) -> str | None:
+            row = parameter_tree.identify_row(event.y)
+            column = parameter_tree.identify_column(event.x)
+            if row and column == "#1":
+                parameter_tree.selection_set(row)
+                toggle_parameter(int(row.removeprefix("parameter-")))
+                return "break"
+            return None
+
+        def toggle_selected_parameter(_event=None) -> str:
+            index = selected_parameter_index()
+            if index is not None:
+                toggle_parameter(index)
+            return "break"
+
+        selection_bar = ttk.Frame(table)
+        selection_bar.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
+        ttk.Button(
+            selection_bar,
+            text=self._t("plugin_select_all"),
+            command=lambda: set_all_parameters(True),
+        ).pack(side="left")
+        ttk.Button(
+            selection_bar,
+            text=self._t("plugin_select_none"),
+            command=lambda: set_all_parameters(False),
+        ).pack(side="left", padx=(8, 0))
+
+        def capture_names_from_liveprofessor() -> None:
+            nonlocal parameters
+            if not messagebox.askokcancel(
+                self._t("plugin_capture_names_title"),
+                self._t("plugin_capture_names_ready", name=summary.observation.name),
+                parent=window,
+            ):
+                return
+            capture_button.configure(
+                state="disabled",
+                text=self._t("plugin_capture_busy"),
+            )
+
+            def finish_capture(live_names: tuple[str, ...]) -> None:
+                nonlocal parameters
+                capture_button.configure(
+                    state="normal",
+                    text=self._t("plugin_capture_names"),
+                )
+                analysis = self._plugin_analysis
+                if analysis is None:
+                    return
+                try:
+                    updated, count = capture_liveprofessor_parameter_names(
+                        parameters,
+                        project=analysis.path,
+                        plugin_uid=summary.instances[0].plugin_uid,
+                        live_names=live_names,
+                    )
+                except PluginProfileError:
+                    messagebox.showwarning(
+                        self._t("plugin_capture_names_title"),
+                        self._t("plugin_capture_no_map"),
+                        parent=window,
+                    )
+                    return
+                if count <= 0:
+                    messagebox.showwarning(
+                        self._t("plugin_capture_names_title"),
+                        self._t(
+                            "plugin_capture_missing",
+                            name=summary.observation.name,
+                        ),
+                        parent=window,
+                    )
+                    return
+                parameters = list(updated)
+                for index in range(len(parameters)):
+                    refresh_parameter_row(index)
+                refresh_included_count()
+                load_parameter()
+                messagebox.showinfo(
+                    self._t("plugin_capture_names_title"),
+                    self._t("plugin_capture_success", count=count),
+                    parent=window,
+                )
+
+            def fail_capture(error: str) -> None:
+                capture_button.configure(
+                    state="normal",
+                    text=self._t("plugin_capture_names"),
+                )
+                messagebox.showwarning(
+                    self._t("plugin_capture_names_title"),
+                    self._t("plugin_capture_error", error=error),
+                    parent=window,
+                )
+
+            runtime = self.runtime
+            if runtime is not None and runtime.running:
+                runtime.clear_companion_names()
+                runtime.refresh_companion()
+                window.after(900, lambda: finish_capture(tuple(runtime.names)))
+                return
+
+            try:
+                request_host = self.liveprofessor_host_var.get().strip() or "127.0.0.1"
+                request_port = int(self.liveprofessor_port_var.get().strip())
+                feedback_port = int(self.feedback_port_var.get().strip())
+            except ValueError:
+                fail_capture("ports OSC invalides")
+                return
+
+            def collect_names() -> None:
+                try:
+                    live_names = request_liveprofessor_companion_names(
+                        host=request_host,
+                        request_port=request_port,
+                        feedback_host=self.runtime_config.feedback_host,
+                        feedback_port=feedback_port,
+                    )
+                except Exception as exc:
+                    error = str(exc)
+                    window.after(0, lambda: fail_capture(error))
+                    return
+                window.after(0, lambda: finish_capture(live_names))
+
+            threading.Thread(
+                target=collect_names,
+                name="liveprofessor-name-capture",
+                daemon=True,
+            ).start()
+
+        capture_button = ttk.Button(
+            selection_bar,
+            text=self._t("plugin_capture_names"),
+            command=capture_names_from_liveprofessor,
+            style="Accent.TButton",
+        )
+        capture_button.pack(side="left", padx=(16, 0))
+        ttk.Label(
+            selection_bar,
+            textvariable=included_var,
+            style="Subtitle.TLabel",
+        ).pack(side="right")
+        refresh_included_count()
 
         editor = ttk.LabelFrame(
             frame,
@@ -1861,6 +2121,7 @@ class ControlHubDesktop:
         role_var = tk.StringVar()
         kind_var = tk.StringVar()
         importance_var = tk.StringVar()
+        enabled_var = tk.BooleanVar(value=True)
         ttk.Label(editor, text=self._t("plugin_parameter_name")).grid(
             row=0, column=0, sticky="w"
         )
@@ -1907,6 +2168,11 @@ class ControlHubDesktop:
             to=100,
             width=8,
         ).grid(row=2, column=3, sticky="w", padx=(6, 0), pady=(8, 0))
+        ttk.Checkbutton(
+            editor,
+            text=self._t("plugin_parameter_enabled_editor"),
+            variable=enabled_var,
+        ).grid(row=3, column=0, columnspan=4, sticky="w", pady=(8, 0))
 
         def selected_parameter_index() -> int | None:
             selected = parameter_tree.selection()
@@ -1925,6 +2191,7 @@ class ControlHubDesktop:
             role_var.set(parameter.role or "")
             kind_var.set(self._plugin_kind_text(parameter.kind))
             importance_var.set(str(parameter.importance))
+            enabled_var.set(parameter.enabled)
 
         def apply_parameter(*, show_error: bool = True) -> bool:
             index = selected_parameter_index()
@@ -1939,6 +2206,7 @@ class ControlHubDesktop:
                     "unit": unit_var.get().strip(),
                     "kind": selected_kind.value if selected_kind is not None else "",
                     "importance": int(importance_var.get()),
+                    "enabled": bool(enabled_var.get()),
                 }
                 role = role_var.get().strip()
                 if role:
@@ -1953,6 +2221,7 @@ class ControlHubDesktop:
                     )
                 return False
             refresh_parameter_row(index)
+            refresh_included_count()
             return True
 
         def reset_parameter() -> None:
@@ -1961,10 +2230,11 @@ class ControlHubDesktop:
                 return
             parameters[index] = loaded_parameters[index]
             refresh_parameter_row(index)
+            refresh_included_count()
             load_parameter()
 
         button_row = ttk.Frame(editor)
-        button_row.grid(row=3, column=0, columnspan=4, sticky="ew", pady=(10, 0))
+        button_row.grid(row=4, column=0, columnspan=4, sticky="ew", pady=(10, 0))
         ttk.Button(
             button_row,
             text=self._t("plugin_parameter_apply"),
@@ -1980,6 +2250,9 @@ class ControlHubDesktop:
             text=self._t("plugin_importance_help"),
             style="Subtitle.TLabel",
         ).pack(side="right")
+
+        parameter_tree.bind("<Double-1>", toggle_parameter_from_pointer)
+        parameter_tree.bind("<space>", toggle_selected_parameter)
 
         actions = ttk.Frame(frame)
         actions.grid(row=5, column=0, sticky="ew", pady=(12, 0))
@@ -2095,7 +2368,12 @@ class ControlHubDesktop:
             else:
                 self._populate_plugin_catalog(plugins)
             available = {row.profile_id for row in rows}
-            selected = previous if previous in available else (rows[0].profile_id if rows else None)
+            default_profile = (
+                "faderfox.ec4"
+                if "faderfox.ec4" in available
+                else (rows[0].profile_id if rows else None)
+            )
+            selected = previous if previous in available else default_profile
             if selected is not None:
                 self.controller_tree.selection_set(selected)
                 self.controller_tree.focus(selected)
@@ -2123,6 +2401,7 @@ class ControlHubDesktop:
         if self.runtime is not None and self.runtime.running:
             self.stop_runtime()
         self.selected_profile_id = profile_id
+        self._remember_active_controller(profile_id)
         self.live_profile_var.set(self._live_profile_label_by_id.get(profile_id, ""))
         self._apply_live_profile_state()
 
@@ -2150,11 +2429,21 @@ class ControlHubDesktop:
         if self.runtime is not None and self.runtime.running:
             self.stop_runtime()
         self.selected_profile_id = profile_id
+        self._remember_active_controller(profile_id)
         if hasattr(self, "controller_tree"):
             self.controller_tree.selection_set(profile_id)
             self.controller_tree.focus(profile_id)
             self.controller_tree.see(profile_id)
         self._apply_live_profile_state()
+
+    def _remember_active_controller(self, profile_id: str | None) -> None:
+        if profile_id == self.settings.active_controller_id:
+            return
+        self.settings = replace(self.settings, active_controller_id=profile_id)
+        try:
+            save_desktop_settings(self.settings, self.settings_path)
+        except OSError as exc:
+            self.status.set(self._t("settings_error", error=exc))
 
     def _active_controller_label(self) -> str:
         if self.selected_profile_id is None:
@@ -2210,11 +2499,43 @@ class ControlHubDesktop:
             return None
         return self.registry.get(self.selected_profile_id)
 
+    def contribute_controller(self) -> None:
+        profile = self._selected_profile()
+        if profile is None:
+            return
+        try:
+            source = self.registry.source(profile.id)
+            contribution, payload = validated_controller_payload(
+                source,
+                expected_profile_id=profile.id,
+            )
+            self.root.clipboard_clear()
+            self.root.clipboard_append(payload)
+            self.root.update_idletasks()
+            url = controller_submission_url(contribution)
+            if not webbrowser.open(url):
+                raise OSError("le navigateur n’a pas accepté le lien GitHub")
+        except Exception as exc:
+            messagebox.showerror(
+                self._t("contribute_controller_error"),
+                str(exc),
+                parent=self.root,
+            )
+            return
+        messagebox.showinfo(
+            self._t("contribute_controller_title"),
+            self._t(
+                "contribute_controller_ready",
+                controller=contribution.display_name,
+            ),
+            parent=self.root,
+        )
+
     def export_controller(self) -> None:
         profile = self._selected_profile()
         if profile is None:
             return
-        initial = _safe_filename(f"SiLeMIO-{profile.manufacturer}-{profile.model}")
+        initial = _safe_filename(f"Controller-Studio-{profile.manufacturer}-{profile.model}")
         destination = filedialog.asksaveasfilename(
             parent=self.root,
             title=self._t("export_title"),
@@ -2609,7 +2930,7 @@ class ControlHubDesktop:
             defaultextension=".rack2",
             filetypes=((self._t("project_file_type"), "*.rack2"),),
             initialdir=str(inventory.path.parent),
-            initialfile=f"{inventory.path.stem}-SiLeMIO-AutoMap.rack2",
+            initialfile=f"{inventory.path.stem}-Controller-Studio-AutoMap.rack2",
         )
         if not destination_name:
             return

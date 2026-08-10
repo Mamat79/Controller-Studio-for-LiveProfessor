@@ -1,0 +1,96 @@
+{
+  "manifest_version": 1,
+  "generated_at": "2026-08-10T01:49:57Z",
+  "profiles": [
+    {
+      "id": "behringer.x-touch-compact.layer-a",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/behringer/x-touch-compact-layer-a/1.0.0/profile.json",
+      "sha256": "C0102732FE49F04AF29A242FA4DAB523980771F6D1A63C86EDE594EFA527704F",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "behringer.x-touch-mini.preset-a",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/behringer/x-touch-mini-preset-a/1.0.0/profile.json",
+      "sha256": "FB24F4E5267F12819E9A9E525181A4DFE657253E4F2D766BAA34D1E115F0312E",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "behringer.x-touch-one.midi",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/behringer/x-touch-one-midi/1.0.0/profile.json",
+      "sha256": "AA54FB24E9CAFF0C5CFC45962B35BCE6DFE9F1CDAAD275BF443CCD1626772E65",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "dj-techtools.midi-fighter-twister.factory-banks-1-4",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/dj-techtools/midi-fighter-twister/1.0.0/profile.json",
+      "sha256": "E658B6468FCF28284DC490E0064553B6BFE0648C7FFB5F376EC1E7D280FD8D35",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "faderfox.ec4",
+      "version": "1.0.0",
+      "status": "verified",
+      "path": "controllers/faderfox/ec4/1.0.0/profile.json",
+      "sha256": "946DB721DC66B49AA061AF8353C207E5B363074A84BDAAF4DFCC4E82177BF73A",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "faderfox.pc12.setup-1",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/faderfox/pc12-setup-1/1.0.0/profile.json",
+      "sha256": "6605A1F26F76DEBF3CD0FD9286B9379C45B160DEF5AAC4FF655B1F86F4805DC8",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "faderfox.pc4.setup-1",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/faderfox/pc4-setup-1/1.0.0/profile.json",
+      "sha256": "EE7699D15AB1400F026943B3F09A6C09679C63FB25D4B4FA28E4041702EFAE26",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "faderfox.uc4.setup-1-group-1",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/faderfox/uc4-setup-1-group-1/1.0.0/profile.json",
+      "sha256": "3B49CECCCC93E8A9A361A7750CD738A5B58C65DDAB5CBC9E31650C5B3C4EFEB8",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "generic.midi.16",
+      "version": "1.0.0",
+      "status": "builtin",
+      "path": "controllers/generic/midi-16/1.0.0/profile.json",
+      "sha256": "7C9FD78766FE40164DA7327471DCF945E34FFE19E4DC8682E5DF4A37A9A5AF59",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launch-control-xl3.mode-16",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launch-control-xl3-mode16/1.0.0/profile.json",
+      "sha256": "FCA320D35F8E947126D55C80D1063503467FDDD4A69BC5B4D2B9B902F1A9C28E",
+      "minimum_hub_version": "0.1.0"
+    }
+  ],
+  "plugin_profiles": [
+    {
+      "id": "example.plugin",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "plugin-profiles/example/plugin/1.0.0/profile.json",
+      "sha256": "B6BA1222444DC466702F3EA9596B9B04B799D6D739C479CE9C46B3F624B509B1",
+      "minimum_hub_version": "0.1.0"
+    }
+  ]
+}

@@ -1,0 +1,468 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "faderfox.uc4.setup-1-group-1",
+  "manufacturer": "Faderfox",
+  "model": "UC4 — Factory Setup 1 / Group 1",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Faderfox UC4",
+      "UC4"
+    ],
+    "output_name_patterns": [
+      "Faderfox UC4",
+      "UC4"
+    ]
+  },
+  "bank_size": 25,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "led",
+    "values",
+    "display"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 8
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 0
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 8
+        }
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 9
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 1
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 9
+        }
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 10
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 2
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 10
+        }
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 11
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 3
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 11
+        }
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 12
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 4
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 12
+        }
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 13
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 5
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 13
+        }
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 14
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 6
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 14
+        }
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 15
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 7
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 15
+        }
+      }
+    },
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 32
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 32
+        }
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 33
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 33
+        }
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 34
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 34
+        }
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 35
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 35
+        }
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 36
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 36
+        }
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 37
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 37
+        }
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 38
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 38
+        }
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 39
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 39
+        }
+      }
+    },
+    {
+      "id": "fader_09",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 112
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 112
+        }
+      }
+    },
+    {
+      "id": "button_01",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 64
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 64
+        }
+      }
+    },
+    {
+      "id": "button_02",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 65
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 65
+        }
+      }
+    },
+    {
+      "id": "button_03",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 66
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 66
+        }
+      }
+    },
+    {
+      "id": "button_04",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 67
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 67
+        }
+      }
+    },
+    {
+      "id": "button_05",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 68
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 68
+        }
+      }
+    },
+    {
+      "id": "button_06",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 69
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 69
+        }
+      }
+    },
+    {
+      "id": "button_07",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 70
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 70
+        }
+      }
+    },
+    {
+      "id": "button_08",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 71
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 71
+        }
+      }
+    }
+  ]
+}

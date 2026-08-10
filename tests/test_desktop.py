@@ -17,7 +17,18 @@ def test_desktop_controller_table_uses_the_registry_without_legacy_dependencies(
         ControllerRegistry(profile_directories=[], library_cache_root=tmp_path / "cache")
     )
 
-    assert {row.profile_id for row in rows} == {"faderfox.ec4", "generic.midi.16"}
+    assert {row.profile_id for row in rows} == {
+        "behringer.x-touch-compact.layer-a",
+        "behringer.x-touch-mini.preset-a",
+        "behringer.x-touch-one.midi",
+        "dj-techtools.midi-fighter-twister.factory-banks-1-4",
+        "faderfox.ec4",
+        "faderfox.pc12.setup-1",
+        "faderfox.pc4.setup-1",
+        "faderfox.uc4.setup-1-group-1",
+        "generic.midi.16",
+        "novation.launch-control-xl3.mode-16",
+    }
     assert all(row.controls > 0 for row in rows)
 
 

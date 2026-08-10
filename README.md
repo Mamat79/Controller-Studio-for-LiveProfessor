@@ -1,106 +1,151 @@
-# Controller Studio for LiveProfessor
+<p align="center">
+  <img src="src/silemio_control_hub/assets/controller-studio.png" alt="Controller Studio for LiveProfessor" width="132">
+</p>
 
-**Version publique V.2026**
+<h1 align="center">Controller Studio for LiveProfessor</h1>
 
-**SiLeMI/O** est la marque et **Controller Studio** le produit. La mention **for LiveProfessor** reste affichée tant que LiveProfessor est le seul hôte intégralement pris en charge.
+<p align="center">
+  <strong>SiLeMI/O — By Mamat</strong><br>
+  Contrôleurs MIDI, Plugin Studio et AutoMap réunis dans une seule application Windows.
+</p>
 
-## Télécharger / Download
+<p align="center">
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2"><img alt="Version V.2026.2" src="https://img.shields.io/badge/version-V.2026.2-0b9fc6"></a>
+  <img alt="Windows 10 et 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
+  <img alt="Français et anglais" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
+</p>
 
-### [Télécharger l'installateur Windows V.2026](https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/latest/download/Controller-Studio-for-LiveProfessor-Setup-v2026.0.exe)
+## Dernière version (accès rapide)
 
-**Windows 11/10 x64 — installateur bilingue français/anglais.** Les anciennes releases EC4 LiveProfessor Bridge restent disponibles dans l'historique du dépôt pour revenir à la version précédente.
+**Version stable : [Controller Studio V.2026.2](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2)**<br>
+Téléchargement direct :
 
-**English:** download the same bilingual Windows installer above. Controller Studio replaces EC4 Bridge while preserving its validated EC4/LiveProfessor behavior and adding controller and plug-in profile libraries.
+- [Installer Controller Studio pour Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Setup-v2026.2.exe)
+- [Version portable Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor.exe)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Sommes de contrôle SHA-256](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/SHA256SUMS.txt)
 
-Controller Studio est un logiciel SiLeMI/O indépendant d’EC4 LiveProfessor Bridge. Il réunit une banque de contrôleurs, l’export LiveProfessor, Plugin Studio, l’AutoMap et le contrôle en direct lorsqu’un pilote matériel compatible est disponible. Le paquet historique reste uniquement une référence de migration non distribuée.
+[Lire cette présentation en anglais](README_EN.md)
 
-## État actuel
+> **Version publique V.2026.2 pour Windows.** Controller Studio travaille sur une copie AutoMap et conserve le projet `.rack2` source intact.
 
-- noyau de profils de contrôleurs ;
-- registre local de profils intégrés et utilisateur ;
-- profil Faderfox EC4 ;
-- profil MIDI générique à 16 encodeurs ;
-- moteur temps réel EC4/LiveProfessor avec reconnexion automatique, message de connexion, setup/groupe, 16 rotatifs et push, Shift, banques, affichage et retours Companion ;
-- import non destructif de la configuration EC4 Bridge et apprentissage guidé des 16 rotatifs + push ;
-- événements normalisés de rotation, pression, toucher, modificateur et retour ;
-- banques, pages et modificateurs indépendants du matériel ;
-- premier moteur d'affectation typé, sans doublons et respectant les mappings manuels ;
-- simulateur de contrôleur sans matériel ;
-- export d'un contrôleur Companion `.ctrl2` neutre depuis un profil ;
-- adaptateur LiveProfessor, lecteur JUCE et AutoMap appartenant au cœur SiLeMI/O ;
-- assistant AutoMap visible depuis l'onglet Live, la banque et le menu Outils, avec UniBank/FullBank, sélection de toutes les instances ou cases à cocher, et réutilisation sûre du contrôleur Companion/OSC déjà présent ;
-- conservation de l'UID et du nom du contrôleur LiveProfessor sélectionné dans le `.ctrl2`, sans second contrôleur concurrent ;
-- notice PDF française ou anglaise selon la langue active, soutien PayPal facultatif avec QR code et vérificateur de mises à jour signé par SHA-256 ;
-- frontière testée interdisant au paquet produit d'importer le bridge historique ;
-- tests de régression historiques exécutés contre le moteur Controller Studio, hors de la distribution produit ;
-- identité de plug-in déterministe et résolution locale `User > Suggested > Raw`.
-- Plugin Studio bilingue : analyse non bloquante d’un `.rack2`, regroupement des instances, édition versionnée des noms/libellés/types/rôles/priorités et sauvegarde locale avec retour arrière ;
-- prise en compte immédiate des priorités du Plugin Studio dans les emplacements AutoMap encore libres, sans jamais déplacer une affectation manuelle.
+## À quoi sert Controller Studio ?
 
-EC4 Bridge reste installé comme solution de repli jusqu’à la réussite du scénario matériel complet et la confirmation explicite de l’utilisateur. Les deux moteurs ne doivent pas ouvrir simultanément les mêmes ports MIDI/OSC.
+Controller Studio transforme un contrôleur MIDI en surface de contrôle organisée pour les plug-ins de LiveProfessor. Dans la même application, vous pouvez choisir ou créer un contrôleur, produire son fichier LiveProfessor, analyser les plug-ins d’un projet et fabriquer une copie AutoMap prête à tester.
 
-## Interface Windows
+| Contrôle Live | Banque de contrôleurs | Plugin Studio | AutoMap |
+|---|---|---|---|
+| Pilote EC4 temps réel, banques, push, Shift, labels, valeurs et reconnexion | Profils prêts à exporter et éditeur de contrôleur | Vrais noms reçus de LiveProfessor, priorités et sélection paramètre par paramètre | Choix des plug-ins et instances, UniBank ou FullBank, copie `.rack2` validée |
 
-L’onglet `Live` affiche le contrôleur actif, les actions essentielles, l’état et le dernier événement. Les réglages MIDI/OSC et les outils propres au pilote sont regroupés dans `Réglages`; le journal complet s’ouvre dans une fenêtre séparée. Le bouton bleu `AutoMap` analyse le `.rack2`, propose le contrôleur déjà présent, le mode de banques, puis tous les plug-ins ou les seules instances cochées. Il produit toujours une nouvelle copie `.rack2` et un `.ctrl2` correspondant.
+L’interface existe en français et en anglais, se réduit dans la zone de notification et place le journal temps réel dans une fenêtre séparée.
 
-L’onglet `Plug-ins` est un Plugin Studio complet. Il analyse un projet en lecture seule, regroupe les instances identiques, indique le niveau de reconnaissance et permet de créer ou corriger un profil local. La priorité 100 place une fonction avant la priorité 0 dans les emplacements AutoMap libres ; les mappings appris ou manuels conservent toujours la priorité absolue. Le bouton `Utiliser dans AutoMap` transmet directement le projet analysé à l’assistant.
+## Utilisation en trois étapes
 
-Le menu `Aide / Help` ouvre la notice localisée, vérifie les mises à jour de Controller Studio, affiche le soutien PayPal facultatif et l'à-propos. Une mise à jour n'est lancée qu'après confirmation, téléchargement complet et validation SHA-256 d'un installateur portant strictement le nom du produit ; un ancien installateur EC4 Bridge est refusé.
+1. Dans **Banque de contrôleurs**, choisissez votre matériel ou créez son profil, puis exportez le fichier `.ctrl2`.
+2. Ajoutez ce contrôleur dans LiveProfessor et analysez votre projet `.rack2` avec **Plugin Studio**.
+3. Cliquez sur le bouton bleu **AutoMap**, choisissez les plug-ins et paramètres utiles, puis ouvrez la nouvelle copie produite.
 
-Elle est disponible en français et en anglais depuis `Options > Langue / Language`. La fermeture et la réduction peuvent envoyer l’application dans la zone de notification ; son menu permet aussi de démarrer, arrêter ou redémarrer le moteur, afficher le journal et vérifier la bibliothèque.
+Controller Studio relit la copie générée avant de la proposer. Les affectations manuelles existantes restent prioritaires.
 
-L'identité visuelle `S/O` est partagée par l'EXE, la fenêtre, la zone de notification, les raccourcis Bureau/menu Démarrer et l'entrée des applications Windows. Le fichier `.ico` contient les résolutions Windows de 16 à 256 px.
+## Plugin Studio
 
-```powershell
-.\packaging\windows\build.ps1
-.\packaging\windows\build_setup.ps1
-.\packaging\windows\install.ps1
-```
+Le fichier `.rack2` conserve l’ordre et les identifiants des paramètres, mais pas toujours leurs libellés humains. Plugin Studio complète ces informations avec les noms renvoyés par le contrôleur Companion de LiveProfessor.
 
-L’installation utilisateur cible `%LOCALAPPDATA%\Programs\Controller Studio for LiveProfessor`, ajoute le raccourci `Controller Studio for LiveProfessor` et enregistre une désinstallation isolée. L'installateur Inno Setup bilingue porte le nom reconnu par le vérificateur de mises à jour. Il ne remplace ni l’ancienne préversion Control Hub, ni EC4 Bridge.
+Pour un plug-in donné :
 
-La construction publique exécute la suite de tests avant de produire les artefacts Windows.
+1. sélectionnez son instance dans LiveProfessor ;
+2. rappelez la map **SiLeMI/O AutoMap - NomDuPlugin** dans la barre supérieure — pas la map Dynamic ;
+3. cliquez sur **Récupérer automatiquement les vrais noms** ;
+4. utilisez **Tout cocher**, **Tout décocher** ou les cases individuelles ;
+5. ajustez si nécessaire le libellé court, le type, le rôle ou la priorité, puis enregistrez le profil local.
 
-## Commandes de développement
+La relation entre l’emplacement de la Controller Map et l’identifiant interne du paramètre est conservée afin d’éviter qu’un bon réglage reçoive le label d’un autre.
+
+## Banque de contrôleurs intégrée
+
+V.2026.2 fournit dix profils déclaratifs prêts à exporter :
+
+- Faderfox EC4, PC4, UC4 et PC12 ;
+- Behringer X-Touch Compact, X-Touch Mini et X-Touch One ;
+- Novation Launch Control XL 3 ;
+- DJ TechTools MIDI Fighter Twister ;
+- contrôleur MIDI générique à 16 commandes.
+
+Les modes matériels et les sources constructeur utilisés sont regroupés dans [la documentation des profils](docs/CONTROLLER_PROFILE_SOURCES.md). La banque peut être mise à jour depuis l’application puis reste disponible hors ligne.
+
+## Créer et partager un contrôleur
+
+L’éditeur intégré permet de décrire les encodeurs, faders, boutons, canaux MIDI, messages CC/Note et retours disponibles, puis de vérifier le profil avant export.
+
+Pour proposer un contrôleur à la bibliothèque commune :
+
+1. créez ou sélectionnez le profil dans **Banque de contrôleurs** ;
+2. cliquez sur **Proposer à la bibliothèque…** ;
+3. Controller Studio valide et prépare le JSON ;
+4. le formulaire GitHub prérempli s’ouvre ;
+5. joignez la documentation constructeur ou vos résultats d’essai puis envoyez la proposition.
+
+La bibliothèque publique fait partie de ce dépôt dans [`library/`](library/). Elle contient uniquement des profils JSON déclaratifs, jamais de code téléchargé et exécuté.
+
+## Fonctions principales
+
+- création, import, export et validation de profils de contrôleurs ;
+- génération de contrôleurs LiveProfessor Companion/OSC `.ctrl2` ;
+- moteur EC4 complet hérité d’EC4 Bridge ;
+- choix mémorisé du contrôleur et reconnexion MIDI/OSC ;
+- labels et valeurs sur l’afficheur, banques, push et raccourcis ;
+- analyse en lecture seule des plug-ins et Controller Maps ;
+- sélection de tous les plug-ins, d’une instance ou d’un ensemble précis ;
+- sélection et priorité de chaque paramètre dans Plugin Studio ;
+- AutoMap UniBank et FullBank dans une nouvelle copie ;
+- conservation des mappings manuels et apprentissages existants ;
+- mise à jour vérifiée du logiciel et de la bibliothèque ;
+- interface FR/EN, réduction dans la zone de notification et journal séparé ;
+- notice PDF intégrée et soutien PayPal facultatif.
+
+## Documentation
+
+- [Notice complète en français](src/silemio_control_hub/manuals/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [Full English manual](src/silemio_control_hub/manuals/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [README in English](README_EN.md)
+- [Sources des profils de contrôleurs](docs/CONTROLLER_PROFILE_SOURCES.md)
+- [Historique des versions](CHANGELOG.md)
+
+La notice correspondant à la langue de l’interface s’ouvre aussi depuis **Aide > Ouvrir la notice PDF**.
+
+## Installation et mises à jour
+
+L’installateur place Controller Studio dans le profil Windows de l’utilisateur et crée les raccourcis du Bureau et du menu Démarrer. Le logiciel se désinstalle ensuite depuis les applications Windows.
+
+Le menu **Aide > Rechercher les mises à jour** consulte la dernière Release de ce dépôt, vérifie le téléchargement puis lance l’installateur. La bibliothèque de contrôleurs se met à jour séparément depuis le menu **Bibliothèque**.
+
+## Développement et vérification
 
 ```powershell
 python -m pip install -e .
+python -m pytest -q
 python -m silemio_control_hub profiles
 python -m silemio_control_hub validate-profile "chemin\profil.json"
-python -m silemio_control_hub profile-dir
-python -m silemio_control_hub install-profile "chemin\profil.json"
-python -m silemio_control_hub simulate generic.midi.16 rotate control_01 0.5
 python -m silemio_control_hub export-liveprofessor-controller faderfox.ec4 ".\Faderfox-EC4.ctrl2"
-python -m silemio_control_hub prepare-liveprofessor generic.midi.16 ".\source.rack2" ".\source-automap.rack2" ".\Generic-MIDI-16.ctrl2"
-python -m silemio_control_hub inspect-liveprofessor-plugins ".\source.rack2"
-python -m silemio_control_hub validate-library ".\ma-bibliotheque"
 python -m silemio_control_hub library-update
-python -m silemio_control_hub library-update --apply
-python -m silemio_control_hub library-backups
-python -m silemio_control_hub library-rollback "nom-de-sauvegarde" --apply
-python -m pytest
 ```
 
-`library-update` ne modifie rien sans `--apply`. La bibliothèque publique se consulte sans jeton ; `GH_TOKEN` ou `GITHUB_TOKEN` reste facultatif pour augmenter la limite d’appels GitHub ou utiliser un fork privé. Le cache local continue à fonctionner hors ligne et alimente automatiquement `profiles` et `plugin-profiles`. `SILEMIO_LIBRARY_CACHE` permet de choisir un cache isolé pour les tests. Un downgrade, une suppression ou un rollback exigent chacun une autorisation explicite.
+## Soutenir le projet
 
-Pour comparer temporairement le comportement de l'interface EC4 historique depuis les sources de développement :
+Controller Studio est développé et maintenu indépendamment. Toutes ses fonctions restent disponibles gratuitement.
 
-```powershell
-python legacy_launcher.py
-```
+- [Soutenir SiLeMI/O via PayPal](https://www.paypal.com/paypalme/MamatLeroy)
+- le même lien et son QR code sont disponibles dans le menu **Aide**.
 
-Cette commande ne fait pas partie du paquet distribuable `silemio-control-hub`.
+## Remerciements
 
-## Principes
+Merci aux utilisateurs qui testent leurs contrôleurs, documentent les plans MIDI et enrichissent la bibliothèque publique.
 
-- LiveProfessor bénéficie de l'AutoMap complet.
-- Les autres logiciels peuvent commencer par une compatibilité MIDI générique.
-- Chaque intégration annonce ses capacités réelles.
-- Les fichiers de projet source ne sont jamais modifiés par l'AutoMap.
-- La réutilisation du contrôleur Companion/OSC existant évite deux listes de labels concurrentes sur les mêmes adresses `/Companion/RotaryN`.
-- Les profils communautaires sont déclaratifs et ne contiennent aucun code exécutable.
-- La reconnaissance automatique distingue identité certaine, profil partagé et suggestion calculée.
+LiveProfessor, Faderfox, Behringer, Novation, DJ TechTools et les autres noms cités restent les marques de leurs propriétaires respectifs. Controller Studio est un outil indépendant et n’est affilié à aucun de ces éditeurs ou fabricants.
 
-L'export `.ctrl2` actuel produit un contrôleur **Companion/OSC** destiné à fonctionner avec le Hub. Sa structure binaire est validée par relecture, mais l'import dans l'interface LiveProfessor doit encore faire l'objet d'un essai reproductible avant d'être déclaré compatible avec tous les contrôleurs.
+---
 
-La [bibliothèque GitHub publique](https://github.com/Mamat79/SiLeMIO-Control-Library) est facultative : le catalogue intégré, le cache local et les profils déjà installés continuent à fonctionner hors ligne. L'approche de Dialr inspire l'expérience « déjà reconnu et déjà mappé », mais pas son implémentation propriétaire.
+**SiLeMI/O**<br>
+**By Mamat**<br>
+`-------[]--`

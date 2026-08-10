@@ -14,13 +14,19 @@ def test_desktop_settings_round_trip_is_atomic(tmp_path):
     path = tmp_path / "settings.json"
 
     saved = save_desktop_settings(
-        DesktopSettings(language="en", close_to_tray=False),
+        DesktopSettings(
+            language="en",
+            close_to_tray=False,
+            active_controller_id="behringer.x-touch-compact.layer-a",
+        ),
         path,
     )
 
     assert saved == path.resolve()
     assert load_desktop_settings(path) == DesktopSettings(
-        language="en", close_to_tray=False
+        language="en",
+        close_to_tray=False,
+        active_controller_id="behringer.x-touch-compact.layer-a",
     )
     assert not list(tmp_path.glob("*.tmp"))
 
@@ -79,3 +85,19 @@ def test_pre_rename_settings_are_loaded_without_being_moved(tmp_path, monkeypatc
 def test_unsupported_language_is_never_persisted(tmp_path):
     with pytest.raises(ValueError, match="unsupported desktop language"):
         save_desktop_settings(DesktopSettings(language="de"), tmp_path / "settings.json")
+
+
+def test_empty_active_controller_is_ignored(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text(
+        json.dumps(
+            {
+                "language": "fr",
+                "close_to_tray": True,
+                "active_controller_id": "",
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert load_desktop_settings(path).active_controller_id is None

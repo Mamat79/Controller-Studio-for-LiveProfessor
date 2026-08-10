@@ -1,5 +1,15 @@
 # Historique des versions
 
+## V.2026 (2026.2) — 2026-08-10
+
+- Réunit le logiciel et sa bibliothèque publique versionnée dans le même dépôt GitHub.
+- Étend la banque à dix profils documentés, dont X-Touch Compact, X-Touch Mini, X-Touch One, Launch Control XL 3, PC4, UC4, PC12 et MIDI Fighter Twister.
+- Ajoute un parcours de contribution depuis l’application vers un formulaire GitHub bilingue, sans stocker de jeton.
+- Ajoute des cases par paramètre dans Plugin Studio, avec Tout cocher, Tout décocher et prise en compte immédiate dans AutoMap.
+- Récupère les vrais noms de paramètres directement depuis LiveProfessor Companion, même lorsque le moteur EC4 est arrêté, en respectant l’ordre enregistré de chaque Controller Map.
+- Bascule les mises à jour du logiciel et de la bibliothèque vers le dépôt public Controller Studio.
+- Publie un README français/anglais inspiré de DCE, avec accès rapide, fonctions, workflow, documentation, soutien et liens directs vers la release.
+
 ## V.2026 (2026.0) — 2026-08-10
 
 - Renomme le produit, l'EXE, l'installateur, les raccourcis et le dossier Windows en `Controller Studio for LiveProfessor` ; SiLeMI/O reste la marque discrète.

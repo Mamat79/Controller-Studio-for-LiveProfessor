@@ -26,6 +26,36 @@ jobs:
       - name: Reject historical package leakage
         run: python scripts/check_wheel_contents.py dist/*.whl
 
+  public-library:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: library/requirements-validation.txt
+      - name: Install schema validator
+        run: python -m pip install -r library/requirements-validation.txt
+      - name: Validate manifest, profiles, and schemas
+        run: |
+          python library/scripts/validate_library.py
+          python library/scripts/validate_schemas.py
+      - name: Verify deterministic manifest
+        run: |
+          cp library/manifest-v1.json library/manifest-v1.before.json
+          python library/scripts/update_manifest.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          before = json.loads(Path("library/manifest-v1.before.json").read_text(encoding="utf-8"))
+          after = json.loads(Path("library/manifest-v1.json").read_text(encoding="utf-8"))
+          before.pop("generated_at", None)
+          after.pop("generated_at", None)
+          if before != after:
+              raise SystemExit("manifest entries are not deterministic")
+          PY
+
   windows-exe:
     runs-on: windows-latest
     steps:

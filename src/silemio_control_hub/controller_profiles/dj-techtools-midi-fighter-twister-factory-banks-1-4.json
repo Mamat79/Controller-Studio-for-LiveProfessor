@@ -1,0 +1,1697 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "dj-techtools.midi-fighter-twister.factory-banks-1-4",
+  "manufacturer": "DJ TechTools",
+  "model": "MIDI Fighter Twister — Factory Banks 1–4",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Midi Fighter Twister",
+      "MIDI Fighter Twister"
+    ],
+    "output_name_patterns": [
+      "Midi Fighter Twister",
+      "MIDI Fighter Twister"
+    ]
+  },
+  "bank_size": 16,
+  "bank_count": 4,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "led",
+    "values",
+    "colors",
+    "banks"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 0
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 0
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 0
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 0
+        }
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 1
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 1
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 1
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 1
+        }
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 2
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 2
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 2
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 2
+        }
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 3
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 3
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 3
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 3
+        }
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 4
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 4
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 4
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 4
+        }
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 5
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 5
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 5
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 5
+        }
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 6
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 6
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 6
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 6
+        }
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 7
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 7
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 7
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 7
+        }
+      }
+    },
+    {
+      "id": "encoder_09",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 8
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 8
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 8
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 8
+        }
+      }
+    },
+    {
+      "id": "encoder_10",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 9
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 9
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 9
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 9
+        }
+      }
+    },
+    {
+      "id": "encoder_11",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 10
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 10
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 10
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 10
+        }
+      }
+    },
+    {
+      "id": "encoder_12",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 11
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 11
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 11
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 11
+        }
+      }
+    },
+    {
+      "id": "encoder_13",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 12
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 12
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 12
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 12
+        }
+      }
+    },
+    {
+      "id": "encoder_14",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 13
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 13
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 13
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 13
+        }
+      }
+    },
+    {
+      "id": "encoder_15",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 14
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 14
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 14
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 14
+        }
+      }
+    },
+    {
+      "id": "encoder_16",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 15
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 15
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 15
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 15
+        }
+      }
+    },
+    {
+      "id": "encoder_17",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 16
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 16
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 16
+        }
+      }
+    },
+    {
+      "id": "encoder_18",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 17
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 17
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 17
+        }
+      }
+    },
+    {
+      "id": "encoder_19",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 18
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 18
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 18
+        }
+      }
+    },
+    {
+      "id": "encoder_20",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 19
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 19
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 19
+        }
+      }
+    },
+    {
+      "id": "encoder_21",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 20
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 20
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 20
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 20
+        }
+      }
+    },
+    {
+      "id": "encoder_22",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 21
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 21
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 21
+        }
+      }
+    },
+    {
+      "id": "encoder_23",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 22
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 22
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 22
+        }
+      }
+    },
+    {
+      "id": "encoder_24",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 23
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 23
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 23
+        }
+      }
+    },
+    {
+      "id": "encoder_25",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 24
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 24
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 24
+        }
+      }
+    },
+    {
+      "id": "encoder_26",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 25
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 25
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 25
+        }
+      }
+    },
+    {
+      "id": "encoder_27",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 26
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 26
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 26
+        }
+      }
+    },
+    {
+      "id": "encoder_28",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 27
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 27
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 27
+        }
+      }
+    },
+    {
+      "id": "encoder_29",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 28
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 28
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 28
+        }
+      }
+    },
+    {
+      "id": "encoder_30",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 29
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 29
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 29
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 29
+        }
+      }
+    },
+    {
+      "id": "encoder_31",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 30
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 30
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 30
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 30
+        }
+      }
+    },
+    {
+      "id": "encoder_32",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 31
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 31
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 31
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 31
+        }
+      }
+    },
+    {
+      "id": "encoder_33",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 32
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 32
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 32
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 32
+        }
+      }
+    },
+    {
+      "id": "encoder_34",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 33
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 33
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 33
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 33
+        }
+      }
+    },
+    {
+      "id": "encoder_35",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 34
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 34
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 34
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 34
+        }
+      }
+    },
+    {
+      "id": "encoder_36",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 35
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 35
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 35
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 35
+        }
+      }
+    },
+    {
+      "id": "encoder_37",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 36
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 36
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 36
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 36
+        }
+      }
+    },
+    {
+      "id": "encoder_38",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 37
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 37
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 37
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 37
+        }
+      }
+    },
+    {
+      "id": "encoder_39",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 38
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 38
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 38
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 38
+        }
+      }
+    },
+    {
+      "id": "encoder_40",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 39
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 39
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 39
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 39
+        }
+      }
+    },
+    {
+      "id": "encoder_41",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 40
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 40
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 40
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 40
+        }
+      }
+    },
+    {
+      "id": "encoder_42",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 41
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 41
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 41
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 41
+        }
+      }
+    },
+    {
+      "id": "encoder_43",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 42
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 42
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 42
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 42
+        }
+      }
+    },
+    {
+      "id": "encoder_44",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 43
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 43
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 43
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 43
+        }
+      }
+    },
+    {
+      "id": "encoder_45",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 44
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 44
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 44
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 44
+        }
+      }
+    },
+    {
+      "id": "encoder_46",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 45
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 45
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 45
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 45
+        }
+      }
+    },
+    {
+      "id": "encoder_47",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 46
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 46
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 46
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 46
+        }
+      }
+    },
+    {
+      "id": "encoder_48",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 47
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 47
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 47
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 47
+        }
+      }
+    },
+    {
+      "id": "encoder_49",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 48
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 48
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 48
+        }
+      }
+    },
+    {
+      "id": "encoder_50",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 49
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 49
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 49
+        }
+      }
+    },
+    {
+      "id": "encoder_51",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 50
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 50
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 50
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 50
+        }
+      }
+    },
+    {
+      "id": "encoder_52",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 51
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 51
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 51
+        }
+      }
+    },
+    {
+      "id": "encoder_53",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 52
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 52
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 52
+        }
+      }
+    },
+    {
+      "id": "encoder_54",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 53
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 53
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 53
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 53
+        }
+      }
+    },
+    {
+      "id": "encoder_55",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 54
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 54
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 54
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 54
+        }
+      }
+    },
+    {
+      "id": "encoder_56",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 55
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 55
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 55
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 55
+        }
+      }
+    },
+    {
+      "id": "encoder_57",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 56
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 56
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 56
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 56
+        }
+      }
+    },
+    {
+      "id": "encoder_58",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 57
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 57
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 57
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 57
+        }
+      }
+    },
+    {
+      "id": "encoder_59",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 58
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 58
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 58
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 58
+        }
+      }
+    },
+    {
+      "id": "encoder_60",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 59
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 59
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 59
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 59
+        }
+      }
+    },
+    {
+      "id": "encoder_61",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 60
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 60
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 60
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 60
+        }
+      }
+    },
+    {
+      "id": "encoder_62",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 61
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 61
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 61
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 61
+        }
+      }
+    },
+    {
+      "id": "encoder_63",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 62
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 62
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 62
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 62
+        }
+      }
+    },
+    {
+      "id": "encoder_64",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 63
+      },
+      "push": {
+        "message": "cc",
+        "channel": 2,
+        "number": 63
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 63
+        },
+        "color": {
+          "message": "cc",
+          "channel": 2,
+          "number": 63
+        }
+      },
+      "roles": [
+        "output"
+      ]
+    }
+  ]
+}

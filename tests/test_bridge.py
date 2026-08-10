@@ -77,6 +77,16 @@ class BridgeTests(unittest.TestCase):
         bridge._on_osc("/Companion/ControllerValues", ["Rotary1", "-12.0 dB"])
         self.assertEqual((bridge.names[0], bridge.display_values[0]), ("Threshold", "-12.0 dB"))
 
+    def test_companion_names_can_be_cleared_before_plugin_capture(self):
+        bridge = self.make_bridge()
+        bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
+
+        bridge.clear_companion_names()
+
+        self.assertEqual(bridge.names[0], "")
+        self.assertEqual(bridge.short_names[0], "")
+        self.assertFalse(bridge._received_companion_names)
+
     def test_push_name_is_visible_without_overriding_a_rotary_label(self):
         bridge = self.make_bridge()
         bridge._on_osc("/Companion/ControllerNames", ["Generic Button 1", "Bypass"])

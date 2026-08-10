@@ -22,6 +22,7 @@ SUPPORTED_LANGUAGES = frozenset({"fr", "en"})
 class DesktopSettings:
     language: str = "fr"
     close_to_tray: bool = True
+    active_controller_id: str | None = None
 
 
 def default_desktop_settings_path() -> Path:
@@ -56,11 +57,18 @@ def load_desktop_settings(path: Path | None = None) -> DesktopSettings:
         return DesktopSettings()
     language = raw.get("language", "fr")
     close_to_tray = raw.get("close_to_tray", True)
+    active_controller_id = raw.get("active_controller_id")
     if language not in SUPPORTED_LANGUAGES:
         language = "fr"
     if not isinstance(close_to_tray, bool):
         close_to_tray = True
-    return DesktopSettings(language=language, close_to_tray=close_to_tray)
+    if not isinstance(active_controller_id, str) or not active_controller_id.strip():
+        active_controller_id = None
+    return DesktopSettings(
+        language=language,
+        close_to_tray=close_to_tray,
+        active_controller_id=active_controller_id,
+    )
 
 
 def save_desktop_settings(
