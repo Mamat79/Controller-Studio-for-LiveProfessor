@@ -134,6 +134,8 @@ class EC4LiveProfessorBridge:
         self._viewset_count: int | None = None
         self._viewset_indices: set[int] = set()
         self._startup_banner_shown: bool = False
+        self._liveprofessor_feedback_received: bool = False
+        self._waiting_for_liveprofessor_displayed: bool = False
 
     @property
     def bank_count(self) -> int:
@@ -175,6 +177,8 @@ class EC4LiveProfessorBridge:
             return
         self._stop.clear()
         self._running = True
+        self._liveprofessor_feedback_received = False
+        self._waiting_for_liveprofessor_displayed = False
         try:
             self._osc_server.start()
             self._log(
@@ -253,6 +257,7 @@ class EC4LiveProfessorBridge:
                     # A reconnect is a new user-visible connection event. Keep the
                     # one-shot guard inside one connection, but show the banner again.
                     self._startup_banner_shown = False
+                    self._waiting_for_liveprofessor_displayed = False
                     self.show_startup_banner()
                     if self.config.setup_request_on_connect:
                         self._midi.send_sysex(SETUP_REQUEST)
@@ -1037,6 +1042,13 @@ class EC4LiveProfessorBridge:
             return
         if self._shift_held:
             return
+        if (
+            self.config.mode == "companion"
+            and self._waiting_for_liveprofessor_displayed
+            and not self._liveprofessor_feedback_received
+        ):
+            self._show_waiting_for_liveprofessor()
+            return
         start = self.active_bank * self.config.bank_size
         labels = self.short_names[start : start + self.config.bank_size]
         labels = [
@@ -1167,9 +1179,37 @@ class EC4LiveProfessorBridge:
         except MidiBackendError as exc:
             self._log(str(exc), logging.WARNING)
             return
-        self._overlay_timer = threading.Timer(2.0, lambda: self._hide_overlay(force=True))
+        self._overlay_timer = threading.Timer(2.0, self._finish_startup_banner)
         self._overlay_timer.daemon = True
         self._overlay_timer.start()
+
+    def _finish_startup_banner(self) -> None:
+        self._overlay_timer = None
+        if not self._midi.is_open:
+            return
+        if self.config.mode != "companion" or self._liveprofessor_feedback_received:
+            self._hide_overlay(force=True)
+            return
+        self._show_waiting_for_liveprofessor()
+
+    def _show_waiting_for_liveprofessor(self) -> None:
+        if not self.config.display_enabled or not self._midi.is_open:
+            return
+        if self.config.ui_language == "en":
+            lines = ["Waiting for", "LiveProfessor", "By Mamat", "-----[]---"]
+        else:
+            lines = ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"]
+        try:
+            self._midi.send_sysex(
+                total_display_message(
+                    lines,
+                    alignments=["center", "center", "right", "right"],
+                )
+            )
+        except MidiBackendError as exc:
+            self._log(str(exc), logging.WARNING)
+            return
+        self._waiting_for_liveprofessor_displayed = True
 
     def _show_overlay(
         self,
@@ -1200,6 +1240,13 @@ class EC4LiveProfessorBridge:
             return
         if self._shift_held:
             self._send_shift_shortcuts()
+            return
+        if (
+            self.config.mode == "companion"
+            and self._waiting_for_liveprofessor_displayed
+            and not self._liveprofessor_feedback_received
+        ):
+            self._show_waiting_for_liveprofessor()
             return
         try:
             if self.config.persistent_parameter_display:
@@ -1238,6 +1285,11 @@ class EC4LiveProfessorBridge:
     def _on_osc(self, address: str, args: list[Any]) -> None:
         try:
             LOGGER.debug("OSC <- %s %r", address, args)
+            first_liveprofessor_feedback = not self._liveprofessor_feedback_received
+            self._liveprofessor_feedback_received = True
+            if first_liveprofessor_feedback and self._waiting_for_liveprofessor_displayed:
+                self._waiting_for_liveprofessor_displayed = False
+                self._hide_overlay(force=True)
             if self.config.mode == "companion":
                 self._on_companion_feedback(address, args)
             else:

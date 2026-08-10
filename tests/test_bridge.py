@@ -519,6 +519,71 @@ class BridgeTests(unittest.TestCase):
         bridge.show_startup_banner()
         self.assertEqual(len(bridge._midi.sysex), banner_count)
 
+    def test_startup_banner_uses_english_when_the_application_is_english(self):
+        bridge = self.make_bridge(display_enabled=True, restrict_to_target=False, ui_language="en")
+        bridge._midi.sysex.clear()
+
+        bridge.show_startup_banner()
+
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            total_display_message(
+                ["Connection OK", "SiLeMI/O CtrlStudio", "By Mamat", "-----[]---"],
+                alignments=["center", "center", "right", "right"],
+            ),
+        )
+
+    def test_ec4_waits_in_french_until_liveprofessor_answers(self):
+        bridge = self.make_bridge(display_enabled=True, restrict_to_target=False, ui_language="fr")
+        bridge._midi.sysex.clear()
+
+        bridge.show_startup_banner()
+        bridge._overlay_timer.cancel()
+        bridge._finish_startup_banner()
+
+        self.assertTrue(bridge._waiting_for_liveprofessor_displayed)
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            total_display_message(
+                ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"],
+                alignments=["center", "center", "right", "right"],
+            ),
+        )
+
+        bridge._refresh_main_display()
+
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            total_display_message(
+                ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"],
+                alignments=["center", "center", "right", "right"],
+            ),
+        )
+
+    def test_ec4_waits_in_english_until_liveprofessor_answers(self):
+        bridge = self.make_bridge(display_enabled=True, restrict_to_target=False, ui_language="en")
+        bridge._midi.sysex.clear()
+
+        bridge.show_startup_banner()
+        bridge._overlay_timer.cancel()
+        bridge._finish_startup_banner()
+
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            total_display_message(
+                ["Waiting for", "LiveProfessor", "By Mamat", "-----[]---"],
+                alignments=["center", "center", "right", "right"],
+            ),
+        )
+
+        bridge._on_osc("/Companion/Rotary1", [0.5])
+
+        self.assertFalse(bridge._waiting_for_liveprofessor_displayed)
+        self.assertEqual(
+            bridge._midi.sysex[-1],
+            parameter_grid_message(bridge.short_names[:16]),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

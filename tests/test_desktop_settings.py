@@ -18,6 +18,7 @@ def test_desktop_settings_round_trip_is_atomic(tmp_path):
             language="en",
             close_to_tray=False,
             active_controller_id="behringer.x-touch-compact.layer-a",
+            auto_start_runtime=True,
         ),
         path,
     )
@@ -27,6 +28,7 @@ def test_desktop_settings_round_trip_is_atomic(tmp_path):
         language="en",
         close_to_tray=False,
         active_controller_id="behringer.x-touch-compact.layer-a",
+        auto_start_runtime=True,
     )
     assert not list(tmp_path.glob("*.tmp"))
 
@@ -95,9 +97,11 @@ def test_empty_active_controller_is_ignored(tmp_path):
                 "language": "fr",
                 "close_to_tray": True,
                 "active_controller_id": "",
+                "auto_start_runtime": "yes",
             }
         ),
         encoding="utf-8",
     )
 
     assert load_desktop_settings(path).active_controller_id is None
+    assert load_desktop_settings(path).auto_start_runtime is False

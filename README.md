@@ -42,7 +42,7 @@ Controller Studio transforme un contrôleur MIDI en surface de contrôle organis
 |---|---|---|---|
 | Pilote EC4 temps réel, banques, push, Shift, labels, valeurs et reconnexion | Profils prêts à exporter et éditeur de contrôleur | Vrais noms lus dans les plug-ins installés, récupération globale, priorités et cases individuelles | Choix des plug-ins et instances, UniBank ou FullBank, copie `.rack2` validée |
 
-L’interface existe en français et en anglais, se réduit dans la zone de notification et place le journal temps réel dans une fenêtre séparée.
+L’interface existe en français et en anglais, se réduit dans la zone de notification et place le journal temps réel dans une fenêtre séparée. Deux options indépendantes permettent de lancer Controller Studio avec Windows puis de connecter automatiquement le contrôleur sélectionné, sans devoir cliquer sur **Démarrer** après chaque redémarrage du serveur.
 
 ## Utilisation en trois étapes
 
@@ -116,7 +116,7 @@ Cliquez sur **Créer un contrôleur…** pour partir d’un modèle de huit enco
 
 **Enregistrer dans ma banque** valide le profil et le rend disponible hors ligne. **Enregistrer + créer .ctrl2** produit aussitôt le fichier LiveProfessor. Le remplacement d’un profil personnel conserve une sauvegarde de la version précédente. La page Live donne aussi accès à **Configurer / apprentissage MIDI…** pour le contrôleur actif ; le setup/groupe visible avec l’EC4 reste une fonction spécifique à ce matériel.
 
-La fenêtre **Réglages** de la page Live retrouve les paramètres avancés d’EC4 Bridge : cadence de l’Overlay, durée d’affichage, rafraîchissement Companion et des labels, délai de confirmation LiveProfessor et affichage persistant. Ces temporisations sont disponibles pour tous les contrôleurs compatibles ; les outils setup/groupe et SysEx restent affichés uniquement pour l’EC4.
+La fenêtre **Réglages** de la page Live retrouve les paramètres avancés d’EC4 Bridge : cadence de l’Overlay, durée d’affichage, rafraîchissement Companion et des labels, délai de confirmation LiveProfessor et affichage persistant. Ces temporisations sont disponibles pour tous les contrôleurs compatibles ; les outils setup/groupe et SysEx restent affichés uniquement pour l’EC4. Lorsque l’EC4 est connecté avant LiveProfessor, son écran affiche une attente localisée puis revient automatiquement aux paramètres dès que LiveProfessor répond.
 
 Pour proposer un contrôleur à la bibliothèque commune :
 
@@ -238,7 +238,7 @@ Controller Studio turns a MIDI controller into an organized control surface for 
 |---|---|---|---|
 | Real-time EC4 driver, banks, push, Shift, labels, values and reconnection | Ready-to-export profiles and a controller editor | Real names read from installed plug-ins, batch retrieval, priorities and individual checkboxes | Plug-in and instance selection, UniBank or FullBank, validated `.rack2` copy |
 
-The interface is available in French and English, minimizes to the notification area and keeps the real-time log in a separate window.
+The interface is available in French and English, minimizes to the notification area and keeps the real-time log in a separate window. Two independent options can launch Controller Studio with Windows and then connect the selected controller automatically, so a server restart no longer requires clicking **Start**.
 
 ## Three-step workflow
 
@@ -312,7 +312,7 @@ Click **Create a controller…** to start with eight encoders, then add, remove,
 
 **Save to my bank** validates the profile and makes it available offline. **Save + create .ctrl2** immediately produces the LiveProfessor file. Replacing a personal profile keeps a backup of the previous version. The Live page also provides **Configure / MIDI Learn…** for the active controller; the setup/group section shown with the EC4 remains hardware-specific.
 
-The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only.
+The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only. If the EC4 connects before LiveProfessor, its screen shows a localized waiting message and automatically restores parameter feedback as soon as LiveProfessor responds.
 
 To submit a controller to the shared library:
 
