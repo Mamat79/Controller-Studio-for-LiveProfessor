@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "novation.launchkey-mk3.compact-custom",
+  "manufacturer": "Novation",
+  "model": "Launchkey Mini MK3 — Custom Modes",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Launchkey Mini MK3 MIDI",
+      "Launchkey Mini MK3"
+    ],
+    "output_name_patterns": [
+      "Launchkey Mini MK3 MIDI",
+      "Launchkey Mini MK3"
+    ]
+  },
+  "bank_size": 24,
+  "page_count": 4,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led",
+    "pages"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      }
+    },
+    {
+      "id": "pad_01",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 36
+      }
+    },
+    {
+      "id": "pad_02",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 37
+      }
+    },
+    {
+      "id": "pad_03",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 38
+      }
+    },
+    {
+      "id": "pad_04",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 39
+      }
+    },
+    {
+      "id": "pad_05",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 40
+      }
+    },
+    {
+      "id": "pad_06",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 41
+      }
+    },
+    {
+      "id": "pad_07",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 42
+      }
+    },
+    {
+      "id": "pad_08",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 43
+      }
+    },
+    {
+      "id": "pad_09",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 44
+      }
+    },
+    {
+      "id": "pad_10",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 45
+      }
+    },
+    {
+      "id": "pad_11",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 46
+      }
+    },
+    {
+      "id": "pad_12",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 47
+      }
+    },
+    {
+      "id": "pad_13",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 48
+      }
+    },
+    {
+      "id": "pad_14",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 49
+      }
+    },
+    {
+      "id": "pad_15",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 50
+      }
+    },
+    {
+      "id": "pad_16",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 51
+      }
+    }
+  ]
+}

@@ -1,0 +1,457 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "novation.launch-control-xl2.user-template",
+  "manufacturer": "Novation",
+  "model": "Launch Control XL MK2 — User Template",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Launch Control XL"
+    ],
+    "output_name_patterns": [
+      "Launch Control XL"
+    ]
+  },
+  "bank_size": 48,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led",
+    "colors"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 13
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 14
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 15
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 20
+      }
+    },
+    {
+      "id": "encoder_09",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "encoder_10",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "encoder_11",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      }
+    },
+    {
+      "id": "encoder_12",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      }
+    },
+    {
+      "id": "encoder_13",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      }
+    },
+    {
+      "id": "encoder_14",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      }
+    },
+    {
+      "id": "encoder_15",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      }
+    },
+    {
+      "id": "encoder_16",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      }
+    },
+    {
+      "id": "encoder_17",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 29
+      }
+    },
+    {
+      "id": "encoder_18",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 30
+      }
+    },
+    {
+      "id": "encoder_19",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 31
+      }
+    },
+    {
+      "id": "encoder_20",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 32
+      }
+    },
+    {
+      "id": "encoder_21",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 33
+      }
+    },
+    {
+      "id": "encoder_22",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 34
+      }
+    },
+    {
+      "id": "encoder_23",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 35
+      }
+    },
+    {
+      "id": "encoder_24",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 36
+      }
+    },
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 5
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 6
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 7
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 8
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 9
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 10
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 11
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 12
+      }
+    },
+    {
+      "id": "button_01",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 37
+      }
+    },
+    {
+      "id": "button_02",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 38
+      }
+    },
+    {
+      "id": "button_03",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 39
+      }
+    },
+    {
+      "id": "button_04",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 40
+      }
+    },
+    {
+      "id": "button_05",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 41
+      }
+    },
+    {
+      "id": "button_06",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 42
+      }
+    },
+    {
+      "id": "button_07",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 43
+      }
+    },
+    {
+      "id": "button_08",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 44
+      }
+    },
+    {
+      "id": "button_09",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 45
+      }
+    },
+    {
+      "id": "button_10",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 46
+      }
+    },
+    {
+      "id": "button_11",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 47
+      }
+    },
+    {
+      "id": "button_12",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      }
+    },
+    {
+      "id": "button_13",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      }
+    },
+    {
+      "id": "button_14",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 50
+      }
+    },
+    {
+      "id": "button_15",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      }
+    },
+    {
+      "id": "button_16",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      }
+    }
+  ]
+}

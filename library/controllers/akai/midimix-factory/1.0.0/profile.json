@@ -1,0 +1,467 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "akai.midimix.factory",
+  "manufacturer": "Akai Professional",
+  "model": "MIDImix — Factory Layout",
+  "midi_identity": {
+    "input_name_patterns": [
+      "MIDI Mix",
+      "MIDImix"
+    ],
+    "output_name_patterns": [
+      "MIDI Mix",
+      "MIDImix"
+    ]
+  },
+  "bank_size": 49,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led"
+  ],
+  "controls": [
+    {
+      "id": "knob_r1_c1",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16
+      }
+    },
+    {
+      "id": "knob_r1_c2",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 20
+      }
+    },
+    {
+      "id": "knob_r1_c3",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      }
+    },
+    {
+      "id": "knob_r1_c4",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      }
+    },
+    {
+      "id": "knob_r1_c5",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 46
+      }
+    },
+    {
+      "id": "knob_r1_c6",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 50
+      }
+    },
+    {
+      "id": "knob_r1_c7",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 54
+      }
+    },
+    {
+      "id": "knob_r1_c8",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 58
+      }
+    },
+    {
+      "id": "knob_r2_c1",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17
+      }
+    },
+    {
+      "id": "knob_r2_c2",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "knob_r2_c3",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      }
+    },
+    {
+      "id": "knob_r2_c4",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 29
+      }
+    },
+    {
+      "id": "knob_r2_c5",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 47
+      }
+    },
+    {
+      "id": "knob_r2_c6",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      }
+    },
+    {
+      "id": "knob_r2_c7",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 55
+      }
+    },
+    {
+      "id": "knob_r2_c8",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 59
+      }
+    },
+    {
+      "id": "knob_r3_c1",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18
+      }
+    },
+    {
+      "id": "knob_r3_c2",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "knob_r3_c3",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      }
+    },
+    {
+      "id": "knob_r3_c4",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 30
+      }
+    },
+    {
+      "id": "knob_r3_c5",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      }
+    },
+    {
+      "id": "knob_r3_c6",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      }
+    },
+    {
+      "id": "knob_r3_c7",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 56
+      }
+    },
+    {
+      "id": "knob_r3_c8",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 60
+      }
+    },
+    {
+      "id": "channel_01_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19
+      }
+    },
+    {
+      "id": "channel_02_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      }
+    },
+    {
+      "id": "channel_03_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      }
+    },
+    {
+      "id": "channel_04_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 31
+      }
+    },
+    {
+      "id": "channel_05_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      }
+    },
+    {
+      "id": "channel_06_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 53
+      }
+    },
+    {
+      "id": "channel_07_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 57
+      }
+    },
+    {
+      "id": "channel_08_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 61
+      }
+    },
+    {
+      "id": "master_fader",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 62
+      }
+    },
+    {
+      "id": "mute_01",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 1
+      }
+    },
+    {
+      "id": "mute_02",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 4
+      }
+    },
+    {
+      "id": "mute_03",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 7
+      }
+    },
+    {
+      "id": "mute_04",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 10
+      }
+    },
+    {
+      "id": "mute_05",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 13
+      }
+    },
+    {
+      "id": "mute_06",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 16
+      }
+    },
+    {
+      "id": "mute_07",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 19
+      }
+    },
+    {
+      "id": "mute_08",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "rec_arm_01",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 3
+      }
+    },
+    {
+      "id": "rec_arm_02",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 6
+      }
+    },
+    {
+      "id": "rec_arm_03",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 9
+      }
+    },
+    {
+      "id": "rec_arm_04",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 12
+      }
+    },
+    {
+      "id": "rec_arm_05",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 15
+      }
+    },
+    {
+      "id": "rec_arm_06",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 18
+      }
+    },
+    {
+      "id": "rec_arm_07",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "rec_arm_08",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 24
+      }
+    }
+  ]
+}

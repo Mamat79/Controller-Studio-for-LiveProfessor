@@ -91,6 +91,34 @@ def test_common_controller_profiles_export_expected_liveprofessor_controls(
     assert _counts(parse_tree(destination.read_bytes())) == expected_counts
 
 
+def test_every_builtin_controller_can_export_a_liveprofessor_file(tmp_path):
+    registry = ControllerRegistry(profile_directories=[], library_cache_root=tmp_path / "cache")
+
+    for profile in registry.all():
+        destination = tmp_path / f"{profile.id}.ctrl2"
+        result = export_liveprofessor_controller(profile, destination)
+
+        assert result.rotary_count >= 1
+        assert result.button_count <= 16
+        assert parse_tree(destination.read_bytes()).type_name == "LPController"
+
+
+def test_mcu_profiles_expose_motor_fader_vpot_push_and_touch():
+    registry = ControllerRegistry()
+
+    for profile_id in (
+        "behringer.x-touch.mcu",
+        "presonus.faderport-8.mcu",
+        "ssl.uf8.mcu",
+    ):
+        profile = registry.get(profile_id)
+        assert sum(control.kind.value == "fader" for control in profile.controls) == 8
+        assert sum(control.kind.value == "relative_encoder" for control in profile.controls) == 8
+        assert sum(control.supports_press for control in profile.controls) == 8
+        assert sum(control.supports_touch for control in profile.controls) == 8
+        assert {"motorized", "high_resolution", "touch"} <= set(profile.capabilities)
+
+
 def test_ec4_profile_can_export_the_recommended_sixteen_rotary_unibank(tmp_path):
     destination = tmp_path / "Faderfox-EC4-UniBank.ctrl2"
 

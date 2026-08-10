@@ -68,13 +68,16 @@ VST is a registered trademark of Steinberg Media Technologies GmbH. Third-party 
 
 ## Built-in controller bank
 
-V.2026.4 includes twelve declarative profiles ready to export and can build more directly in the application:
+V.2026.4 includes 33 declarative profiles ready to export and can build more directly in the application:
 
-- Akai Professional LPD8 MK2 (documented Program 1);
+- Akai Professional LPD8 MK2, MIDImix, APC Mini MK2, MPK Mini MK3, MPK Mini IV, and MPK Mini Plus;
+- Arturia MiniLab 3, KeyLab Essential MK3, and BeatStep;
 - Faderfox EC4, PC4, UC4 and PC12;
-- Behringer X-Touch Compact, X-Touch Mini and X-Touch One;
+- Behringer X-Touch, X-Touch Compact, X-Touch Mini, and X-Touch One;
 - Korg nanoKONTROL2 (CC mode, factory knob and fader assignments);
-- Novation Launch Control XL 3;
+- Novation Launch Control XL MK2/XL 3, Launchkey MK3/MK4, and Launchpad X/Mini MK3;
+- PreSonus FaderPort V2, 8, and 16;
+- Solid State Logic UF1 and UF8;
 - DJ TechTools MIDI Fighter Twister;
 - generic 16-control MIDI controller.
 

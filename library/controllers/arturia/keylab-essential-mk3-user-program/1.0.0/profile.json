@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "arturia.keylab-essential-mk3.user-program",
+  "manufacturer": "Arturia",
+  "model": "KeyLab Essential MK3 — User Program",
+  "midi_identity": {
+    "input_name_patterns": [
+      "KeyLab Essential 49 mk3 MIDI",
+      "KeyLab Essential 61 mk3 MIDI",
+      "KeyLab Essential mk3"
+    ],
+    "output_name_patterns": [
+      "KeyLab Essential 49 mk3 MIDI",
+      "KeyLab Essential 61 mk3 MIDI",
+      "KeyLab Essential mk3"
+    ]
+  },
+  "bank_size": 26,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 74
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 75
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 76
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 77
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 78
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 79
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 80
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 81
+      }
+    },
+    {
+      "id": "encoder_09",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 82
+      }
+    },
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 83
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 84
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 85
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 86
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 87
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 88
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 89
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 90
+      }
+    },
+    {
+      "id": "fader_09",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 91
+      }
+    },
+    {
+      "id": "pad_01",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 36
+      }
+    },
+    {
+      "id": "pad_02",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 37
+      }
+    },
+    {
+      "id": "pad_03",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 38
+      }
+    },
+    {
+      "id": "pad_04",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 39
+      }
+    },
+    {
+      "id": "pad_05",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 40
+      }
+    },
+    {
+      "id": "pad_06",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 41
+      }
+    },
+    {
+      "id": "pad_07",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 42
+      }
+    },
+    {
+      "id": "pad_08",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 10,
+        "number": 43
+      }
+    }
+  ]
+}

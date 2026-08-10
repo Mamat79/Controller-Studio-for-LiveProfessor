@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "novation.launchkey-mk3.49-61-88-custom",
+  "manufacturer": "Novation",
+  "model": "Launchkey MK3 49/61/88 — Custom Modes",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Launchkey MK3 MIDI",
+      "Launchkey MK3"
+    ],
+    "output_name_patterns": [
+      "Launchkey MK3 MIDI",
+      "Launchkey MK3"
+    ]
+  },
+  "bank_size": 26,
+  "page_count": 4,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led",
+    "pages"
+  ],
+  "controls": [
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      }
+    },
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 41
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 42
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 43
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 44
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 45
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 46
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 47
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      }
+    },
+    {
+      "id": "fader_09",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      }
+    },
+    {
+      "id": "fader_button_01",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      }
+    },
+    {
+      "id": "fader_button_02",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      }
+    },
+    {
+      "id": "fader_button_03",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 53
+      }
+    },
+    {
+      "id": "fader_button_04",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 54
+      }
+    },
+    {
+      "id": "fader_button_05",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 55
+      }
+    },
+    {
+      "id": "fader_button_06",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 56
+      }
+    },
+    {
+      "id": "fader_button_07",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 57
+      }
+    },
+    {
+      "id": "fader_button_08",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 58
+      }
+    },
+    {
+      "id": "fader_button_09",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 59
+      }
+    }
+  ]
+}

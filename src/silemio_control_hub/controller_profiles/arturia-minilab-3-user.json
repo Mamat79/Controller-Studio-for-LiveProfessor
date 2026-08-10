@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "arturia.minilab-3.user",
+  "manufacturer": "Arturia",
+  "model": "MiniLab 3 — User Program",
+  "midi_identity": {
+    "input_name_patterns": [
+      "MiniLab 3 MIDI",
+      "MiniLab 3"
+    ],
+    "output_name_patterns": [
+      "MiniLab 3 MIDI",
+      "MiniLab 3"
+    ]
+  },
+  "bank_size": 21,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "display"
+  ],
+  "controls": [
+    {
+      "id": "main_encoder",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 114,
+        "mode": "increment_decrement"
+      },
+      "push": {
+        "message": "cc",
+        "channel": 1,
+        "number": 115
+      }
+    },
+    {
+      "id": "encoder_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 74
+      }
+    },
+    {
+      "id": "encoder_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 71
+      }
+    },
+    {
+      "id": "encoder_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 76
+      }
+    },
+    {
+      "id": "encoder_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 77
+      }
+    },
+    {
+      "id": "encoder_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 93
+      }
+    },
+    {
+      "id": "encoder_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18
+      }
+    },
+    {
+      "id": "encoder_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19
+      }
+    },
+    {
+      "id": "encoder_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16
+      }
+    },
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 82
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 83
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 85
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17
+      }
+    },
+    {
+      "id": "pad_01",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 102
+      }
+    },
+    {
+      "id": "pad_02",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 103
+      }
+    },
+    {
+      "id": "pad_03",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 104
+      }
+    },
+    {
+      "id": "pad_04",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 105
+      }
+    },
+    {
+      "id": "pad_05",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 106
+      }
+    },
+    {
+      "id": "pad_06",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 107
+      }
+    },
+    {
+      "id": "pad_07",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 108
+      }
+    },
+    {
+      "id": "pad_08",
+      "kind": "pad",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 109
+      }
+    }
+  ]
+}

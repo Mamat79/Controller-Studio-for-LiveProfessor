@@ -12,6 +12,8 @@
 - Restaure dans Réglages la fenêtre de réactivité d'EC4 Bridge : cadence et durée d'Overlay, rafraîchissement Companion/labels, timeout du retour et affichage persistant, pour tous les contrôleurs compatibles.
 - Étend la banque intégrée à douze profils avec le Korg nanoKONTROL2 en mode CC et l'Akai LPD8 MK2 Program 1 documenté.
 - Agrandit les polices des notices française et anglaise pour une lecture plus confortable.
+- Étend la banque intégrée de 12 à 33 profils avec Akai MIDImix/APC/MPK, Arturia MiniLab/KeyLab/BeatStep, Novation Launchkey/Launchpad/Launch Control XL MK2, FaderPort, X-Touch complet et SSL UF.
+- Ajoute un socle Mackie Control réutilisable pour les faders motorisés, V-Pots, appuis et touchers des surfaces MCU.
 
 ## V.2026 (2026.3) — 2026-08-10
 

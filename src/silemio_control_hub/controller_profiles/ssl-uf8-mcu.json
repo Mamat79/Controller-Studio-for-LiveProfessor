@@ -1,0 +1,367 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "ssl.uf8.mcu",
+  "manufacturer": "Solid State Logic",
+  "model": "UF8 — MCU",
+  "midi_identity": {
+    "input_name_patterns": [
+      "SSL UF8",
+      "UF8"
+    ],
+    "output_name_patterns": [
+      "SSL UF8",
+      "UF8"
+    ]
+  },
+  "bank_size": 16,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "touch",
+    "led",
+    "values",
+    "motorized",
+    "high_resolution"
+  ],
+  "controls": [
+    {
+      "id": "channel_01_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 1
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 104
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 1
+        }
+      }
+    },
+    {
+      "id": "channel_02_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 2
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 105
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 2
+        }
+      }
+    },
+    {
+      "id": "channel_03_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 3
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 106
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 3
+        }
+      }
+    },
+    {
+      "id": "channel_04_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 4
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 107
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 4
+        }
+      }
+    },
+    {
+      "id": "channel_05_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 5
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 108
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 5
+        }
+      }
+    },
+    {
+      "id": "channel_06_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 6
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 109
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 6
+        }
+      }
+    },
+    {
+      "id": "channel_07_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 7
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 110
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 7
+        }
+      }
+    },
+    {
+      "id": "channel_08_fader",
+      "kind": "fader",
+      "input": {
+        "message": "pitch_bend",
+        "channel": 8
+      },
+      "touch": {
+        "message": "note",
+        "channel": 1,
+        "number": 111
+      },
+      "feedback": {
+        "value": {
+          "message": "pitch_bend",
+          "channel": 8
+        }
+      }
+    },
+    {
+      "id": "channel_01_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 32
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 16,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_02_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 33
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 17,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_03_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 34
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 18,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_04_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 35
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 19,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_05_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 20,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 36
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 20,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_06_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 37
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 21,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_07_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 38
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 22,
+          "mode": "signed_bit"
+        }
+      }
+    },
+    {
+      "id": "channel_08_vpot",
+      "kind": "relative_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23,
+        "mode": "signed_bit"
+      },
+      "push": {
+        "message": "note",
+        "channel": 1,
+        "number": 39
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 23,
+          "mode": "signed_bit"
+        }
+      }
+    }
+  ]
+}

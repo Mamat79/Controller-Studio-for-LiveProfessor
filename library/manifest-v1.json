@@ -1,7 +1,15 @@
 {
   "manifest_version": 1,
-  "generated_at": "2026-08-10T09:57:14Z",
+  "generated_at": "2026-08-10T10:51:57Z",
   "profiles": [
+    {
+      "id": "akai.apc-mini-mk2.port-0",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/apc-mini-mk2-port-0/1.0.0/profile.json",
+      "sha256": "BD5EB6C0B355ACF77813F15C5FC7D34086E5AE0DFB19CA628E3445F152FE7B0E",
+      "minimum_hub_version": "0.1.0"
+    },
     {
       "id": "akai.lpd8-mk2.program-1-mpc",
       "version": "1.0.0",
@@ -11,11 +19,75 @@
       "minimum_hub_version": "0.1.0"
     },
     {
+      "id": "akai.midimix.factory",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/midimix-factory/1.0.0/profile.json",
+      "sha256": "E55A549A95DAD2D1C74BF8EF7F67716DB60F4BA91DCA8A380A355C2AA8010279",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "akai.mpk-mini-iv.user-program",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/mpk-mini-iv-user-program/1.0.0/profile.json",
+      "sha256": "FFC5FC6B2543E14ED7941A62F049782881AE539EA4F95291200DB86D27471FE3",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "akai.mpk-mini-mk3.program-1",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/mpk-mini-mk3-program-1/1.0.0/profile.json",
+      "sha256": "47D03A4D7181AE99F506B3D2A808D9DD52E140FA8EAE7E2D37D83C1F3D1C22C3",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "akai.mpk-mini-plus.program-1",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/mpk-mini-plus-program-1/1.0.0/profile.json",
+      "sha256": "932E9266F0651397C0B359C40159D9026B15ED9E307941CE57842280C5126D6C",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "arturia.beatstep.user-preset",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/arturia/beatstep-user-preset/1.0.0/profile.json",
+      "sha256": "9BF1E7093318B4F7BC1499D0A4039B03A14757EAE936C5A092222AA64DFCA44F",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "arturia.keylab-essential-mk3.user-program",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/arturia/keylab-essential-mk3-user-program/1.0.0/profile.json",
+      "sha256": "F8CA009FFB0C0A3BDC22507C1A50D2C29FDFAEAE4D7EAEA99966A6283D0B8D83",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "arturia.minilab-3.user",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/arturia/minilab-3-user/1.0.0/profile.json",
+      "sha256": "3F621DC363DA4510B0166792A80AE671B8EB941D7489E5CC1A21EF2126BD527B",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
       "id": "behringer.x-touch-compact.layer-a",
       "version": "1.0.0",
       "status": "community",
       "path": "controllers/behringer/x-touch-compact-layer-a/1.0.0/profile.json",
       "sha256": "C0102732FE49F04AF29A242FA4DAB523980771F6D1A63C86EDE594EFA527704F",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "behringer.x-touch.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/behringer/x-touch-mcu/1.0.0/profile.json",
+      "sha256": "A1546B6E816BB72B9AD8083C3A7D13DDA5625376CE09C95E26D7569495B08E19",
       "minimum_hub_version": "0.1.0"
     },
     {
@@ -91,11 +163,107 @@
       "minimum_hub_version": "0.1.0"
     },
     {
+      "id": "novation.launch-control-xl2.user-template",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launch-control-xl2-user-template/1.0.0/profile.json",
+      "sha256": "AFEC29F5511A4C68A9146AE4A29BFAD714C8399060C0FEA18F6829AE70437C34",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
       "id": "novation.launch-control-xl3.mode-16",
       "version": "1.0.0",
       "status": "community",
       "path": "controllers/novation/launch-control-xl3-mode16/1.0.0/profile.json",
       "sha256": "FCA320D35F8E947126D55C80D1063503467FDDD4A69BC5B4D2B9B902F1A9C28E",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchkey-mk3.compact-custom",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchkey-mk3-compact-custom/1.0.0/profile.json",
+      "sha256": "C35D4F865924253D523B0C9696890E476575D58DCA79116261C6F2E1FC0453F3",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchkey-mk3.49-61-88-custom",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchkey-mk3-full-custom/1.0.0/profile.json",
+      "sha256": "5274F945627C5C5095CC9D30B71EDB8C840654077D18BEBC05650DAFE9416843",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchkey-mk4.compact-custom",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchkey-mk4-compact-custom/1.0.0/profile.json",
+      "sha256": "4FEFE793D437D8B0F892B0BB6CFA9EE9743E3C16FF75ADAAF10E80C0CB0EE3F8",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchkey-mk4.49-61-88-custom",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchkey-mk4-full-custom/1.0.0/profile.json",
+      "sha256": "FF9AAE88C036FA84A46EF9A8B9B9E4EB5A26859B0431F53E8562CC33C69BF71E",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchpad-mini-mk3.custom-faders",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchpad-mini-mk3-custom-faders/1.0.0/profile.json",
+      "sha256": "418F05B7B67E730D200B26E26628263829F258EC6A404E661DCD20DCDA19FE55",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "novation.launchpad-x.custom-faders",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/novation/launchpad-x-custom-faders/1.0.0/profile.json",
+      "sha256": "7CB93579657BB00EBB786FD6F3294BB149107BAFDD1A57675ED428160AD4FEC7",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "presonus.faderport-16.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/presonus/faderport-16-mcu/1.0.0/profile.json",
+      "sha256": "B2C6EC51CEBFAC4DA96966185CAF977F49F408FC63D31995D35C4FBB61AC035A",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "presonus.faderport-8.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/presonus/faderport-8-mcu/1.0.0/profile.json",
+      "sha256": "674AB43276B33329D2F887802CBA447AEF0D25B675B62893F8EB600DFF1EABFD",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "presonus.faderport-v2.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/presonus/faderport-v2-mcu/1.0.0/profile.json",
+      "sha256": "728337BD699AC4FD5B96327DA171CCFCA1BD179693809A60D17D69B148522D38",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "ssl.uf1.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/ssl/uf1-mcu/1.0.0/profile.json",
+      "sha256": "2D16A9C9DB01882A86DA5D6A6771F553ED6BA55EA98F564EFA02C8B0F26C53FB",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "ssl.uf8.mcu",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/ssl/uf8-mcu/1.0.0/profile.json",
+      "sha256": "4DBB458F31A8F667C31619F230B2B38BC17C03CB737E6202AC43D9A7192D7A11",
       "minimum_hub_version": "0.1.0"
     }
   ],

@@ -1,0 +1,227 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "novation.launchpad-x.custom-faders",
+  "manufacturer": "Novation",
+  "model": "Launchpad X — Custom Faders",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Launchpad X MIDI",
+      "Launchpad X"
+    ],
+    "output_name_patterns": [
+      "Launchpad X MIDI",
+      "Launchpad X"
+    ]
+  },
+  "bank_size": 16,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led",
+    "colors"
+  ],
+  "controls": [
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      }
+    },
+    {
+      "id": "switch_01",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 36
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 36
+        }
+      }
+    },
+    {
+      "id": "switch_02",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 37
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 37
+        }
+      }
+    },
+    {
+      "id": "switch_03",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 38
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 38
+        }
+      }
+    },
+    {
+      "id": "switch_04",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 39
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 39
+        }
+      }
+    },
+    {
+      "id": "switch_05",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 40
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 40
+        }
+      }
+    },
+    {
+      "id": "switch_06",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 41
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 41
+        }
+      }
+    },
+    {
+      "id": "switch_07",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 42
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 42
+        }
+      }
+    },
+    {
+      "id": "switch_08",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 43
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 43
+        }
+      }
+    }
+  ]
+}

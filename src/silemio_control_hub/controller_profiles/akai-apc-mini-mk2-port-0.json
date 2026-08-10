@@ -1,0 +1,1388 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "akai.apc-mini-mk2.port-0",
+  "manufacturer": "Akai Professional",
+  "model": "APC Mini MK2 — Port 0",
+  "midi_identity": {
+    "input_name_patterns": [
+      "APC mini mk2 0",
+      "APC mini mk2"
+    ],
+    "output_name_patterns": [
+      "APC mini mk2 0",
+      "APC mini mk2"
+    ]
+  },
+  "bank_size": 25,
+  "page_count": 1,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "led",
+    "colors"
+  ],
+  "controls": [
+    {
+      "id": "fader_01",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      }
+    },
+    {
+      "id": "fader_02",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      }
+    },
+    {
+      "id": "fader_03",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 50
+      }
+    },
+    {
+      "id": "fader_04",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      }
+    },
+    {
+      "id": "fader_05",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      }
+    },
+    {
+      "id": "fader_06",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 53
+      }
+    },
+    {
+      "id": "fader_07",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 54
+      }
+    },
+    {
+      "id": "fader_08",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 55
+      }
+    },
+    {
+      "id": "fader_09",
+      "kind": "fader",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 56
+      }
+    },
+    {
+      "id": "track_button_01",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 100
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 100
+        }
+      }
+    },
+    {
+      "id": "track_button_02",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 101
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 101
+        }
+      }
+    },
+    {
+      "id": "track_button_03",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 102
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 102
+        }
+      }
+    },
+    {
+      "id": "track_button_04",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 103
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 103
+        }
+      }
+    },
+    {
+      "id": "track_button_05",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 104
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 104
+        }
+      }
+    },
+    {
+      "id": "track_button_06",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 105
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 105
+        }
+      }
+    },
+    {
+      "id": "track_button_07",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 106
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 106
+        }
+      }
+    },
+    {
+      "id": "track_button_08",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 107
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 107
+        }
+      }
+    },
+    {
+      "id": "scene_button_01",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 112
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 112
+        }
+      }
+    },
+    {
+      "id": "scene_button_02",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 113
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 113
+        }
+      }
+    },
+    {
+      "id": "scene_button_03",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 114
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 114
+        }
+      }
+    },
+    {
+      "id": "scene_button_04",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 115
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 115
+        }
+      }
+    },
+    {
+      "id": "scene_button_05",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 116
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 116
+        }
+      }
+    },
+    {
+      "id": "scene_button_06",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 117
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 117
+        }
+      }
+    },
+    {
+      "id": "scene_button_07",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 118
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 118
+        }
+      }
+    },
+    {
+      "id": "scene_button_08",
+      "kind": "button",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 119
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 119
+        }
+      }
+    },
+    {
+      "id": "grid_pad_01",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 0
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 0
+        }
+      }
+    },
+    {
+      "id": "grid_pad_02",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 1
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 1
+        }
+      }
+    },
+    {
+      "id": "grid_pad_03",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 2
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 2
+        }
+      }
+    },
+    {
+      "id": "grid_pad_04",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 3
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 3
+        }
+      }
+    },
+    {
+      "id": "grid_pad_05",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 4
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 4
+        }
+      }
+    },
+    {
+      "id": "grid_pad_06",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 5
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 5
+        }
+      }
+    },
+    {
+      "id": "grid_pad_07",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 6
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 6
+        }
+      }
+    },
+    {
+      "id": "grid_pad_08",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 7
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 7
+        }
+      }
+    },
+    {
+      "id": "grid_pad_09",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 8
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 8
+        }
+      }
+    },
+    {
+      "id": "grid_pad_10",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 9
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 9
+        }
+      }
+    },
+    {
+      "id": "grid_pad_11",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 10
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 10
+        }
+      }
+    },
+    {
+      "id": "grid_pad_12",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 11
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 11
+        }
+      }
+    },
+    {
+      "id": "grid_pad_13",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 12
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 12
+        }
+      }
+    },
+    {
+      "id": "grid_pad_14",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 13
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 13
+        }
+      }
+    },
+    {
+      "id": "grid_pad_15",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 14
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 14
+        }
+      }
+    },
+    {
+      "id": "grid_pad_16",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 15
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 15
+        }
+      }
+    },
+    {
+      "id": "grid_pad_17",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 16
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 16
+        }
+      }
+    },
+    {
+      "id": "grid_pad_18",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 17
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 17
+        }
+      }
+    },
+    {
+      "id": "grid_pad_19",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 18
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 18
+        }
+      }
+    },
+    {
+      "id": "grid_pad_20",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 19
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 19
+        }
+      }
+    },
+    {
+      "id": "grid_pad_21",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 20
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 20
+        }
+      }
+    },
+    {
+      "id": "grid_pad_22",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 21
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 21
+        }
+      }
+    },
+    {
+      "id": "grid_pad_23",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 22
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 22
+        }
+      }
+    },
+    {
+      "id": "grid_pad_24",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 23
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 23
+        }
+      }
+    },
+    {
+      "id": "grid_pad_25",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 24
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 24
+        }
+      }
+    },
+    {
+      "id": "grid_pad_26",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 25
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 25
+        }
+      }
+    },
+    {
+      "id": "grid_pad_27",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 26
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 26
+        }
+      }
+    },
+    {
+      "id": "grid_pad_28",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 27
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 27
+        }
+      }
+    },
+    {
+      "id": "grid_pad_29",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 28
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 28
+        }
+      }
+    },
+    {
+      "id": "grid_pad_30",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 29
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 29
+        }
+      }
+    },
+    {
+      "id": "grid_pad_31",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 30
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 30
+        }
+      }
+    },
+    {
+      "id": "grid_pad_32",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 31
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 31
+        }
+      }
+    },
+    {
+      "id": "grid_pad_33",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 32
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 32
+        }
+      }
+    },
+    {
+      "id": "grid_pad_34",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 33
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 33
+        }
+      }
+    },
+    {
+      "id": "grid_pad_35",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 34
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 34
+        }
+      }
+    },
+    {
+      "id": "grid_pad_36",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 35
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 35
+        }
+      }
+    },
+    {
+      "id": "grid_pad_37",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 36
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 36
+        }
+      }
+    },
+    {
+      "id": "grid_pad_38",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 37
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 37
+        }
+      }
+    },
+    {
+      "id": "grid_pad_39",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 38
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 38
+        }
+      }
+    },
+    {
+      "id": "grid_pad_40",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 39
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 39
+        }
+      }
+    },
+    {
+      "id": "grid_pad_41",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 40
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 40
+        }
+      }
+    },
+    {
+      "id": "grid_pad_42",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 41
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 41
+        }
+      }
+    },
+    {
+      "id": "grid_pad_43",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 42
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 42
+        }
+      }
+    },
+    {
+      "id": "grid_pad_44",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 43
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 43
+        }
+      }
+    },
+    {
+      "id": "grid_pad_45",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 44
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 44
+        }
+      }
+    },
+    {
+      "id": "grid_pad_46",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 45
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 45
+        }
+      }
+    },
+    {
+      "id": "grid_pad_47",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 46
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 46
+        }
+      }
+    },
+    {
+      "id": "grid_pad_48",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 47
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 47
+        }
+      }
+    },
+    {
+      "id": "grid_pad_49",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 48
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 48
+        }
+      }
+    },
+    {
+      "id": "grid_pad_50",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 49
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 49
+        }
+      }
+    },
+    {
+      "id": "grid_pad_51",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 50
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 50
+        }
+      }
+    },
+    {
+      "id": "grid_pad_52",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 51
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 51
+        }
+      }
+    },
+    {
+      "id": "grid_pad_53",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 52
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 52
+        }
+      }
+    },
+    {
+      "id": "grid_pad_54",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 53
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 53
+        }
+      }
+    },
+    {
+      "id": "grid_pad_55",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 54
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 54
+        }
+      }
+    },
+    {
+      "id": "grid_pad_56",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 55
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 55
+        }
+      }
+    },
+    {
+      "id": "grid_pad_57",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 56
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 56
+        }
+      }
+    },
+    {
+      "id": "grid_pad_58",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 57
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 57
+        }
+      }
+    },
+    {
+      "id": "grid_pad_59",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 58
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 58
+        }
+      }
+    },
+    {
+      "id": "grid_pad_60",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 59
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 59
+        }
+      }
+    },
+    {
+      "id": "grid_pad_61",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 60
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 60
+        }
+      }
+    },
+    {
+      "id": "grid_pad_62",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 61
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 61
+        }
+      }
+    },
+    {
+      "id": "grid_pad_63",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 62
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 62
+        }
+      }
+    },
+    {
+      "id": "grid_pad_64",
+      "kind": "pad",
+      "input": {
+        "message": "note",
+        "channel": 1,
+        "number": 63
+      },
+      "feedback": {
+        "led": {
+          "message": "note",
+          "channel": 1,
+          "number": 63
+        }
+      }
+    }
+  ]
+}
