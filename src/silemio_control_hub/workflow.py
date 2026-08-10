@@ -98,7 +98,7 @@ def prepare_liveprofessor_project(
         item for item in inventory.controllers if not item.is_embedded
     )
     if embed_new_controller:
-        selected_controller_uid = controller.controller_uid
+        selected_controller_uid = probe.controller_uid
     elif project_controller_uid is not None:
         selected = next(
             (
