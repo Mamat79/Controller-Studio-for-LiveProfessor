@@ -30,7 +30,7 @@ sys.path.insert(0, str(SRC))
 from silemio_control_hub import __version__  # noqa: E402
 
 
-DISPLAY_VERSION = "V.2026"
+DISPLAY_VERSION = f"V.{__version__}"
 
 
 OUTPUT_DIR = ROOT / "output" / "pdf"
@@ -534,7 +534,7 @@ CONTENT = {
                     (
                         "steps",
                         [
-                            ("1", "Ouvrez la Banque de contrôleurs et choisissez le profil de votre matériel."),
+                            ("1", "Ouvrez la Banque de contrôleurs et choisissez le profil de votre matériel, ou cliquez sur Créer un contrôleur."),
                             ("2", "Exportez le fichier .ctrl2 si vous souhaitez ajouter ce contrôleur à LiveProfessor."),
                             ("3", "Cliquez sur AutoMap, choisissez un projet .rack2 et lancez l'analyse."),
                             ("4", "Sélectionnez les plug-ins voulus puis créez une nouvelle copie du projet."),
@@ -555,10 +555,21 @@ CONTENT = {
                         "p",
                         "Chaque profil décrit les commandes MIDI, les banques, les poussoirs, les retours et les capacités d'un contrôleur. Son état indique s'il est intégré, vérifié, local ou proposé par la communauté.",
                     ),
+                    ("h2", "Fabriquer un contrôleur absent de la banque"),
+                    (
+                        "steps",
+                        [
+                            ("1", "Cliquez sur Créer un contrôleur, renseignez le fabricant et le modèle, puis générez son identifiant."),
+                            ("2", "Ajoutez, supprimez et réordonnez encodeurs absolus ou relatifs, faders et boutons."),
+                            ("3", "Renseignez CC, Note, NRPN ou Pitch Bend, le canal et le numéro, ou utilisez Apprendre le mouvement et Apprendre l'appui sur l'entrée MIDI choisie."),
+                            ("4", "Enregistrez le profil dans votre banque, ou choisissez Enregistrer + créer .ctrl2."),
+                        ],
+                    ),
+                    ("p", "Modifier / dupliquer crée une copie personnelle d'un profil intégré sans toucher à l'original. Importer un profil ajoute un JSON validé. Chaque remplacement personnel conserve une sauvegarde."),
                     ("h2", "Contrôleur actif"),
                     (
                         "p",
-                        "Le sélecteur de la page Live reste synchronisé avec la banque. Lorsqu'un pilote temps réel est disponible, les boutons Démarrer, Arrêter, les banques et les réglages adaptés deviennent accessibles. Sinon, le profil reste immédiatement utilisable pour l'export et AutoMap.",
+                        "Le sélecteur de la page Live reste synchronisé avec la banque. Configurer / apprentissage MIDI ouvre l'éditeur pour le contrôleur actif. Lorsqu'un pilote temps réel est disponible, les boutons Démarrer, Arrêter, les banques et les réglages adaptés deviennent accessibles. Le setup et le groupe affichés avec l'EC4 sont propres à ce matériel. Sinon, le profil reste immédiatement utilisable pour l'export et AutoMap.",
                     ),
                     ("h2", "Exporter vers LiveProfessor"),
                     (
@@ -629,7 +640,7 @@ CONTENT = {
                     ("h2", "Contribuer"),
                     (
                         "p",
-                        "Dans la Banque de contrôleurs, Proposer à la bibliothèque valide le profil sélectionné, copie son JSON et ouvre le formulaire GitHub déjà titré. Collez le JSON, ajoutez la documentation ou les essais disponibles, puis envoyez.",
+                        "Dans la Banque de contrôleurs, Proposer à la bibliothèque valide le profil et place automatiquement son contenu complet dans le formulaire. GitHub s'ouvre uniquement pour identifier l'auteur, ajouter si possible la documentation ou les essais matériels, puis confirmer l'envoi. Controller Studio ne demande et ne conserve aucun jeton d'accès.",
                     ),
                     (
                         "bullets",
@@ -649,6 +660,11 @@ CONTENT = {
                     (
                         "p",
                         "La page Live garde uniquement le contrôleur actif, les commandes essentielles, l'état et le dernier événement. Les connexions MIDI/OSC sont dans Réglages et le journal complet s'ouvre dans une fenêtre séparée.",
+                    ),
+                    ("h2", "Réactivité, feedback et Overlay"),
+                    (
+                        "p",
+                        "Réglages retrouve la petite fenêtre avancée d'EC4 Bridge : cadence et durée de l'Overlay, rafraîchissement Companion et des labels, délai maximal du retour LiveProfessor et affichage persistant. Ces temporisations sont communes aux contrôleurs compatibles ; les commandes setup/groupe et SysEx restent propres à l'EC4.",
                     ),
                     ("h2", "Langue et zone de notification"),
                     (
@@ -716,7 +732,7 @@ CONTENT = {
                 "1. Quick start",
                 [
                     ("h2", "The shortest workflow"),
-                    ("steps", [("1", "Open the Controller bank and choose the profile for your hardware."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, choose a .rack2 project, and analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
+                    ("steps", [("1", "Open the Controller bank and choose the profile for your hardware, or click Create a controller."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, choose a .rack2 project, and analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
                     ("callout", "Always preserve the original LiveProfessor project. Work only with the copy created by AutoMap."),
                 ],
             ),
@@ -725,8 +741,11 @@ CONTENT = {
                 [
                     ("h2", "Controller bank"),
                     ("p", "Each profile describes MIDI controls, banks, pushes, feedback, and capabilities. Its status identifies it as built-in, verified, local, or community supplied."),
+                    ("h2", "Build a controller missing from the bank"),
+                    ("steps", [("1", "Click Create a controller, enter its manufacturer and model, then generate its identifier."), ("2", "Add, remove, and reorder absolute or relative encoders, faders, and buttons."), ("3", "Enter CC, Note, NRPN, or Pitch Bend, channel, and number, or use Learn movement and Learn push on the chosen MIDI input."), ("4", "Save the profile to your bank, or choose Save + create .ctrl2.")]),
+                    ("p", "Edit / duplicate creates a personal copy of a built-in profile without changing the original. Import a profile installs validated JSON. Every personal replacement keeps a backup."),
                     ("h2", "Active controller"),
-                    ("p", "The Live page selector stays synchronized with the bank. When a real-time driver is available, Start, Stop, bank, and matching settings become available. Otherwise, the profile remains ready for export and AutoMap."),
+                    ("p", "The Live page selector stays synchronized with the bank. Configure / MIDI Learn opens the editor for the active controller. When a real-time driver is available, Start, Stop, bank, and matching settings become available. The setup and group shown with the EC4 are specific to that hardware. Otherwise, the profile remains ready for export and AutoMap."),
                     ("h2", "Export to LiveProfessor"),
                     ("steps", [("1", "Select the controller in the bank."), ("2", "Click Export controller .ctrl2."), ("3", "In LiveProfessor, open Hardware Controllers Setup, then Load from file.")]),
                 ],
@@ -757,7 +776,7 @@ CONTENT = {
                     ("h2", "Update"),
                     ("p", "The public library provides controller and plug-in profiles. Preview changes before installing them, then keep working offline from the local cache."),
                     ("h2", "Contribute"),
-                    ("p", "In Controller bank, Submit to the library validates the selected profile, copies its JSON, and opens a pre-titled GitHub form. Paste the JSON, add available documentation or test results, then submit it."),
+                    ("p", "In Controller bank, Submit to the library validates the profile and automatically inserts its full content into the form. GitHub opens only to identify the author, add hardware documentation or test details when possible, and confirm the submission. Controller Studio never asks for or stores an access token."),
                     ("bullets", ["strict format validation;", "version and SHA-256 checks;", "backup before replacement;", "no executable code in profiles."]),
                 ],
             ),
@@ -766,6 +785,8 @@ CONTENT = {
                 [
                     ("h2", "A simple first page"),
                     ("p", "The Live page keeps only the active controller, essential actions, status, and last event. MIDI/OSC connections are under Settings, and the complete log opens in a separate window."),
+                    ("h2", "Responsiveness, feedback, and Overlay"),
+                    ("p", "Settings restores EC4 Bridge's compact advanced window: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are shared by compatible controllers; setup/group and SysEx commands remain EC4-only."),
                     ("h2", "Language and notification area"),
                     ("p", "Options > Language switches immediately between French and English. Minimizing to the notification area hides the window without stopping an active engine; Quit actually stops the application."),
                     ("h2", "Manual, updates, and support"),
@@ -794,13 +815,13 @@ def styles():
         "manual": ParagraphStyle("Manual", parent=base["Normal"], fontName="Helvetica-Bold", fontSize=10, leading=12, textColor=BLUE, alignment=TA_CENTER, tracking=1.2),
         "subtitle": ParagraphStyle("Subtitle", parent=base["Normal"], fontName="Helvetica", fontSize=12, leading=17, textColor=MID, alignment=TA_CENTER),
         "h1": ParagraphStyle("H1", parent=base["Heading1"], fontName="Helvetica-Bold", fontSize=18, leading=22, textColor=NAVY, spaceAfter=5 * mm),
-        "h2": ParagraphStyle("H2", parent=base["Heading2"], fontName="Helvetica-Bold", fontSize=11.5, leading=15, textColor=BLUE, spaceBefore=3 * mm, spaceAfter=2 * mm),
-        "body": ParagraphStyle("Body", parent=base["BodyText"], fontName="Helvetica", fontSize=9.3, leading=13.2, textColor=NAVY, alignment=TA_LEFT, spaceAfter=2.5 * mm),
-        "small": ParagraphStyle("Small", parent=base["BodyText"], fontName="Helvetica", fontSize=8, leading=11, textColor=MID, alignment=TA_CENTER),
-        "toc": ParagraphStyle("Toc", parent=base["BodyText"], fontName="Helvetica", fontSize=10, leading=15, leftIndent=5 * mm, textColor=NAVY),
-        "bullet": ParagraphStyle("Bullet", parent=base["BodyText"], fontName="Helvetica", fontSize=9.2, leading=13, leftIndent=6 * mm, firstLineIndent=-3 * mm, textColor=NAVY, spaceAfter=1.5 * mm),
-        "callout": ParagraphStyle("Callout", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=9.2, leading=13, textColor=NAVY, leftIndent=3 * mm, rightIndent=3 * mm),
-        "table_header": ParagraphStyle("TableHeader", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=9.3, leading=13.2, textColor=colors.white, alignment=TA_LEFT),
+        "h2": ParagraphStyle("H2", parent=base["Heading2"], fontName="Helvetica-Bold", fontSize=12.2, leading=16, textColor=BLUE, spaceBefore=3 * mm, spaceAfter=2 * mm),
+        "body": ParagraphStyle("Body", parent=base["BodyText"], fontName="Helvetica", fontSize=10.2, leading=14.5, textColor=NAVY, alignment=TA_LEFT, spaceAfter=2.7 * mm),
+        "small": ParagraphStyle("Small", parent=base["BodyText"], fontName="Helvetica", fontSize=8.8, leading=12, textColor=MID, alignment=TA_CENTER),
+        "toc": ParagraphStyle("Toc", parent=base["BodyText"], fontName="Helvetica", fontSize=10.7, leading=16, leftIndent=5 * mm, textColor=NAVY),
+        "bullet": ParagraphStyle("Bullet", parent=base["BodyText"], fontName="Helvetica", fontSize=10.1, leading=14.3, leftIndent=6 * mm, firstLineIndent=-3 * mm, textColor=NAVY, spaceAfter=1.5 * mm),
+        "callout": ParagraphStyle("Callout", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.1, leading=14.3, textColor=NAVY, leftIndent=3 * mm, rightIndent=3 * mm),
+        "table_header": ParagraphStyle("TableHeader", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.1, leading=14.3, textColor=colors.white, alignment=TA_LEFT),
     }
 
 

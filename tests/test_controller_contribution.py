@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlsplit
 import pytest
 
 from silemio_control_hub.controller_contribution import (
+    controller_submission_body,
     controller_submission_url,
     validated_controller_payload,
 )
@@ -65,3 +66,14 @@ def test_submission_url_targets_the_product_repository_and_template(tmp_path: Pa
     assert parsed.path == "/Mamat79/Controller-Studio-for-LiveProfessor/issues/new"
     assert query["template"] == ["controller-profile.md"]
     assert query["title"] == ["Controller profile: ACME & Sons Knob / One"]
+
+
+def test_submission_url_can_prefill_the_complete_validated_profile(tmp_path: Path):
+    profile, payload = validated_controller_payload(_profile(tmp_path / "profile.json"))
+    url = controller_submission_url(profile, payload=payload)
+    body = parse_qs(urlsplit(url).query)["body"][0]
+
+    assert "ACME & Sons Knob / One" in body
+    assert '"id":"acme.knob"' in body
+    assert "```json" in body
+    assert controller_submission_body(profile, "{}").startswith("## Contrôleur")

@@ -10,25 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3"><img alt="Version V.2026.3" src="https://img.shields.io/badge/version-V.2026.3-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4"><img alt="Version V.2026.4" src="https://img.shields.io/badge/version-V.2026.4-0b9fc6"></a>
   <img alt="Windows 10 and 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
   <img alt="French and English" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Latest version (quick access)
 
-**Stable release: [Controller Studio V.2026.3](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3)**<br>
+**Stable release: [Controller Studio V.2026.4](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4)**<br>
 Direct downloads:
 
-- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Setup-v2026.3.exe)
-- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor.exe)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/SHA256SUMS.txt)
+- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Setup-v2026.4.exe)
+- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor.exe)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/SHA256SUMS.txt)
 
 [Lire cette présentation en français](README.md)
 
-> **Public V.2026.3 Windows release.** Controller Studio always works on a new AutoMap copy and keeps the source `.rack2` project untouched.
+> **Public V.2026.4 Windows release.** Controller Studio always works on a new AutoMap copy and keeps the source `.rack2` project untouched.
 
 ## What does Controller Studio do?
 
@@ -68,10 +68,12 @@ VST is a registered trademark of Steinberg Media Technologies GmbH. Third-party 
 
 ## Built-in controller bank
 
-V.2026.3 includes ten declarative profiles ready to export:
+V.2026.4 includes twelve declarative profiles ready to export and can build more directly in the application:
 
+- Akai Professional LPD8 MK2 (documented Program 1);
 - Faderfox EC4, PC4, UC4 and PC12;
 - Behringer X-Touch Compact, X-Touch Mini and X-Touch One;
+- Korg nanoKONTROL2 (CC mode, factory knob and fader assignments);
 - Novation Launch Control XL 3;
 - DJ TechTools MIDI Fighter Twister;
 - generic 16-control MIDI controller.
@@ -80,15 +82,21 @@ Hardware modes and manufacturer references are collected in the [controller prof
 
 ## Build and share a controller
 
-The built-in editor describes encoders, faders, buttons, MIDI channels, CC/Note messages and available feedback, then validates the profile before export.
+Click **Create a controller…** to start with eight encoders, then add, remove, or reorder absolute or relative encoders, faders, and buttons. Every control accepts CC, Note, NRPN, or Pitch Bend, its channel, and its number. **Learn movement** and **Learn push** capture messages directly from the chosen MIDI input. You can also **Edit / duplicate…** an existing model or **Import a profile…**.
+
+**Save to my bank** validates the profile and makes it available offline. **Save + create .ctrl2** immediately produces the LiveProfessor file. Replacing a personal profile keeps a backup of the previous version. The Live page also provides **Configure / MIDI Learn…** for the active controller; the setup/group section shown with the EC4 remains hardware-specific.
+
+The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only.
 
 To submit a controller to the shared library:
 
 1. create or select its profile in **Controller bank**;
 2. click **Submit to the library…**;
-3. Controller Studio validates and prepares the JSON file;
-4. a pre-filled GitHub form opens;
-5. attach manufacturer documentation or hardware test results and submit.
+3. Controller Studio validates the profile and automatically inserts all its content into the form;
+4. GitHub opens to identify the author and request final confirmation;
+5. add manufacturer documentation or hardware test results when possible, then submit.
+
+That final confirmation deliberately stays with GitHub: Controller Studio never asks for or stores a password or access token.
 
 The public library lives in this repository under [`library/`](library/). It contains declarative JSON profiles only—never downloaded executable code.
 

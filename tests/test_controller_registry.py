@@ -14,6 +14,7 @@ def test_builtin_profiles_are_valid_and_distinct():
     registry = ControllerRegistry()
     profiles = registry.all()
     assert {profile.id for profile in profiles} == {
+        "akai.lpd8-mk2.program-1-mpc",
         "behringer.x-touch-compact.layer-a",
         "behringer.x-touch-mini.preset-a",
         "behringer.x-touch-one.midi",
@@ -23,6 +24,7 @@ def test_builtin_profiles_are_valid_and_distinct():
         "faderfox.pc4.setup-1",
         "faderfox.uc4.setup-1-group-1",
         "generic.midi.16",
+        "korg.nanokontrol2.cc-factory",
         "novation.launch-control-xl3.mode-16",
     }
     ec4 = registry.get("faderfox.ec4")
@@ -63,6 +65,15 @@ def test_builtin_profiles_are_valid_and_distinct():
     assert len(twister.controls) == 64
     assert all(control.supports_rotation for control in twister.controls)
     assert all(control.supports_press for control in twister.controls)
+
+    nanokontrol = registry.get("korg.nanokontrol2.cc-factory")
+    assert nanokontrol.bank_size == 16
+    assert sum(control.supports_rotation for control in nanokontrol.controls) == 16
+
+    lpd8 = registry.get("akai.lpd8-mk2.program-1-mpc")
+    assert lpd8.bank_size == 16
+    assert sum(control.supports_rotation for control in lpd8.controls) == 8
+    assert sum(control.supports_press for control in lpd8.controls) == 8
 
 
 def test_duplicate_control_ids_are_rejected(tmp_path):

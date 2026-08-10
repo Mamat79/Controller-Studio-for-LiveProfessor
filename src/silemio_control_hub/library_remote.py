@@ -226,7 +226,7 @@ def _installed_hub_version() -> str:
     try:
         return package_version("silemio-control-hub")
     except PackageNotFoundError:
-        return "2026.3.dev0"
+        return "2026.4.dev0"
 
 
 def _check_hub_compatibility(manifest: LibraryManifest, hub_version: str) -> None:

@@ -1,7 +1,15 @@
 {
   "manifest_version": 1,
-  "generated_at": "2026-08-10T01:49:57Z",
+  "generated_at": "2026-08-10T09:57:14Z",
   "profiles": [
+    {
+      "id": "akai.lpd8-mk2.program-1-mpc",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/akai/lpd8-mk2-program-1-mpc/1.0.0/profile.json",
+      "sha256": "A3231D0D69233A76F626FE4561EAE9315729779D793416ED95A7C4CB3AF2CD87",
+      "minimum_hub_version": "0.1.0"
+    },
     {
       "id": "behringer.x-touch-compact.layer-a",
       "version": "1.0.0",
@@ -72,6 +80,14 @@
       "status": "builtin",
       "path": "controllers/generic/midi-16/1.0.0/profile.json",
       "sha256": "7C9FD78766FE40164DA7327471DCF945E34FFE19E4DC8682E5DF4A37A9A5AF59",
+      "minimum_hub_version": "0.1.0"
+    },
+    {
+      "id": "korg.nanokontrol2.cc-factory",
+      "version": "1.0.0",
+      "status": "community",
+      "path": "controllers/korg/nanokontrol2-cc-factory/1.0.0/profile.json",
+      "sha256": "809F2E406E49789623F4E80B333BB6B7D651459BB9BF023DAB5C65BD2188D37D",
       "minimum_hub_version": "0.1.0"
     },
     {

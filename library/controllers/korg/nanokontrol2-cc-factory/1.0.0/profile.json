@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "korg.nanokontrol2.cc-factory",
+  "manufacturer": "Korg",
+  "model": "nanoKONTROL2 — CC Mode (factory knobs + faders)",
+  "midi_identity": {
+    "input_name_patterns": ["nanoKONTROL2"],
+    "output_name_patterns": ["nanoKONTROL2"]
+  },
+  "bank_size": 16,
+  "status": "community",
+  "capabilities": [],
+  "controls": [
+    {"id": "knob_01", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 16}},
+    {"id": "knob_02", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 17}},
+    {"id": "knob_03", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 18}},
+    {"id": "knob_04", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 19}},
+    {"id": "knob_05", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 20}},
+    {"id": "knob_06", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 21}},
+    {"id": "knob_07", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 22}},
+    {"id": "knob_08", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 1, "number": 23}},
+    {"id": "fader_01", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 0}},
+    {"id": "fader_02", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 1}},
+    {"id": "fader_03", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 2}},
+    {"id": "fader_04", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 3}},
+    {"id": "fader_05", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 4}},
+    {"id": "fader_06", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 5}},
+    {"id": "fader_07", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 6}},
+    {"id": "fader_08", "kind": "fader", "input": {"message": "cc", "channel": 1, "number": 7}, "roles": ["output"]}
+  ]
+}
