@@ -2,6 +2,7 @@
 
 ## V.2026 (2026.4) — 2026-08-10
 
+- Simplifie l'écran d'attente EC4 en retirant la signature « By Mamat » et efface cet écran dès l'arrêt du moteur ou la fermeture de Controller Studio.
 - Ajoute deux options indépendantes : lancement de Controller Studio avec Windows dans la zone de notification et connexion automatique du contrôleur sélectionné au démarrage, avec plusieurs tentatives silencieuses si les ports ne sont pas encore prêts.
 - Maintient sur l'EC4 un message localisé d'attente de LiveProfessor après la connexion MIDI, puis restaure automatiquement les paramètres dès le premier retour OSC.
 - Corrige la fenêtre de réglages EC4 afin que tous les boutons restent entièrement visibles en français comme en anglais, même lorsque la largeur disponible est réduite.

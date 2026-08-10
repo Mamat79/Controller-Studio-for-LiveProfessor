@@ -8,6 +8,7 @@ from silemio_control_hub.runtime.ec4_liveprofessor import (
 )
 from silemio_control_hub.adapters.devices.ec4_protocol import (
     EC4SetupState,
+    hide_total_display_message,
     main_display_message,
     parameter_grid_message,
     total_display_message,
@@ -545,7 +546,7 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(
             bridge._midi.sysex[-1],
             total_display_message(
-                ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"],
+                ["Attente demarrage", "LiveProfessor", "", "-----[]---"],
                 alignments=["center", "center", "right", "right"],
             ),
         )
@@ -555,7 +556,7 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(
             bridge._midi.sysex[-1],
             total_display_message(
-                ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"],
+                ["Attente demarrage", "LiveProfessor", "", "-----[]---"],
                 alignments=["center", "center", "right", "right"],
             ),
         )
@@ -571,7 +572,7 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(
             bridge._midi.sysex[-1],
             total_display_message(
-                ["Waiting for", "LiveProfessor", "By Mamat", "-----[]---"],
+                ["Waiting for", "LiveProfessor", "", "-----[]---"],
                 alignments=["center", "center", "right", "right"],
             ),
         )
@@ -583,6 +584,17 @@ class BridgeTests(unittest.TestCase):
             bridge._midi.sysex[-1],
             parameter_grid_message(bridge.short_names[:16]),
         )
+
+    def test_stopping_clears_the_ec4_waiting_display_before_midi_closes(self):
+        bridge = self.make_bridge(display_enabled=True, restrict_to_target=False)
+        bridge._midi.sysex.clear()
+        bridge._show_waiting_for_liveprofessor()
+
+        bridge.stop()
+
+        self.assertFalse(bridge._waiting_for_liveprofessor_displayed)
+        self.assertFalse(bridge._midi.is_open)
+        self.assertEqual(bridge._midi.sysex[-1], hide_total_display_message())
 
 
 if __name__ == "__main__":
