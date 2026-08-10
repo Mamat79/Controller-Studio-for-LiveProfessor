@@ -116,7 +116,7 @@ Cliquez sur **Créer un contrôleur…** pour partir d’un modèle de huit enco
 
 **Enregistrer dans ma banque** valide le profil et le rend disponible hors ligne. **Enregistrer + créer .ctrl2** produit aussitôt le fichier LiveProfessor. Le remplacement d’un profil personnel conserve une sauvegarde de la version précédente. La page Live donne aussi accès à **Configurer / apprentissage MIDI…** pour le contrôleur actif ; le setup/groupe visible avec l’EC4 reste une fonction spécifique à ce matériel.
 
-La fenêtre **Réglages** de la page Live retrouve les paramètres avancés d’EC4 Bridge : cadence de l’Overlay, durée d’affichage, rafraîchissement Companion et des labels, délai de confirmation LiveProfessor et affichage persistant. Ces temporisations sont disponibles pour tous les contrôleurs compatibles ; les outils setup/groupe et SysEx restent affichés uniquement pour l’EC4. Lorsque l’EC4 est connecté avant LiveProfessor, son écran affiche une attente localisée puis revient automatiquement aux paramètres dès que LiveProfessor répond.
+La fenêtre **Réglages** de la page Live retrouve les paramètres avancés d’EC4 Bridge : cadence de l’Overlay, durée d’affichage, rafraîchissement Companion et des labels, délai de confirmation LiveProfessor et affichage persistant. Ces temporisations sont disponibles pour tous les contrôleurs compatibles ; les outils setup/groupe et SysEx restent affichés uniquement pour l’EC4. Lorsque l’EC4 est connecté avant LiveProfessor, son écran affiche une attente localisée et le petit fader ASCII, puis revient automatiquement aux paramètres dès que LiveProfessor répond. Cet écran est effacé dès que le moteur est arrêté ou que Controller Studio est quitté.
 
 Pour proposer un contrôleur à la bibliothèque commune :
 
@@ -312,7 +312,7 @@ Click **Create a controller…** to start with eight encoders, then add, remove,
 
 **Save to my bank** validates the profile and makes it available offline. **Save + create .ctrl2** immediately produces the LiveProfessor file. Replacing a personal profile keeps a backup of the previous version. The Live page also provides **Configure / MIDI Learn…** for the active controller; the setup/group section shown with the EC4 remains hardware-specific.
 
-The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only. If the EC4 connects before LiveProfessor, its screen shows a localized waiting message and automatically restores parameter feedback as soon as LiveProfessor responds.
+The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only. If the EC4 connects before LiveProfessor, its screen shows a localized waiting message with the small ASCII fader and automatically restores parameter feedback as soon as LiveProfessor responds. This waiting screen is cleared when the runtime stops or Controller Studio quits.
 
 To submit a controller to the shared library:
 

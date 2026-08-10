@@ -225,6 +225,7 @@ class EC4LiveProfessorBridge:
             self._parameter_overlay_timer.cancel()
             self._parameter_overlay_timer = None
             self._pending_overlay_index = None
+        self._clear_display_on_stop()
         if hasattr(self._osc_client, "close"):
             try:
                 self._osc_client.close()
@@ -1193,12 +1194,16 @@ class EC4LiveProfessorBridge:
         self._show_waiting_for_liveprofessor()
 
     def _show_waiting_for_liveprofessor(self) -> None:
-        if not self.config.display_enabled or not self._midi.is_open:
+        if (
+            self._stop.is_set()
+            or not self.config.display_enabled
+            or not self._midi.is_open
+        ):
             return
         if self.config.ui_language == "en":
-            lines = ["Waiting for", "LiveProfessor", "By Mamat", "-----[]---"]
+            lines = ["Waiting for", "LiveProfessor", "", "-----[]---"]
         else:
-            lines = ["Attente demarrage", "LiveProfessor", "By Mamat", "-----[]---"]
+            lines = ["Attente demarrage", "LiveProfessor", "", "-----[]---"]
         try:
             self._midi.send_sysex(
                 total_display_message(
@@ -1210,6 +1215,16 @@ class EC4LiveProfessorBridge:
             self._log(str(exc), logging.WARNING)
             return
         self._waiting_for_liveprofessor_displayed = True
+
+    def _clear_display_on_stop(self) -> None:
+        self._waiting_for_liveprofessor_displayed = False
+        self._startup_banner_shown = False
+        if not self.config.display_enabled or not self._midi.is_open:
+            return
+        try:
+            self._midi.send_sysex(hide_total_display_message())
+        except MidiBackendError as exc:
+            self._log(str(exc), logging.WARNING)
 
     def _show_overlay(
         self,
