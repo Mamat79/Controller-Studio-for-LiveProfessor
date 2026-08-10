@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, replace
 from pathlib import Path
+import hashlib
 import os
 import queue
 import re
@@ -27,7 +28,11 @@ from .adapters.devices.ec4_protocol import (
     total_display_message,
 )
 from .adapters.hosts import export_liveprofessor_controller
-from .adapters.hosts.liveprofessor_automap import ProjectInventory, inspect_project
+from .adapters.hosts.liveprofessor_automap import (
+    ProjectInventory,
+    inspect_plugin_parameter_slots,
+    inspect_project,
+)
 from .adapters.hosts.liveprofessor_controller import (
     bank_rotary_count,
     default_companion_template,
@@ -67,8 +72,10 @@ from .plugin_studio import (
     capture_liveprofessor_parameter_names,
     compatible_user_profile,
     editable_parameters,
+    merge_scanned_parameter_names,
     next_user_profile_version,
     request_liveprofessor_companion_names,
+    retrieve_installed_parameter_names,
     save_user_profile,
 )
 from .registry import ControllerRegistry
@@ -358,6 +365,26 @@ UI_TEXT = {
         "plugin_status_analysis": "{types} type(s) reconnu(s), {instances} instance(s).",
         "plugin_analysis_ready": "Analyse terminée : {types} type(s), {instances} instance(s).",
         "plugin_analysis_error": "Analyse des plug-ins impossible",
+        "plugin_scan_all": "Récupérer tous les vrais noms",
+        "plugin_scan_all_title": "Récupérer tous les noms de paramètres",
+        "plugin_scan_all_confirm": (
+            "Controller Studio va lire les paramètres exposés par les {types} types de "
+            "plug-ins installés, chacun dans un processus isolé. Seuls les inventaires "
+            "dont le nombre correspond exactement au projet seront enregistrés. Les "
+            "profils locaux existants seront sauvegardés avant mise à jour.\n\n"
+            "Le projet .rack2 ne sera jamais modifié. Continuer ?"
+        ),
+        "plugin_scan_all_running": "Lecture des plug-ins installés…",
+        "plugin_scan_all_progress": "Lecture {current}/{total} : {name}",
+        "plugin_scan_all_success": (
+            "{saved} profil(s) mis à jour avec les vrais noms.\n"
+            "{skipped} plug-in(s) ignoré(s).{details}"
+        ),
+        "plugin_scan_all_details": (
+            "\n\nDétails :\n{details}\n\nOuvrez le profil d'un plug-in ignoré pour "
+            "utiliser automatiquement le secours LiveProfessor."
+        ),
+        "plugin_scan_all_none": "Aucun profil n'a pu être mis à jour.{details}",
         "plugin_edit": "Créer / modifier le profil…",
         "plugin_use_automap": "Utiliser dans AutoMap",
         "plugin_open_folder": "Dossier des profils",
@@ -373,7 +400,7 @@ UI_TEXT = {
         "plugin_kind_meter": "Mesure",
         "plugin_editor_title": "Profil de plug-in — {name}",
         "plugin_editor_intro": (
-            "Récupérez automatiquement les vrais noms depuis LiveProfessor, puis choisissez "
+            "Lisez automatiquement les vrais noms dans le plug-in installé, puis choisissez "
             "précisément les paramètres à inclure dans AutoMap."
         ),
         "plugin_editor_instances": "{instances} instance(s) • {parameters} paramètre(s)",
@@ -383,19 +410,31 @@ UI_TEXT = {
         "plugin_select_none": "Tout décocher",
         "plugin_enabled_count": "{enabled}/{total} paramètre(s) inclus",
         "plugin_capture_names": "Récupérer automatiquement les vrais noms",
-        "plugin_capture_names_title": "Récupérer les noms depuis LiveProfessor",
+        "plugin_capture_names_title": "Récupérer les vrais noms",
+        "plugin_scan_direct_busy": "Lecture du plug-in installé…",
+        "plugin_scan_direct_success": (
+            "{count} vrai(s) nom(s) lu(s) directement dans le plug-in installé. "
+            "Vérifiez-les avant d'enregistrer."
+        ),
+        "plugin_scan_fallback": (
+            "La lecture directe de « {name} » n'a pas abouti :\n{error}\n\n"
+            "Voulez-vous essayer l'interception du retour LiveProfessor ?"
+        ),
         "plugin_capture_names_ready": (
             "Dans LiveProfessor, sélectionnez une instance de « {name} ». Dans la barre "
             "du haut, cliquez sur le nom de la map et choisissez exactement "
-            "« SiLeMI/O AutoMap - {name} » — pas la map Dynamic. Cliquez ensuite sur OK : "
-            "Controller Studio demandera les noms sans modifier le projet."
+            "« SiLeMI/O AutoMap - {name} » — pas la map Dynamic. Si les libellés sont "
+            "visibles sur votre contrôleur, cliquez sur OK. Sinon, changez brièvement de "
+            "plug-in puis revenez sur « {name} » : Controller Studio intercepte les noms "
+            "envoyés au contrôleur sans modifier le projet."
         ),
-        "plugin_capture_busy": "Récupération en cours…",
+        "plugin_capture_busy": "Interception des noms en cours…",
         "plugin_capture_error": "Récupération impossible : {error}",
         "plugin_capture_missing": (
             "Aucun vrai nom n’a été reçu. Vérifiez que la bonne instance est sélectionnée "
             "et que « SiLeMI/O AutoMap - {name} » est la map active dans LiveProfessor "
-            "(la map Dynamic ne convient pas à cette capture), puis réessayez."
+            "(la map Dynamic ne convient pas), changez de plug-in puis revenez sur cette "
+            "instance avant de réessayer."
         ),
         "plugin_capture_no_map": (
             "Le projet analysé ne contient pas encore de Controller Map exploitable pour "
@@ -762,6 +801,26 @@ UI_TEXT = {
         "plugin_status_analysis": "{types} type(s) recognized, {instances} instance(s).",
         "plugin_analysis_ready": "Analysis complete: {types} type(s), {instances} instance(s).",
         "plugin_analysis_error": "Could not analyze plug-ins",
+        "plugin_scan_all": "Retrieve all real names",
+        "plugin_scan_all_title": "Retrieve all parameter names",
+        "plugin_scan_all_confirm": (
+            "Controller Studio will read the parameters exported by the {types} installed "
+            "plug-in types, each in an isolated process. Only inventories whose count "
+            "exactly matches the project will be saved. Existing local profiles will be "
+            "backed up before they are updated.\n\nThe .rack2 project will never be "
+            "modified. Continue?"
+        ),
+        "plugin_scan_all_running": "Reading installed plug-ins…",
+        "plugin_scan_all_progress": "Reading {current}/{total}: {name}",
+        "plugin_scan_all_success": (
+            "{saved} profile(s) updated with real names.\n"
+            "{skipped} plug-in(s) skipped.{details}"
+        ),
+        "plugin_scan_all_details": (
+            "\n\nDetails:\n{details}\n\nOpen a skipped plug-in profile to "
+            "automatically use the LiveProfessor fallback."
+        ),
+        "plugin_scan_all_none": "No profile could be updated.{details}",
         "plugin_edit": "Create / edit profile…",
         "plugin_use_automap": "Use in AutoMap",
         "plugin_open_folder": "Profiles folder",
@@ -777,8 +836,8 @@ UI_TEXT = {
         "plugin_kind_meter": "Meter",
         "plugin_editor_title": "Plug-in profile — {name}",
         "plugin_editor_intro": (
-            "Automatically retrieve the real names from LiveProfessor, then choose exactly "
-            "which parameters AutoMap should include."
+            "Automatically read the real names from the installed plug-in, then choose "
+            "exactly which parameters AutoMap should include."
         ),
         "plugin_editor_instances": "{instances} instance(s) • {parameters} parameter(s)",
         "plugin_parameter_enabled": "AutoMap",
@@ -787,19 +846,30 @@ UI_TEXT = {
         "plugin_select_none": "Select none",
         "plugin_enabled_count": "{enabled}/{total} parameter(s) included",
         "plugin_capture_names": "Automatically retrieve real names",
-        "plugin_capture_names_title": "Get names from LiveProfessor",
+        "plugin_capture_names_title": "Retrieve real names",
+        "plugin_scan_direct_busy": "Reading the installed plug-in…",
+        "plugin_scan_direct_success": (
+            "{count} real name(s) read directly from the installed plug-in. "
+            "Review them before saving."
+        ),
+        "plugin_scan_fallback": (
+            "Direct inspection of “{name}” did not succeed:\n{error}\n\n"
+            "Would you like to try intercepting LiveProfessor feedback?"
+        ),
         "plugin_capture_names_ready": (
             "In LiveProfessor, select an instance of “{name}”. In the top bar, click the "
             "map name and choose exactly “SiLeMI/O AutoMap - {name}” — not the Dynamic "
-            "map. Then click OK: Controller Studio will request the names without changing "
-            "the project."
+            "map. If the labels are visible on your controller, click OK. Otherwise, "
+            "briefly select another plug-in and return to “{name}”: Controller Studio "
+            "intercepts the names sent to the controller without changing the project."
         ),
-        "plugin_capture_busy": "Retrieving names…",
+        "plugin_capture_busy": "Intercepting names…",
         "plugin_capture_error": "Could not retrieve names: {error}",
         "plugin_capture_missing": (
             "No real name was received. Check that the correct instance is selected and "
             "“SiLeMI/O AutoMap - {name}” is the active map in LiveProfessor (the Dynamic "
-            "map cannot be used for this capture), then try again."
+            "map cannot be used), select another plug-in and return to this instance, "
+            "then try again."
         ),
         "plugin_capture_no_map": (
             "The analyzed project does not yet contain a usable Controller Map for this "
@@ -1028,6 +1098,7 @@ class ControlHubDesktop:
         self._plugin_analysis: PluginProjectAnalysis | None = None
         self._plugin_summary_by_iid: dict[str, PluginTypeSummary] = {}
         self._plugin_analysis_running = False
+        self._plugin_batch_running = False
         self._plugin_analysis_results: queue.SimpleQueue[
             tuple[PluginProjectAnalysis | None, PluginProfileRegistry | None, str | None]
         ] = queue.SimpleQueue()
@@ -1560,26 +1631,33 @@ class ControlHubDesktop:
             textvariable=self.plugin_analysis_status_var,
             style="Subtitle.TLabel",
         ).grid(row=0, column=0, sticky="w")
+        self.plugin_scan_all_button = ttk.Button(
+            toolbar,
+            text=self._t("plugin_scan_all"),
+            command=self._scan_all_plugin_names,
+            state="disabled",
+            style="Accent.TButton",
+        )
+        self.plugin_scan_all_button.grid(row=0, column=1, padx=(8, 0))
         self.plugin_edit_button = ttk.Button(
             toolbar,
             text=self._t("plugin_edit"),
             command=self._open_plugin_profile_editor,
             state="disabled",
-            style="Accent.TButton",
         )
-        self.plugin_edit_button.grid(row=0, column=1, padx=(8, 0))
+        self.plugin_edit_button.grid(row=0, column=2, padx=(8, 0))
         self.plugin_automap_button = ttk.Button(
             toolbar,
             text=self._t("plugin_use_automap"),
             command=self._use_plugin_project_in_automap,
             state="disabled",
         )
-        self.plugin_automap_button.grid(row=0, column=2, padx=(8, 0))
+        self.plugin_automap_button.grid(row=0, column=3, padx=(8, 0))
         ttk.Button(
             toolbar,
             text=self._t("plugin_open_folder"),
             command=self._open_plugin_profile_folder,
-        ).grid(row=0, column=3, padx=(8, 0))
+        ).grid(row=0, column=4, padx=(8, 0))
 
         tree_frame = ttk.Frame(parent)
         tree_frame.grid(row=4, column=0, sticky="nsew")
@@ -1681,6 +1759,7 @@ class ControlHubDesktop:
             self._t("plugin_catalog_status", profiles=len(profiles))
         )
         self.plugin_edit_button.configure(state="disabled")
+        self.plugin_scan_all_button.configure(state="disabled")
         self.plugin_automap_button.configure(state="disabled")
 
     def _populate_plugin_analysis(self, analysis: PluginProjectAnalysis) -> None:
@@ -1715,6 +1794,9 @@ class ControlHubDesktop:
             )
         )
         self.plugin_edit_button.configure(state="disabled")
+        self.plugin_scan_all_button.configure(
+            state="normal" if analysis.plugin_types else "disabled"
+        )
         self.plugin_automap_button.configure(state="normal")
         if analysis.plugin_types:
             first = "plugin-type-0"
@@ -1729,7 +1811,12 @@ class ControlHubDesktop:
         return self._plugin_summary_by_iid.get(selected[0])
 
     def _select_plugin_type(self, _event=None) -> None:
-        state = "normal" if self._selected_plugin_summary() is not None else "disabled"
+        state = (
+            "normal"
+            if self._selected_plugin_summary() is not None
+            and not self._plugin_batch_running
+            else "disabled"
+        )
         self.plugin_edit_button.configure(state=state)
 
     def _browse_plugin_project(self) -> None:
@@ -1749,6 +1836,7 @@ class ControlHubDesktop:
         self._plugin_analysis_running = True
         self.plugin_analysis_status_var.set(self._t("plugin_status_running"))
         self.plugin_edit_button.configure(state="disabled")
+        self.plugin_scan_all_button.configure(state="disabled")
         self.plugin_automap_button.configure(state="disabled")
 
         def worker() -> None:
@@ -1783,6 +1871,7 @@ class ControlHubDesktop:
             self._plugin_analysis = None
             self.plugin_analysis_status_var.set(error or self._t("plugin_analysis_error"))
             self.plugin_edit_button.configure(state="disabled")
+            self.plugin_scan_all_button.configure(state="disabled")
             self.plugin_automap_button.configure(state="disabled")
             messagebox.showerror(
                 self._t("plugin_analysis_error"),
@@ -1821,6 +1910,140 @@ class ControlHubDesktop:
         self.prepare_automap()
         self.automap_project_var.set(str(analysis.path))
         self._analyze_automap_project()
+
+    def _scan_all_plugin_names(self) -> None:
+        analysis = self._plugin_analysis
+        if analysis is None or self._plugin_batch_running:
+            return
+        if not messagebox.askyesno(
+            self._t("plugin_scan_all_title"),
+            self._t("plugin_scan_all_confirm", types=len(analysis.plugin_types)),
+            parent=self.root,
+        ):
+            return
+
+        self._plugin_batch_running = True
+        self.plugin_scan_all_button.configure(state="disabled")
+        self.plugin_edit_button.configure(state="disabled")
+        self.plugin_automap_button.configure(state="disabled")
+        self.plugin_analysis_status_var.set(self._t("plugin_scan_all_running"))
+
+        def show_progress(current: int, name: str) -> None:
+            if self._closing:
+                return
+            self.plugin_analysis_status_var.set(
+                self._t(
+                    "plugin_scan_all_progress",
+                    current=current,
+                    total=len(analysis.plugin_types),
+                    name=name,
+                )
+            )
+
+        def worker() -> None:
+            prepared: list[tuple[PluginTypeSummary, object]] = []
+            errors: list[str] = []
+            try:
+                profiles = list(PluginProfileRegistry().all())
+                for index, summary in enumerate(analysis.plugin_types, start=1):
+                    self.root.after(
+                        0,
+                        lambda current=index, name=summary.observation.name: show_progress(
+                            current, name
+                        ),
+                    )
+                    try:
+                        scan = retrieve_installed_parameter_names(summary)
+                        parameters = merge_scanned_parameter_names(
+                            editable_parameters(summary.resolved),
+                            scan,
+                        )
+                        current_profile = compatible_user_profile(
+                            profiles,
+                            summary.observation,
+                        )
+                        profile = build_user_profile(
+                            summary.observation,
+                            parameters,
+                            profile_id=(
+                                current_profile.id
+                                if current_profile is not None
+                                else None
+                            ),
+                            profile_version=next_user_profile_version(
+                                profiles,
+                                summary.observation,
+                            ),
+                        )
+                        prepared.append((summary, profile))
+                        profiles.append(profile)
+                    except Exception as exc:
+                        errors.append(f"{summary.observation.name}: {exc}")
+
+                current_hash = hashlib.sha256(analysis.path.read_bytes()).hexdigest().upper()
+                if current_hash != analysis.source_sha256:
+                    prepared.clear()
+                    errors.append(
+                        "Le projet LiveProfessor a changé pendant la lecture ; "
+                        "aucun profil n'a été enregistré."
+                    )
+
+                saved = 0
+                for summary, profile in prepared:
+                    try:
+                        destination = (
+                            default_user_plugin_profile_dir() / f"{profile.id}.json"
+                        )
+                        save_user_profile(profile, replace=destination.exists())
+                        saved += 1
+                    except Exception as exc:
+                        errors.append(f"{summary.observation.name}: {exc}")
+            except Exception as exc:
+                saved = 0
+                errors.append(str(exc))
+
+            self.root.after(0, lambda: finish(saved, errors))
+
+        def finish(saved: int, errors: list[str]) -> None:
+            self._plugin_batch_running = False
+            if self._closing:
+                return
+            detail_lines = errors[:8]
+            if len(errors) > len(detail_lines):
+                detail_lines.append(f"… +{len(errors) - len(detail_lines)}")
+            details = (
+                self._t("plugin_scan_all_details", details="\n".join(detail_lines))
+                if detail_lines
+                else ""
+            )
+            if saved:
+                body = self._t(
+                    "plugin_scan_all_success",
+                    saved=saved,
+                    skipped=len(errors),
+                    details=details,
+                )
+                if errors:
+                    messagebox.showwarning(
+                        self._t("plugin_scan_all_title"), body, parent=self.root
+                    )
+                else:
+                    messagebox.showinfo(
+                        self._t("plugin_scan_all_title"), body, parent=self.root
+                    )
+            else:
+                messagebox.showerror(
+                    self._t("plugin_scan_all_title"),
+                    self._t("plugin_scan_all_none", details=details),
+                    parent=self.root,
+                )
+            self._analyze_plugin_project()
+
+        threading.Thread(
+            target=worker,
+            name="installed-plugin-batch-scanner",
+            daemon=True,
+        ).start()
 
     def _open_plugin_profile_editor(self) -> None:
         summary = self._selected_plugin_summary()
@@ -1990,13 +2213,17 @@ class ControlHubDesktop:
             command=lambda: set_all_parameters(False),
         ).pack(side="left", padx=(8, 0))
 
-        def capture_names_from_liveprofessor() -> None:
+        def begin_liveprofessor_capture() -> None:
             nonlocal parameters
             if not messagebox.askokcancel(
                 self._t("plugin_capture_names_title"),
                 self._t("plugin_capture_names_ready", name=summary.observation.name),
                 parent=window,
             ):
+                capture_button.configure(
+                    state="normal",
+                    text=self._t("plugin_capture_names"),
+                )
                 return
             capture_button.configure(
                 state="disabled",
@@ -2060,9 +2287,33 @@ class ControlHubDesktop:
 
             runtime = self.runtime
             if runtime is not None and runtime.running:
-                runtime.clear_companion_names()
-                runtime.refresh_companion()
-                window.after(900, lambda: finish_capture(tuple(runtime.names)))
+                analysis = self._plugin_analysis
+                if analysis is None:
+                    fail_capture("aucun projet LiveProfessor analysé")
+                    return
+                required_slots = tuple(
+                    inspect_plugin_parameter_slots(
+                        analysis.path,
+                        plugin_uid=summary.instances[0].plugin_uid,
+                    )
+                )
+
+                def collect_runtime_names() -> None:
+                    try:
+                        live_names = runtime.capture_companion_names(
+                            required_indices=required_slots,
+                        )
+                    except Exception as exc:
+                        error = str(exc)
+                        window.after(0, lambda: fail_capture(error))
+                        return
+                    window.after(0, lambda: finish_capture(live_names))
+
+                threading.Thread(
+                    target=collect_runtime_names,
+                    name="liveprofessor-runtime-name-capture",
+                    daemon=True,
+                ).start()
                 return
 
             try:
@@ -2093,10 +2344,74 @@ class ControlHubDesktop:
                 daemon=True,
             ).start()
 
+        def capture_names_automatically() -> None:
+            nonlocal parameters
+            capture_button.configure(
+                state="disabled",
+                text=self._t("plugin_scan_direct_busy"),
+            )
+
+            def finish_direct_scan(scan) -> None:
+                nonlocal parameters
+                try:
+                    parameters = list(
+                        merge_scanned_parameter_names(parameters, scan)
+                    )
+                except Exception as exc:
+                    offer_liveprofessor_fallback(str(exc))
+                    return
+                capture_button.configure(
+                    state="normal",
+                    text=self._t("plugin_capture_names"),
+                )
+                for index in range(len(parameters)):
+                    refresh_parameter_row(index)
+                refresh_included_count()
+                load_parameter()
+                messagebox.showinfo(
+                    self._t("plugin_capture_names_title"),
+                    self._t(
+                        "plugin_scan_direct_success",
+                        count=len(parameters),
+                    ),
+                    parent=window,
+                )
+
+            def offer_liveprofessor_fallback(error: str) -> None:
+                capture_button.configure(
+                    state="normal",
+                    text=self._t("plugin_capture_names"),
+                )
+                if messagebox.askyesno(
+                    self._t("plugin_capture_names_title"),
+                    self._t(
+                        "plugin_scan_fallback",
+                        name=summary.observation.name,
+                        error=error,
+                    ),
+                    parent=window,
+                ):
+                    begin_liveprofessor_capture()
+
+            def scan_installed_plugin() -> None:
+                try:
+                    scan = retrieve_installed_parameter_names(summary)
+                except Exception as exc:
+                    error = str(exc)
+                    window.after(0, lambda: offer_liveprofessor_fallback(error))
+                    return
+                window.after(0, lambda: finish_direct_scan(scan))
+
+            threading.Thread(
+                target=scan_installed_plugin,
+                name="installed-plugin-name-scanner",
+                daemon=True,
+            ).start()
+
         capture_button = ttk.Button(
             selection_bar,
             text=self._t("plugin_capture_names"),
-            command=capture_names_from_liveprofessor,
+            command=capture_names_automatically,
             style="Accent.TButton",
         )
         capture_button.pack(side="left", padx=(16, 0))

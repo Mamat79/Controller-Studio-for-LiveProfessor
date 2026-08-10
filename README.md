@@ -10,25 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2"><img alt="Version V.2026.2" src="https://img.shields.io/badge/version-V.2026.2-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3"><img alt="Version V.2026.3" src="https://img.shields.io/badge/version-V.2026.3-0b9fc6"></a>
   <img alt="Windows 10 et 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
   <img alt="Français et anglais" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Dernière version (accès rapide)
 
-**Version stable : [Controller Studio V.2026.2](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2)**<br>
+**Version stable : [Controller Studio V.2026.3](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3)**<br>
 Téléchargement direct :
 
-- [Installer Controller Studio pour Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Setup-v2026.2.exe)
-- [Version portable Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor.exe)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Sommes de contrôle SHA-256](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/SHA256SUMS.txt)
+- [Installer Controller Studio pour Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Setup-v2026.3.exe)
+- [Version portable Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor.exe)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Sommes de contrôle SHA-256](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/SHA256SUMS.txt)
 
 [Lire cette présentation en anglais](README_EN.md)
 
-> **Version publique V.2026.2 pour Windows.** Controller Studio travaille sur une copie AutoMap et conserve le projet `.rack2` source intact.
+> **Version publique V.2026.3 pour Windows.** Controller Studio travaille sur une copie AutoMap et conserve le projet `.rack2` source intact.
 
 ## À quoi sert Controller Studio ?
 
@@ -36,7 +36,7 @@ Controller Studio transforme un contrôleur MIDI en surface de contrôle organis
 
 | Contrôle Live | Banque de contrôleurs | Plugin Studio | AutoMap |
 |---|---|---|---|
-| Pilote EC4 temps réel, banques, push, Shift, labels, valeurs et reconnexion | Profils prêts à exporter et éditeur de contrôleur | Vrais noms reçus de LiveProfessor, priorités et sélection paramètre par paramètre | Choix des plug-ins et instances, UniBank ou FullBank, copie `.rack2` validée |
+| Pilote EC4 temps réel, banques, push, Shift, labels, valeurs et reconnexion | Profils prêts à exporter et éditeur de contrôleur | Vrais noms lus dans les plug-ins installés, récupération globale, priorités et cases individuelles | Choix des plug-ins et instances, UniBank ou FullBank, copie `.rack2` validée |
 
 L’interface existe en français et en anglais, se réduit dans la zone de notification et place le journal temps réel dans une fenêtre séparée.
 
@@ -50,21 +50,25 @@ Controller Studio relit la copie générée avant de la proposer. Les affectatio
 
 ## Plugin Studio
 
-Le fichier `.rack2` conserve l’ordre et les identifiants des paramètres, mais pas toujours leurs libellés humains. Plugin Studio complète ces informations avec les noms renvoyés par le contrôleur Companion de LiveProfessor.
+Le fichier `.rack2` conserve l’ordre et les identifiants des paramètres, mais pas toujours leurs libellés humains. Plugin Studio retrouve ces informations directement dans les plug-ins VST3 installés, chacun dans un processus isolé. Le résultat n’est accepté que si son nombre de paramètres correspond exactement au projet LiveProfessor.
+
+Après l’analyse du projet, **Récupérer tous les vrais noms** traite tous ses types de plug-ins en une seule opération, crée ou met à jour les profils locaux et sauvegarde automatiquement les versions précédentes.
 
 Pour un plug-in donné :
 
-1. sélectionnez son instance dans LiveProfessor ;
-2. rappelez la map **SiLeMI/O AutoMap - NomDuPlugin** dans la barre supérieure — pas la map Dynamic ;
-3. cliquez sur **Récupérer automatiquement les vrais noms** ;
-4. utilisez **Tout cocher**, **Tout décocher** ou les cases individuelles ;
-5. ajustez si nécessaire le libellé court, le type, le rôle ou la priorité, puis enregistrez le profil local.
+1. ouvrez le profil du plug-in puis cliquez sur **Récupérer automatiquement les vrais noms** ;
+2. utilisez **Tout cocher**, **Tout décocher** ou les cases individuelles ;
+3. ajustez si nécessaire le libellé court, le type, le rôle ou la priorité, puis enregistrez le profil local.
+
+Si un ancien format ou un plug-in particulier ne fournit pas directement un inventaire compatible, Controller Studio propose automatiquement le retour Companion/OSC de LiveProfessor comme seconde méthode.
 
 La relation entre l’emplacement de la Controller Map et l’identifiant interne du paramètre est conservée afin d’éviter qu’un bon réglage reçoive le label d’un autre.
 
+VST est une marque déposée de Steinberg Media Technologies GmbH. Les mentions tierces figurent dans [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Banque de contrôleurs intégrée
 
-V.2026.2 fournit dix profils déclaratifs prêts à exporter :
+V.2026.3 fournit dix profils déclaratifs prêts à exporter :
 
 - Faderfox EC4, PC4, UC4 et PC12 ;
 - Behringer X-Touch Compact, X-Touch Mini et X-Touch One ;

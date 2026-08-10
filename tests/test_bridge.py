@@ -1,4 +1,5 @@
 import unittest
+import threading
 from types import SimpleNamespace
 
 from silemio_control_hub.runtime.config import BridgeConfig
@@ -86,6 +87,64 @@ class BridgeTests(unittest.TestCase):
         self.assertEqual(bridge.names[0], "")
         self.assertEqual(bridge.short_names[0], "")
         self.assertFalse(bridge._received_companion_names)
+
+    def test_plugin_capture_reuses_names_already_sent_to_controller(self):
+        bridge = self.make_bridge()
+        bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
+        bridge._osc_client.messages.clear()
+
+        names = bridge.capture_companion_names(
+            required_indices=(0,),
+            timeout=0.1,
+            quiet_period=0,
+        )
+
+        self.assertEqual(names[0], "Threshold")
+        self.assertFalse(bridge._osc_client.messages)
+
+    def test_plugin_capture_waits_for_delayed_controller_feedback(self):
+        bridge = self.make_bridge()
+
+        def delayed_feedback():
+            bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Brightness"])
+
+        timer = threading.Timer(0.04, delayed_feedback)
+        timer.start()
+        self.addCleanup(timer.cancel)
+
+        names = bridge.capture_companion_names(
+            required_indices=(0,),
+            timeout=0.3,
+            quiet_period=0.01,
+            retry_interval=0.02,
+        )
+
+        self.assertEqual(names[0], "Brightness")
+        self.assertTrue(
+            any(address == "/refresh" for address, _args in bridge._osc_client.messages)
+        )
+
+    def test_plugin_capture_waits_for_a_recent_name_batch_to_settle(self):
+        bridge = self.make_bridge()
+        bridge._on_osc("/Companion/ControllerNames", ["Rotary1", "Threshold"])
+
+        timer = threading.Timer(
+            0.04,
+            lambda: bridge._on_osc(
+                "/Companion/ControllerNames", ["Rotary2", "Ratio"]
+            ),
+        )
+        timer.start()
+        self.addCleanup(timer.cancel)
+
+        names = bridge.capture_companion_names(
+            required_indices=(0, 1),
+            timeout=0.3,
+            quiet_period=0.06,
+            retry_interval=0.2,
+        )
+
+        self.assertEqual(names[:2], ("Threshold", "Ratio"))
 
     def test_push_name_is_visible_without_overriding_a_rotary_label(self):
         bridge = self.make_bridge()

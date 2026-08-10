@@ -1,5 +1,16 @@
 # Historique des versions
 
+## V.2026 (2026.3) — 2026-08-10
+
+- Lit directement les vrais noms, unités et types des paramètres exposés par les plug-ins VST3 installés, dans un processus isolé par plug-in.
+- Ajoute **Récupérer tous les vrais noms** pour traiter en une fois tous les types présents dans le projet analysé et enregistrer leurs profils locaux avec sauvegarde des versions précédentes.
+- Refuse automatiquement tout inventaire dont le nombre de paramètres diffère du projet LiveProfessor afin d'empêcher les décalages de labels.
+- Conserve l'interception Companion/OSC comme solution de secours pour les formats anciens et les plug-ins qui n'exposent pas directement un inventaire compatible.
+- Intercepte en continu les vrais noms envoyés par LiveProfessor au contrôleur actif au lieu de les effacer au début de la capture.
+- Réutilise instantanément les libellés déjà visibles sur le contrôleur et conserve leur ordre exact dans la Controller Map enregistrée.
+- Attend et relance la demande jusqu’à 30 secondes lorsque LiveProfessor tarde à envoyer son inventaire, sans bloquer l’interface.
+- Clarifie en français et en anglais le changement temporaire de plug-in qui déclenche l’émission des noms par LiveProfessor.
+
 ## V.2026 (2026.2) — 2026-08-10
 
 - Réunit le logiciel et sa bibliothèque publique versionnée dans le même dépôt GitHub.

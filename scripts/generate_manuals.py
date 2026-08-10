@@ -604,13 +604,13 @@ CONTENT = {
                         [
                             ("1", "Ouvrez l'onglet Plug-ins et choisissez un projet .rack2."),
                             ("2", "Analysez le projet : les instances identiques sont regroupées automatiquement."),
-                            ("3", "Ouvrez le profil d'un type de plug-in."),
-                            ("4", "Dans la barre supérieure de LiveProfessor, rappelez SiLeMI/O AutoMap - NomDuPlugin, et non la map Dynamic."),
-                            ("5", "Cliquez sur Récupérer automatiquement les vrais noms."),
-                            ("6", "Utilisez Tout cocher, Tout décocher ou les cases individuelles pour choisir les paramètres AutoMap."),
-                            ("7", "Corrigez si nécessaire les noms et priorités, enregistrez localement, puis utilisez le profil dans AutoMap."),
+                            ("3", "Cliquez sur Récupérer tous les vrais noms pour traiter tous les types installés dans des processus isolés."),
+                            ("4", "Seuls les inventaires dont le nombre correspond exactement au projet sont enregistrés."),
+                            ("5", "Ouvrez un profil pour utiliser Tout cocher, Tout décocher ou les cases individuelles."),
+                            ("6", "Corrigez si nécessaire les noms et priorités, enregistrez localement, puis utilisez le profil dans AutoMap."),
                         ],
                     ),
+                    ("callout", "Pour un format ancien ou un plug-in atypique, le bouton individuel propose automatiquement l'interception Companion/OSC comme solution de secours."),
                     ("h2", "Profils locaux sûrs"),
                     (
                         "p",
@@ -745,7 +745,8 @@ CONTENT = {
                 "4. Organize parameters with Plugin Studio",
                 [
                     ("h2", "Recognize a plug-in"),
-                    ("steps", [("1", "Open the Plug-ins tab and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Open the profile for one plug-in type."), ("4", "In the LiveProfessor top bar, recall SiLeMI/O AutoMap - PluginName, not the Dynamic map."), ("5", "Click Automatically retrieve real names."), ("6", "Use Select all, Select none, or individual checkboxes to choose AutoMap parameters."), ("7", "Adjust names and priorities if needed, save locally, then use the profile in AutoMap.")]),
+                    ("steps", [("1", "Open the Plug-ins tab and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Click Retrieve all real names to process every installed type in isolated workers."), ("4", "Only inventories whose count exactly matches the project are saved."), ("5", "Open a profile to use Select all, Select none, or individual checkboxes."), ("6", "Adjust names and priorities if needed, save locally, then use the profile in AutoMap.")]),
+                    ("callout", "For an older format or an unusual plug-in, the individual button automatically offers Companion/OSC interception as a fallback."),
                     ("h2", "Safe local profiles"),
                     ("p", "Profiles are declarative JSON files. Replaced versions can be backed up, downloaded code is never executed, and the analyzed project remains unchanged."),
                 ],

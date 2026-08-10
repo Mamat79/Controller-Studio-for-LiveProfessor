@@ -15,4 +15,4 @@ def test_current_product_identity_is_liveprofessor_specific():
     assert FULL_PRODUCT_NAME == "Controller Studio for LiveProfessor"
     assert WINDOWS_PRODUCT_FOLDER == "Controller Studio for LiveProfessor"
     assert WINDOWS_PRODUCT_SLUG == "Controller-Studio-for-LiveProfessor"
-    assert __version__ == "2026.2"
+    assert __version__ == "2026.3"

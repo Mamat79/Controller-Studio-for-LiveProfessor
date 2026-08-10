@@ -23,6 +23,7 @@ from .adapters.hosts.liveprofessor_automap import (
 )
 from .plugin_profiles import (
     PluginObservation,
+    PluginParameterKind,
     PluginParameterProfile,
     PluginProfile,
     PluginProfileError,
@@ -33,6 +34,7 @@ from .plugin_profiles import (
 )
 from .plugin_registry import default_user_plugin_profile_dir
 from .transports.osc import OSCClient, OSCServer
+from .vst3_scanner import VST3ScanResult, scan_installed_vst3
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,14 +73,17 @@ def request_liveprofessor_companion_names(
     feedback_host: str,
     feedback_port: int,
     max_controls: int = 512,
-    timeout: float = 1.5,
-    quiet_period: float = 0.15,
+    timeout: float = 30.0,
+    quiet_period: float = 0.35,
+    retry_interval: float = 2.0,
 ) -> tuple[str, ...]:
     """Request Companion labels without starting a hardware controller runtime.
 
     LiveProfessor sends one ``/Companion/ControllerNames`` message per mapped
-    rotary.  Collection stops shortly after the last label so the desktop stays
-    responsive while still accepting larger Controller Maps.
+    rotary.  Depending on the active Controller Map, that inventory can arrive
+    several seconds after a refresh request.  Requests are therefore retried
+    until the first label arrives, then collection stops shortly after the last
+    label so larger Controller Maps are accepted without a fixed short delay.
     """
 
     if not 1 <= int(request_port) <= 65535 or not 1 <= int(feedback_port) <= 65535:
@@ -124,18 +129,26 @@ def request_liveprofessor_companion_names(
             raise PluginProfileError(
                 f"le port de retour OSC {feedback_host}:{feedback_port} est indisponible: {exc}"
             ) from exc
-        client.send("/init")
-        client.send("/refresh")
-        client.send("/ViewSets/Refresh")
-
         deadline = time.monotonic() + max(0.05, timeout)
-        first_name.wait(max(0.05, timeout))
-        while first_name.is_set() and time.monotonic() < deadline:
-            with lock:
-                quiet_for = time.monotonic() - last_update[0]
-            if quiet_for >= max(0.0, quiet_period):
+        next_request = 0.0
+        retry_after = max(0.05, retry_interval)
+        settle_after = max(0.0, quiet_period)
+        while time.monotonic() < deadline:
+            now = time.monotonic()
+            if now >= next_request:
+                client.send("/init")
+                client.send("/refresh")
+                client.send("/ViewSets/Refresh")
+                next_request = now + retry_after
+            if first_name.is_set():
+                with lock:
+                    quiet_for = time.monotonic() - last_update[0]
+                if quiet_for >= settle_after:
+                    break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
                 break
-            time.sleep(min(0.02, max(0.001, deadline - time.monotonic())))
+            time.sleep(min(0.02, max(0.001, remaining)))
     except OSError as exc:
         raise PluginProfileError(f"communication OSC impossible: {exc}") from exc
     finally:
@@ -234,6 +247,59 @@ def editable_parameters(
         )
         for parameter in resolved.parameters
     )
+
+
+def retrieve_installed_parameter_names(
+    summary: PluginTypeSummary,
+    *,
+    database: Path | None = None,
+    timeout: float = 20.0,
+) -> VST3ScanResult:
+    """Read the exact parameter inventory exported by an installed plug-in.
+
+    The scanner itself runs out of process.  Its result is accepted only when
+    the exported parameter count exactly matches the LiveProfessor project.
+    """
+
+    return scan_installed_vst3(
+        summary.observation.name,
+        expected_parameter_count=len(summary.observation.parameters),
+        plugin_format=summary.observation.plugin_format,
+        database=database,
+        timeout=timeout,
+    )
+
+
+def merge_scanned_parameter_names(
+    parameters: Sequence[PluginParameterProfile],
+    scan: VST3ScanResult,
+) -> tuple[PluginParameterProfile, ...]:
+    """Merge a verified VST3 inventory without losing the user's choices."""
+
+    if len(parameters) != len(scan.parameters):
+        raise PluginProfileError(
+            f"inventaire incompatible : {len(scan.parameters)} noms pour "
+            f"{len(parameters)} paramètres LiveProfessor"
+        )
+    updated: list[PluginParameterProfile] = []
+    for index, (current, scanned) in enumerate(zip(parameters, scan.parameters)):
+        if scanned.index != index:
+            raise PluginProfileError("l'ordre du scanner de plug-ins est invalide")
+        kind = current.kind
+        if scanned.step_count == 1:
+            kind = PluginParameterKind.TOGGLE
+        elif scanned.step_count > 1:
+            kind = PluginParameterKind.ENUM
+        updated.append(
+            replace(
+                current,
+                name=scanned.name,
+                short_label=compact_label(scanned.name, fallback_index=index),
+                unit=scanned.unit or current.unit,
+                kind=kind,
+            )
+        )
+    return tuple(updated)
 
 
 def capture_liveprofessor_parameter_names(

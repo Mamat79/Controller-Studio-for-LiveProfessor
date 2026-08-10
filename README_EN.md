@@ -10,25 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2"><img alt="Version V.2026.2" src="https://img.shields.io/badge/version-V.2026.2-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3"><img alt="Version V.2026.3" src="https://img.shields.io/badge/version-V.2026.3-0b9fc6"></a>
   <img alt="Windows 10 and 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
   <img alt="French and English" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Latest version (quick access)
 
-**Stable release: [Controller Studio V.2026.2](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.2)**<br>
+**Stable release: [Controller Studio V.2026.3](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.3)**<br>
 Direct downloads:
 
-- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Setup-v2026.2.exe)
-- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor.exe)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.2/SHA256SUMS.txt)
+- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Setup-v2026.3.exe)
+- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor.exe)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.3/SHA256SUMS.txt)
 
 [Lire cette présentation en français](README.md)
 
-> **Public V.2026.2 Windows release.** Controller Studio always works on a new AutoMap copy and keeps the source `.rack2` project untouched.
+> **Public V.2026.3 Windows release.** Controller Studio always works on a new AutoMap copy and keeps the source `.rack2` project untouched.
 
 ## What does Controller Studio do?
 
@@ -36,7 +36,7 @@ Controller Studio turns a MIDI controller into an organized control surface for 
 
 | Live control | Controller bank | Plugin Studio | AutoMap |
 |---|---|---|---|
-| Real-time EC4 driver, banks, push, Shift, labels, values and reconnection | Ready-to-export profiles and a controller editor | Names received from LiveProfessor, priorities and parameter-by-parameter selection | Plug-in and instance selection, UniBank or FullBank, validated `.rack2` copy |
+| Real-time EC4 driver, banks, push, Shift, labels, values and reconnection | Ready-to-export profiles and a controller editor | Real names read from installed plug-ins, batch retrieval, priorities and individual checkboxes | Plug-in and instance selection, UniBank or FullBank, validated `.rack2` copy |
 
 The interface is available in French and English, minimizes to the notification area and keeps the real-time log in a separate window.
 
@@ -50,21 +50,25 @@ Controller Studio reloads the generated copy before presenting it. Existing manu
 
 ## Plugin Studio
 
-A `.rack2` file stores parameter order and identifiers, but not always their human-readable labels. Plugin Studio completes that data with names returned by the LiveProfessor Companion controller.
+A `.rack2` file stores parameter order and identifiers, but not always their human-readable labels. Plugin Studio retrieves that data directly from installed VST3 plug-ins, each in an isolated process. A result is accepted only when its parameter count exactly matches the LiveProfessor project.
+
+After project analysis, **Retrieve all real names** processes every plug-in type in one operation, creates or updates local profiles, and automatically backs up previous versions.
 
 For one plug-in:
 
-1. select its instance in LiveProfessor;
-2. recall **SiLeMI/O AutoMap - PluginName** from the top bar — not the Dynamic map;
-3. click **Automatically retrieve real names**;
-4. use **Select all**, **Select none** or the individual checkboxes;
-5. adjust the short label, kind, technical role or priority if needed, then save the local profile.
+1. open the plug-in profile and click **Automatically retrieve real names**;
+2. use **Select all**, **Select none** or the individual checkboxes;
+3. adjust the short label, kind, technical role or priority if needed, then save the local profile.
+
+If an older format or a particular plug-in does not provide a directly compatible inventory, Controller Studio automatically offers LiveProfessor Companion/OSC feedback as a second method.
 
 The link between each Controller Map slot and the internal parameter identifier is preserved, preventing a correct control from receiving another parameter’s label.
 
+VST is a registered trademark of Steinberg Media Technologies GmbH. Third-party notices are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
 ## Built-in controller bank
 
-V.2026.2 includes ten declarative profiles ready to export:
+V.2026.3 includes ten declarative profiles ready to export:
 
 - Faderfox EC4, PC4, UC4 and PC12;
 - Behringer X-Touch Compact, X-Touch Mini and X-Touch One;
