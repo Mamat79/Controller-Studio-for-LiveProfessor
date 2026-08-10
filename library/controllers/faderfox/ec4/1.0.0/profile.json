@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "faderfox.ec4",
+  "manufacturer": "Faderfox",
+  "model": "EC4",
+  "midi_identity": {
+    "input_name_patterns": ["EC4"],
+    "output_name_patterns": ["EC4"]
+  },
+  "bank_size": 16,
+  "bank_count": 7,
+  "last_bank_size": 3,
+  "page_count": 1,
+  "status": "verified",
+  "capabilities": ["commands", "push", "labels", "values", "display", "sysex", "banks", "modifiers"],
+  "controls": [
+    {"id": "encoder_01", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 48}, "push": {"message": "note", "channel": 13, "number": 40}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 48}}, "display_cell": 1},
+    {"id": "encoder_02", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 49}, "push": {"message": "note", "channel": 13, "number": 41}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 49}}, "display_cell": 2},
+    {"id": "encoder_03", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 50}, "push": {"message": "note", "channel": 13, "number": 42}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 50}}, "display_cell": 3},
+    {"id": "encoder_04", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 51}, "push": {"message": "note", "channel": 13, "number": 43}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 51}}, "display_cell": 4},
+    {"id": "encoder_05", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 52}, "push": {"message": "note", "channel": 13, "number": 44}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 52}}, "display_cell": 5},
+    {"id": "encoder_06", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 53}, "push": {"message": "note", "channel": 13, "number": 45}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 53}}, "display_cell": 6},
+    {"id": "encoder_07", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 54}, "push": {"message": "note", "channel": 13, "number": 46}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 54}}, "display_cell": 7},
+    {"id": "encoder_08", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 13, "number": 55}, "push": {"message": "note", "channel": 13, "number": 47}, "feedback": {"value": {"message": "cc", "channel": 13, "number": 55}}, "display_cell": 8},
+    {"id": "encoder_09", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 73}, "push": {"message": "note", "channel": 13, "number": 48}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 73}}, "display_cell": 9},
+    {"id": "encoder_10", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 74}, "push": {"message": "note", "channel": 13, "number": 49}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 74}}, "display_cell": 10},
+    {"id": "encoder_11", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 75}, "push": {"message": "note", "channel": 13, "number": 50}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 75}}, "display_cell": 11},
+    {"id": "encoder_12", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 76}, "push": {"message": "note", "channel": 13, "number": 51}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 76}}, "display_cell": 12},
+    {"id": "encoder_13", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 77}, "push": {"message": "note", "channel": 13, "number": 52}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 77}}, "display_cell": 13},
+    {"id": "encoder_14", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 78}, "push": {"message": "note", "channel": 13, "number": 53}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 78}}, "display_cell": 14},
+    {"id": "encoder_15", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 79}, "push": {"message": "note", "channel": 13, "number": 54}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 79}}, "display_cell": 15},
+    {"id": "encoder_16", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 14, "number": 80}, "push": {"message": "note", "channel": 13, "number": 55}, "feedback": {"value": {"message": "cc", "channel": 14, "number": 80}}, "display_cell": 16, "roles": ["output"]}
+  ],
+  "modifiers": [
+    {"id": "shift", "input": {"message": "sysex", "mode": "ec4_shift"}, "behavior": "momentary"}
+  ]
+}

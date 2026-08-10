@@ -293,6 +293,15 @@ class EC4LiveProfessorBridge:
         if log_request:
             self._log("Demande des noms et valeurs Companion envoyee")
 
+    def clear_companion_names(self) -> None:
+        """Clear cached labels before a plug-in-specific Companion refresh."""
+
+        with self._lock:
+            self.names[:] = [""] * len(self.names)
+            self.short_names[:] = [""] * len(self.short_names)
+            self._received_control_numbers.clear()
+            self._received_companion_names = False
+
     def _schedule_companion_refresh(self, delay: float | None = None) -> None:
         if self.config.mode != "companion":
             return

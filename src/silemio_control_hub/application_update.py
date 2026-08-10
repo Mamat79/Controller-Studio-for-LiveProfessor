@@ -18,12 +18,9 @@ from urllib.request import Request, urlopen
 from .platform_paths import product_data_dir
 
 
-# Keep the already-distributed public EC4 Bridge repository URL stable. Once
-# Controller Studio is explicitly accepted, that repository can be replaced by
-# this independent product and future releases will be discovered here without
-# asking existing users to change links.
+REPOSITORY_SLUG = "Mamat79/Controller-Studio-for-LiveProfessor"
 LATEST_RELEASE_API_URL = (
-    "https://api.github.com/repos/Mamat79/EC4-LiveProfessor-Bridge/releases/latest"
+    f"https://api.github.com/repos/{REPOSITORY_SLUG}/releases/latest"
 )
 GITHUB_API_VERSION = "2022-11-28"
 MAXIMUM_INSTALLER_BYTES = 512 * 1024 * 1024
@@ -129,7 +126,7 @@ def _parse_asset(raw: dict[str, Any]) -> ReleaseAsset | None:
         or not _trusted_url(
             url,
             hosts={"github.com"},
-            path_prefix="/Mamat79/EC4-LiveProfessor-Bridge/releases/download/",
+            path_prefix=f"/{REPOSITORY_SLUG}/releases/download/",
         )
     ):
         return None
@@ -154,7 +151,7 @@ def parse_release(payload: dict[str, Any]) -> ApplicationRelease:
     if not _trusted_url(
         page_url,
         hosts={"github.com"},
-        path_prefix="/Mamat79/EC4-LiveProfessor-Bridge/releases/",
+        path_prefix=f"/{REPOSITORY_SLUG}/releases/",
     ):
         raise ApplicationUpdateError("la page de version GitHub n'est pas fiable")
     raw_assets = payload.get("assets", [])
@@ -211,7 +208,7 @@ def fetch_latest_release(
     if not _trusted_url(
         LATEST_RELEASE_API_URL,
         hosts={"api.github.com"},
-        path_prefix="/repos/Mamat79/EC4-LiveProfessor-Bridge/releases/latest",
+        path_prefix=f"/repos/{REPOSITORY_SLUG}/releases/latest",
     ):
         raise ApplicationUpdateError("l'adresse de mise à jour n'est pas fiable")
     try:

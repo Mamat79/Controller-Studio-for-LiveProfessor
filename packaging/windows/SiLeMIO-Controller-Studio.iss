@@ -1,6 +1,6 @@
 #define MyAppName "Controller Studio for LiveProfessor"
-#define MyAppVersion "2026.0"
-#define MyAppPublisher "SiLeMI/O"
+#define MyAppVersion "2026.2"
+#define MyAppPublisher "Mamat"
 #define MyAppExeName "Controller-Studio-for-LiveProfessor.exe"
 #define MyShortcutName "Controller Studio for LiveProfessor"
 #define ProjectRoot "..\.."
@@ -23,7 +23,7 @@ ArchitecturesAllowed=x64compatible
 PrivilegesRequired=lowest
 UsedUserAreasWarning=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
-VersionInfoVersion=2026.0.0.0
+VersionInfoVersion=2026.2.0.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} installer
 VersionInfoProductName={#MyAppName}

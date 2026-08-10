@@ -13,12 +13,56 @@ from silemio_control_hub.registry import ControllerRegistry
 def test_builtin_profiles_are_valid_and_distinct():
     registry = ControllerRegistry()
     profiles = registry.all()
-    assert {profile.id for profile in profiles} == {"faderfox.ec4", "generic.midi.16"}
+    assert {profile.id for profile in profiles} == {
+        "behringer.x-touch-compact.layer-a",
+        "behringer.x-touch-mini.preset-a",
+        "behringer.x-touch-one.midi",
+        "dj-techtools.midi-fighter-twister.factory-banks-1-4",
+        "faderfox.ec4",
+        "faderfox.pc12.setup-1",
+        "faderfox.pc4.setup-1",
+        "faderfox.uc4.setup-1-group-1",
+        "generic.midi.16",
+        "novation.launch-control-xl3.mode-16",
+    }
     ec4 = registry.get("faderfox.ec4")
     assert ec4.bank_size == 16
     assert len(ec4.controls) == 16
     assert all(control.supports_rotation for control in ec4.controls)
     assert all(control.supports_press for control in ec4.controls)
+
+    compact = registry.get("behringer.x-touch-compact.layer-a")
+    assert compact.bank_size == 25
+    assert sum(control.supports_rotation for control in compact.controls) == 25
+    assert sum(control.supports_press for control in compact.controls) == 16
+    assert compact.status == "community"
+
+    launch_control = registry.get("novation.launch-control-xl3.mode-16")
+    assert launch_control.bank_size == 48
+    assert sum(control.supports_rotation for control in launch_control.controls) == 32
+    assert sum(control.supports_press for control in launch_control.controls) == 16
+
+    pc4 = registry.get("faderfox.pc4.setup-1")
+    assert pc4.bank_size == 24
+    assert sum(control.supports_rotation for control in pc4.controls) == 24
+    assert sum(control.supports_press for control in pc4.controls) == 0
+
+    uc4 = registry.get("faderfox.uc4.setup-1-group-1")
+    assert uc4.bank_size == 25
+    assert sum(control.supports_rotation for control in uc4.controls) == 17
+    assert sum(control.supports_press for control in uc4.controls) == 16
+
+    pc12 = registry.get("faderfox.pc12.setup-1")
+    assert pc12.bank_size == 85
+    assert sum(control.supports_rotation for control in pc12.controls) == 73
+    assert sum(control.supports_press for control in pc12.controls) == 13
+
+    twister = registry.get("dj-techtools.midi-fighter-twister.factory-banks-1-4")
+    assert twister.bank_size == 16
+    assert twister.bank_count == 4
+    assert len(twister.controls) == 64
+    assert all(control.supports_rotation for control in twister.controls)
+    assert all(control.supports_press for control in twister.controls)
 
 
 def test_duplicate_control_ids_are_rejected(tmp_path):

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "behringer.x-touch-mini.preset-a",
+  "manufacturer": "Behringer",
+  "model": "X-Touch Mini — Standard Preset A",
+  "midi_identity": {
+    "input_name_patterns": ["X-TOUCH MINI"],
+    "output_name_patterns": ["X-TOUCH MINI"]
+  },
+  "bank_size": 9,
+  "status": "community",
+  "capabilities": ["commands", "push", "led", "values"],
+  "controls": [
+    {"id": "encoder_01", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 1}, "push": {"message": "note", "channel": 11, "number": 0}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 9}, "led": {"message": "note", "channel": 11, "number": 0}}},
+    {"id": "encoder_02", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 2}, "push": {"message": "note", "channel": 11, "number": 1}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 10}, "led": {"message": "note", "channel": 11, "number": 1}}},
+    {"id": "encoder_03", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 3}, "push": {"message": "note", "channel": 11, "number": 2}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 11}, "led": {"message": "note", "channel": 11, "number": 2}}},
+    {"id": "encoder_04", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 4}, "push": {"message": "note", "channel": 11, "number": 3}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 12}, "led": {"message": "note", "channel": 11, "number": 3}}},
+    {"id": "encoder_05", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 5}, "push": {"message": "note", "channel": 11, "number": 4}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 13}, "led": {"message": "note", "channel": 11, "number": 4}}},
+    {"id": "encoder_06", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 6}, "push": {"message": "note", "channel": 11, "number": 5}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 14}, "led": {"message": "note", "channel": 11, "number": 5}}},
+    {"id": "encoder_07", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 7}, "push": {"message": "note", "channel": 11, "number": 6}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 15}, "led": {"message": "note", "channel": 11, "number": 6}}},
+    {"id": "encoder_08", "kind": "absolute_encoder", "input": {"message": "cc", "channel": 11, "number": 8}, "push": {"message": "note", "channel": 11, "number": 7}, "feedback": {"value": {"message": "cc", "channel": 11, "number": 16}, "led": {"message": "note", "channel": 11, "number": 7}}},
+    {"id": "fader", "kind": "fader", "input": {"message": "cc", "channel": 11, "number": 9}, "roles": ["output"]}
+  ]
+}

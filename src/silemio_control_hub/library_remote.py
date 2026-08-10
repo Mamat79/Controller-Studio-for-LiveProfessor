@@ -29,8 +29,9 @@ from .library import (
 from .platform_paths import product_data_dir
 
 
-DEFAULT_LIBRARY_REPOSITORY = "Mamat79/SiLeMIO-Control-Library"
+DEFAULT_LIBRARY_REPOSITORY = "Mamat79/Controller-Studio-for-LiveProfessor"
 DEFAULT_LIBRARY_REF = "main"
+DEFAULT_LIBRARY_ROOT = PurePosixPath("library")
 MAX_MANIFEST_BYTES = 1_000_000
 MAX_PROFILE_BYTES = 4_000_000
 CONTENT_API_OVERHEAD_BYTES = 65_536
@@ -128,6 +129,7 @@ class GitHubLibraryClient:
         *,
         token: str | None = None,
         timeout: float = 15.0,
+        root: str | PurePosixPath = DEFAULT_LIBRARY_ROOT,
         opener=urlopen,
     ) -> None:
         if not isinstance(repository, str) or not REPOSITORY.fullmatch(repository):
@@ -136,8 +138,12 @@ class GitHubLibraryClient:
             raise LibraryRemoteError("ref GitHub est invalide")
         if timeout <= 0:
             raise LibraryRemoteError("timeout doit être positif")
+        library_root = PurePosixPath(str(root))
+        if library_root.is_absolute() or ".." in library_root.parts:
+            raise LibraryRemoteError("root GitHub est invalide")
         self.repository = repository
         self.ref = ref.strip()
+        self.root = library_root
         self.token = token or os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
         self.timeout = float(timeout)
         self._opener = opener
@@ -179,7 +185,10 @@ class GitHubLibraryClient:
         return payload
 
     def fetch_manifest(self) -> tuple[LibraryManifest, bytes]:
-        payload = self._fetch(PurePosixPath("manifest-v1.json"), limit=MAX_MANIFEST_BYTES)
+        payload = self._fetch(
+            self.root / "manifest-v1.json",
+            limit=MAX_MANIFEST_BYTES,
+        )
         try:
             raw = json.loads(payload.decode("utf-8"))
             manifest = LibraryManifest.from_dict(raw)
@@ -188,7 +197,7 @@ class GitHubLibraryClient:
         return manifest, payload
 
     def fetch_profile(self, path: PurePosixPath) -> bytes:
-        return self._fetch(path, limit=MAX_PROFILE_BYTES)
+        return self._fetch(self.root / path, limit=MAX_PROFILE_BYTES)
 
 
 def _entry_map(manifest: LibraryManifest | None) -> dict[tuple[str, str], LibraryEntry]:
@@ -217,7 +226,7 @@ def _installed_hub_version() -> str:
     try:
         return package_version("silemio-control-hub")
     except PackageNotFoundError:
-        return "2026.0.dev0"
+        return "2026.2.dev0"
 
 
 def _check_hub_compatibility(manifest: LibraryManifest, hub_version: str) -> None:

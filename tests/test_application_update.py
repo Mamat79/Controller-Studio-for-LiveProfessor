@@ -21,7 +21,8 @@ def _release_payload(*assets):
         "name": "Controller Studio 0.3.0",
         "body": "AutoMap improvements",
         "html_url": (
-            "https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/tag/v0.3.0"
+            "https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/"
+            "releases/tag/v0.3.0"
         ),
         "draft": False,
         "prerelease": False,
@@ -33,7 +34,8 @@ def _asset(name: str, data: bytes, *, digest: str | None = None):
     result = {
         "name": name,
         "browser_download_url": (
-            "https://github.com/Mamat79/EC4-LiveProfessor-Bridge/releases/download/"
+            "https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/"
+            "releases/download/"
             f"v0.3.0/{name}"
         ),
         "size": len(data),

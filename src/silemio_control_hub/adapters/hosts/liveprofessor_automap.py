@@ -779,6 +779,52 @@ def _existing_mapping_profile(
     return profile, priorities, tuple(preserved_parameters)
 
 
+def inspect_plugin_parameter_slots(
+    path: Path,
+    *,
+    plugin_uid: int,
+) -> dict[int, int]:
+    """Return zero-based Companion rotary slots mapped to plug-in parameters.
+
+    This is read-only and intentionally relies on LiveProfessor's saved
+    Controller Map instead of assuming that slot N always means parameter N.
+    """
+
+    tree = _load_project(Path(path).expanduser().resolve())
+    plugins, _skipped = _project_plugins(tree)
+    target_pair = next(
+        (pair for pair in plugins if pair[0].plugin_uid == int(plugin_uid)),
+        None,
+    )
+    if target_pair is None:
+        raise AutoMapError("le plugin choisi n'existe plus dans ce projet")
+    controllers = _project_controllers(tree)
+    if not controllers:
+        return {}
+    target, _target_node = target_pair
+    same_type_uids = {
+        plugin.plugin_uid
+        for plugin, _node in plugins
+        if plugin.map_type_id == target.map_type_id
+    }
+    best: dict[int, int] = {}
+    for _controller, controller_node in controllers:
+        profile, _priorities, _preserved = _existing_mapping_profile(
+            tree,
+            controller_node,
+            plugin=target,
+            plugin_uids=same_type_uids,
+        )
+        slots = {
+            number - 1: profile[int(control.get("id"))]
+            for number, control in _rotary_controls(controller_node)
+            if int(control.get("id")) in profile
+        }
+        if len(slots) > len(best):
+            best = slots
+    return best
+
+
 def _plugin_assignments(
     *,
     controller_uid: int,
@@ -789,6 +835,7 @@ def _plugin_assignments(
     profile_priority: dict[int, tuple[int, int, int]] | None = None,
     preserve_parameters: list[int] | tuple[int, ...] = (),
     preferred_parameter_order: Iterable[int] = (),
+    allowed_parameters: Iterable[int] | None = None,
     fill_unassigned: bool = True,
 ) -> tuple[list[ValueTree], int]:
     """Build one semantic hardware layout for a plugin instance.
@@ -807,6 +854,15 @@ def _plugin_assignments(
     button_parameters: dict[int, int] = {}
     used_parameters: set[int] = set()
     priority = profile_priority or {}
+    allowed = (
+        set(range(plugin.parameter_count))
+        if allowed_parameters is None
+        else {
+            int(parameter_id)
+            for parameter_id in allowed_parameters
+            if 0 <= int(parameter_id) < plugin.parameter_count
+        }
+    )
 
     def ranked_controls(
         controls: list[tuple[int, ValueTree]],
@@ -863,6 +919,7 @@ def _plugin_assignments(
         parameter_id
         for parameter_id in dict.fromkeys(preferred_parameter_order)
         if 0 <= parameter_id < plugin.parameter_count
+        and parameter_id in allowed
         and parameter_id not in used_parameters
         and parameter_id not in preserved
     ]
@@ -874,7 +931,8 @@ def _plugin_assignments(
                 *(
                     parameter_id
                     for parameter_id in range(plugin.parameter_count)
-                    if parameter_id not in used_parameters
+                    if parameter_id in allowed
+                    and parameter_id not in used_parameters
                     and parameter_id not in preserved
                     and parameter_id not in preferred
                 ),
@@ -1127,6 +1185,7 @@ def create_automapped_project(
     ] = {}
     semantic_resolver = PluginProfileResolver(plugin_profiles)
     semantic_orders: dict[str, tuple[int, ...]] = {}
+    semantic_allowed: dict[str, frozenset[int]] = {}
     for project_plugin, _node in selected_plugins:
         if project_plugin.map_type_id in type_profiles:
             continue
@@ -1137,12 +1196,18 @@ def create_automapped_project(
             plugin_uids=all_plugins_by_map_type.get(project_plugin.map_type_id, set()),
         )
         resolved = semantic_resolver.resolve(project_plugin.observation)
+        semantic_allowed[project_plugin.map_type_id] = frozenset(
+            parameter.position
+            for parameter in resolved.parameters
+            if parameter.enabled
+        )
         semantic_orders[project_plugin.map_type_id] = tuple(
             parameter.position
             for parameter in sorted(
                 resolved.parameters,
                 key=lambda parameter: (-parameter.importance, parameter.position),
             )
+            if parameter.enabled
         )
     for plugin, _plugin_node in selected_plugins:
         type_profile, type_priority, preserved_parameters = type_profiles.get(
@@ -1160,6 +1225,9 @@ def create_automapped_project(
             profile_priority=type_priority,
             preserve_parameters=preserved_parameters,
             preferred_parameter_order=semantic_orders.get(plugin.map_type_id, ()),
+            # Explicit exclusions apply to automatically filled slots. Existing
+            # manual mappings remain authoritative and are preserved above.
+            allowed_parameters=semantic_allowed.get(plugin.map_type_id),
         )
         if mapped_count <= 0:
             continue

@@ -534,7 +534,7 @@ CONTENT = {
                     (
                         "steps",
                         [
-                            ("1", "Ouvrez la Banque de contrôleurs et choisissez un profil existant, ou créez le vôtre."),
+                            ("1", "Ouvrez la Banque de contrôleurs et choisissez le profil de votre matériel."),
                             ("2", "Exportez le fichier .ctrl2 si vous souhaitez ajouter ce contrôleur à LiveProfessor."),
                             ("3", "Cliquez sur AutoMap, choisissez un projet .rack2 et lancez l'analyse."),
                             ("4", "Sélectionnez les plug-ins voulus puis créez une nouvelle copie du projet."),
@@ -605,8 +605,10 @@ CONTENT = {
                             ("1", "Ouvrez l'onglet Plug-ins et choisissez un projet .rack2."),
                             ("2", "Analysez le projet : les instances identiques sont regroupées automatiquement."),
                             ("3", "Ouvrez le profil d'un type de plug-in."),
-                            ("4", "Nommez les paramètres utiles et définissez leur priorité."),
-                            ("5", "Enregistrez localement puis utilisez ce profil dans AutoMap."),
+                            ("4", "Dans la barre supérieure de LiveProfessor, rappelez SiLeMI/O AutoMap - NomDuPlugin, et non la map Dynamic."),
+                            ("5", "Cliquez sur Récupérer automatiquement les vrais noms."),
+                            ("6", "Utilisez Tout cocher, Tout décocher ou les cases individuelles pour choisir les paramètres AutoMap."),
+                            ("7", "Corrigez si nécessaire les noms et priorités, enregistrez localement, puis utilisez le profil dans AutoMap."),
                         ],
                     ),
                     ("h2", "Profils locaux sûrs"),
@@ -627,7 +629,7 @@ CONTENT = {
                     ("h2", "Contribuer"),
                     (
                         "p",
-                        "Les utilisateurs peuvent proposer leurs profils via GitHub. Ne publiez jamais de projet .rack2, réglage audio, identité de machine, adresse de production ou information de licence.",
+                        "Dans la Banque de contrôleurs, Proposer à la bibliothèque valide le profil sélectionné, copie son JSON et ouvre le formulaire GitHub déjà titré. Collez le JSON, ajoutez la documentation ou les essais disponibles, puis envoyez.",
                     ),
                     (
                         "bullets",
@@ -714,7 +716,7 @@ CONTENT = {
                 "1. Quick start",
                 [
                     ("h2", "The shortest workflow"),
-                    ("steps", [("1", "Open the Controller bank and choose an existing profile, or create your own."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, choose a .rack2 project, and analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
+                    ("steps", [("1", "Open the Controller bank and choose the profile for your hardware."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, choose a .rack2 project, and analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
                     ("callout", "Always preserve the original LiveProfessor project. Work only with the copy created by AutoMap."),
                 ],
             ),
@@ -743,7 +745,7 @@ CONTENT = {
                 "4. Organize parameters with Plugin Studio",
                 [
                     ("h2", "Recognize a plug-in"),
-                    ("steps", [("1", "Open the Plug-ins tab and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Open the profile for one plug-in type."), ("4", "Name useful parameters and set their priority."), ("5", "Save locally, then use the profile in AutoMap.")]),
+                    ("steps", [("1", "Open the Plug-ins tab and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Open the profile for one plug-in type."), ("4", "In the LiveProfessor top bar, recall SiLeMI/O AutoMap - PluginName, not the Dynamic map."), ("5", "Click Automatically retrieve real names."), ("6", "Use Select all, Select none, or individual checkboxes to choose AutoMap parameters."), ("7", "Adjust names and priorities if needed, save locally, then use the profile in AutoMap.")]),
                     ("h2", "Safe local profiles"),
                     ("p", "Profiles are declarative JSON files. Replaced versions can be backed up, downloaded code is never executed, and the analyzed project remains unchanged."),
                 ],
@@ -754,7 +756,7 @@ CONTENT = {
                     ("h2", "Update"),
                     ("p", "The public library provides controller and plug-in profiles. Preview changes before installing them, then keep working offline from the local cache."),
                     ("h2", "Contribute"),
-                    ("p", "Users can propose profiles through GitHub. Never publish a .rack2 project, audio setting, machine identity, production address, or licence information."),
+                    ("p", "In Controller bank, Submit to the library validates the selected profile, copies its JSON, and opens a pre-titled GitHub form. Paste the JSON, add available documentation or test results, then submit it."),
                     ("bullets", ["strict format validation;", "version and SHA-256 checks;", "backup before replacement;", "no executable code in profiles."]),
                 ],
             ),
@@ -916,7 +918,7 @@ def build_manual(language: str) -> Path:
             Paragraph(data["subtitle"], style["subtitle"]),
             Spacer(1, 13 * mm),
             Paragraph(f"{data['edition']} - {DISPLAY_VERSION}", style["small"]),
-            Paragraph("SiLeMI/O - By Mamat  -----[]---", style["small"]),
+            Paragraph("SiLeMI/O - By Mamat  -------[]--", style["small"]),
             Spacer(1, 12 * mm),
         ]
     )

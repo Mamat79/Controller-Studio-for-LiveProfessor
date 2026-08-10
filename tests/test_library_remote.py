@@ -274,7 +274,26 @@ def test_github_client_uses_token_header_and_decodes_content_api_base64():
 
     assert parsed.profiles == ()
     assert requests[0][0].get_header("Authorization") == "Bearer secret-token"
+    assert "/contents/library/manifest-v1.json?ref=main" in requests[0][0].full_url
     assert requests[0][1] == 15.0
+
+
+def test_github_client_can_target_a_root_level_compatible_fork():
+    manifest = {
+        "manifest_version": 1,
+        "generated_at": "2026-08-09T20:00:00Z",
+        "profiles": [],
+        "plugin_profiles": [],
+    }
+    requests = []
+
+    def opener(request, timeout):
+        requests.append(request)
+        return FakeResponse(json.dumps(manifest).encode("utf-8"))
+
+    GitHubLibraryClient("owner/library", root="", opener=opener).fetch_manifest()
+
+    assert "/contents/manifest-v1.json?ref=main" in requests[0].full_url
 
 
 def test_content_api_wrapper_can_be_larger_than_the_decoded_profile_limit():

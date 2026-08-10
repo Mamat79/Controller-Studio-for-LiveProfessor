@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 import hashlib
 import json
@@ -12,9 +12,15 @@ from pathlib import Path
 import re
 import shutil
 import tempfile
+import threading
+import time
 import unicodedata
 
-from .adapters.hosts.liveprofessor_automap import ProjectPlugin, inspect_plugins
+from .adapters.hosts.liveprofessor_automap import (
+    ProjectPlugin,
+    inspect_plugin_parameter_slots,
+    inspect_plugins,
+)
 from .plugin_profiles import (
     PluginObservation,
     PluginParameterProfile,
@@ -23,8 +29,10 @@ from .plugin_profiles import (
     PluginProfileLayer,
     PluginProfileResolver,
     ResolvedPluginProfile,
+    compact_label,
 )
 from .plugin_registry import default_user_plugin_profile_dir
+from .transports.osc import OSCClient, OSCServer
 
 
 @dataclass(frozen=True, slots=True)
@@ -54,6 +62,91 @@ class UserProfileSaveResult:
     profile: PluginProfile
     path: Path
     backup_path: Path | None
+
+
+def request_liveprofessor_companion_names(
+    *,
+    host: str,
+    request_port: int,
+    feedback_host: str,
+    feedback_port: int,
+    max_controls: int = 512,
+    timeout: float = 1.5,
+    quiet_period: float = 0.15,
+) -> tuple[str, ...]:
+    """Request Companion labels without starting a hardware controller runtime.
+
+    LiveProfessor sends one ``/Companion/ControllerNames`` message per mapped
+    rotary.  Collection stops shortly after the last label so the desktop stays
+    responsive while still accepting larger Controller Maps.
+    """
+
+    if not 1 <= int(request_port) <= 65535 or not 1 <= int(feedback_port) <= 65535:
+        raise PluginProfileError("les ports OSC doivent être compris entre 1 et 65535")
+    if max_controls < 1:
+        raise PluginProfileError("max_controls doit être supérieur à zéro")
+
+    names = [""] * max_controls
+    first_name = threading.Event()
+    lock = threading.Lock()
+    last_update = [0.0]
+    errors: list[Exception] = []
+
+    def receive(address: str, args: list[object]) -> None:
+        if not address.casefold().endswith("/controllernames") or len(args) < 2:
+            return
+        match = re.search(
+            r"(?:Rotary|Encoder)\s*(\d+)",
+            str(args[0]),
+            flags=re.IGNORECASE,
+        )
+        if match is None:
+            return
+        index = int(match.group(1)) - 1
+        if not 0 <= index < max_controls:
+            return
+        name = str(args[1] or "").strip()
+        if not name:
+            return
+        with lock:
+            names[index] = name
+            last_update[0] = time.monotonic()
+        first_name.set()
+
+    server = OSCServer(feedback_host, int(feedback_port), receive, errors.append)
+    client = OSCClient(host, int(request_port))
+    started = False
+    try:
+        try:
+            server.start()
+            started = True
+        except OSError as exc:
+            raise PluginProfileError(
+                f"le port de retour OSC {feedback_host}:{feedback_port} est indisponible: {exc}"
+            ) from exc
+        client.send("/init")
+        client.send("/refresh")
+        client.send("/ViewSets/Refresh")
+
+        deadline = time.monotonic() + max(0.05, timeout)
+        first_name.wait(max(0.05, timeout))
+        while first_name.is_set() and time.monotonic() < deadline:
+            with lock:
+                quiet_for = time.monotonic() - last_update[0]
+            if quiet_for >= max(0.0, quiet_period):
+                break
+            time.sleep(min(0.02, max(0.001, deadline - time.monotonic())))
+    except OSError as exc:
+        raise PluginProfileError(f"communication OSC impossible: {exc}") from exc
+    finally:
+        client.close()
+        if started:
+            server.stop()
+
+    highest = max((index for index, name in enumerate(names) if name), default=-1)
+    if highest < 0 and errors:
+        raise PluginProfileError(f"retour OSC impossible: {errors[0]}")
+    return tuple(names[: highest + 1])
 
 
 def _sha256(path: Path) -> str:
@@ -137,9 +230,47 @@ def editable_parameters(
             role=parameter.role,
             kind=parameter.kind,
             importance=parameter.importance,
+            enabled=parameter.enabled,
         )
         for parameter in resolved.parameters
     )
+
+
+def capture_liveprofessor_parameter_names(
+    parameters: Sequence[PluginParameterProfile],
+    *,
+    project: Path,
+    plugin_uid: int,
+    live_names: Sequence[str],
+) -> tuple[tuple[PluginParameterProfile, ...], int]:
+    """Merge real names reported by LiveProfessor into an editable profile.
+
+    The saved Controller Map supplies the slot-to-parameter relationship, so a
+    semantic or manually reordered map cannot shift labels onto the wrong IDs.
+    """
+
+    slots = inspect_plugin_parameter_slots(project, plugin_uid=plugin_uid)
+    if not slots:
+        raise PluginProfileError(
+            "aucune Controller Map enregistrée ne relie ce plug-in aux rotatifs"
+        )
+    updated = list(parameters)
+    captured = 0
+    for slot, parameter_id in slots.items():
+        if not 0 <= slot < len(live_names) or not 0 <= parameter_id < len(updated):
+            continue
+        name = str(live_names[slot] or "").strip()
+        if not name:
+            continue
+        current = updated[parameter_id]
+        captured += 1
+        if current.name != name:
+            updated[parameter_id] = replace(
+                current,
+                name=name,
+                short_label=compact_label(name, fallback_index=parameter_id),
+            )
+    return tuple(updated), captured
 
 
 def build_user_profile(

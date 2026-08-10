@@ -20,9 +20,11 @@ from silemio_control_hub.plugin_registry import PluginProfileRegistry
 from silemio_control_hub.plugin_studio import (
     analyze_plugin_project,
     build_user_profile,
+    capture_liveprofessor_parameter_names,
     default_user_profile_id,
     editable_parameters,
     next_user_profile_version,
+    request_liveprofessor_companion_names,
     save_user_profile,
 )
 
@@ -49,6 +51,7 @@ def _parameters(observation, *, first_name="Input"):
                 else PluginParameterKind.TOGGLE
             ),
             importance=90 if parameter.position == 0 else 50,
+            enabled=parameter.position != 2,
         )
         for parameter in observation.parameters
     )
@@ -65,6 +68,7 @@ def test_user_profile_builder_round_trips_every_declarative_field():
     assert profile.status == "local"
     assert profile.parameters[0].role == "input_gain"
     assert profile.parameters[1].kind == PluginParameterKind.TOGGLE
+    assert profile.parameters[2].enabled is False
 
 
 def test_default_local_profile_id_is_safe_stable_and_identity_specific():
@@ -186,3 +190,98 @@ def test_semantic_order_fills_only_free_controls_after_manual_and_preserved_mapp
     }
     assert mapped == 4
     assert by_control == {10: 2, 11: 1, 12: 3, 13: 0}
+
+
+def test_automap_allowed_parameters_excludes_unchecked_automatic_slots():
+    plugin = ProjectPlugin("Compressor", "VST3-Test-1234", 101, 5, "VST3-Test")
+    rotaries = []
+    for number, control_id in enumerate((10, 11, 12, 13), start=1):
+        control = ValueTree("HardwareControl", [], [])
+        control.set("id", control_id)
+        rotaries.append((number, control))
+
+    assignments, mapped = _plugin_assignments(
+        controller_uid=99,
+        plugin=plugin,
+        rotaries=rotaries,
+        buttons=[],
+        profile={},
+        preferred_parameter_order=(4, 2, 0),
+        allowed_parameters=(0, 2, 4),
+    )
+
+    assert mapped == 3
+    assert [assignment.get("ParameterId") for assignment in assignments] == [4, 2, 0]
+
+
+def test_liveprofessor_names_follow_saved_slot_mapping_not_parameter_order(
+    tmp_path, monkeypatch
+):
+    observation = _observation()
+    parameters = _parameters(observation)
+    monkeypatch.setattr(
+        "silemio_control_hub.plugin_studio.inspect_plugin_parameter_slots",
+        lambda _path, plugin_uid: {0: 2, 1: 0},
+    )
+
+    updated, count = capture_liveprofessor_parameter_names(
+        parameters,
+        project=tmp_path / "project.rack2",
+        plugin_uid=123,
+        live_names=("Output Gain", "Input Gain"),
+    )
+
+    assert count == 2
+    assert updated[0].name == "Input Gain"
+    assert updated[0].short_label == "InputGai"
+    assert updated[2].name == "Output Gain"
+    assert updated[2].enabled is False
+
+
+def test_companion_name_request_works_without_hardware_runtime(monkeypatch):
+    state = {}
+
+    class FakeServer:
+        def __init__(self, host, port, callback, error_callback):
+            state["callback"] = callback
+
+        def start(self):
+            state["started"] = True
+
+        def stop(self):
+            state["stopped"] = True
+
+    class FakeClient:
+        def __init__(self, host, port):
+            state["target"] = (host, port)
+
+        def send(self, address, *args):
+            state.setdefault("requests", []).append(address)
+            if address == "/refresh":
+                state["callback"](
+                    "/Companion/ControllerNames", ["Rotary3", "Output Gain"]
+                )
+                state["callback"](
+                    "/Companion/ControllerNames", ["Rotary1", "Input Gain"]
+                )
+                state["callback"](
+                    "/Companion/ControllerNames", ["Generic Button 1", "Bypass"]
+                )
+
+        def close(self):
+            state["closed"] = True
+
+    monkeypatch.setattr("silemio_control_hub.plugin_studio.OSCServer", FakeServer)
+    monkeypatch.setattr("silemio_control_hub.plugin_studio.OSCClient", FakeClient)
+
+    names = request_liveprofessor_companion_names(
+        host="127.0.0.1",
+        request_port=8010,
+        feedback_host="127.0.0.1",
+        feedback_port=8011,
+        quiet_period=0,
+    )
+
+    assert names == ("Input Gain", "", "Output Gain")
+    assert state["requests"] == ["/init", "/refresh", "/ViewSets/Refresh"]
+    assert state["started"] and state["stopped"] and state["closed"]

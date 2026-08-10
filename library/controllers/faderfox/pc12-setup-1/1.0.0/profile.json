@@ -1,0 +1,1393 @@
+{
+  "schema_version": 1,
+  "profile_version": "1.0.0",
+  "id": "faderfox.pc12.setup-1",
+  "manufacturer": "Faderfox",
+  "model": "PC12 — Factory Setup 1",
+  "midi_identity": {
+    "input_name_patterns": [
+      "Faderfox PC12",
+      "PC12"
+    ],
+    "output_name_patterns": [
+      "Faderfox PC12",
+      "PC12"
+    ]
+  },
+  "bank_size": 85,
+  "status": "community",
+  "capabilities": [
+    "commands",
+    "push",
+    "led",
+    "values",
+    "display"
+  ],
+  "controls": [
+    {
+      "id": "pot_01",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 1
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 1
+        }
+      }
+    },
+    {
+      "id": "pot_02",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 2
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 2
+        }
+      }
+    },
+    {
+      "id": "pot_03",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 3
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 3
+        }
+      }
+    },
+    {
+      "id": "pot_04",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 4
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 4
+        }
+      }
+    },
+    {
+      "id": "pot_05",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 5
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 5
+        }
+      }
+    },
+    {
+      "id": "pot_06",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 6
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 6
+        }
+      }
+    },
+    {
+      "id": "pot_07",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 7
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 7
+        }
+      }
+    },
+    {
+      "id": "pot_08",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 8
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 8
+        }
+      }
+    },
+    {
+      "id": "pot_09",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 9
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 9
+        }
+      }
+    },
+    {
+      "id": "pot_10",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 10
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 10
+        }
+      }
+    },
+    {
+      "id": "pot_11",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 11
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 11
+        }
+      }
+    },
+    {
+      "id": "pot_12",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 12
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 12
+        }
+      }
+    },
+    {
+      "id": "pot_13",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 13
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 13
+        }
+      }
+    },
+    {
+      "id": "pot_14",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 14
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 14
+        }
+      }
+    },
+    {
+      "id": "pot_15",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 15
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 15
+        }
+      }
+    },
+    {
+      "id": "pot_16",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 16
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 16
+        }
+      }
+    },
+    {
+      "id": "pot_17",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 17
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 17
+        }
+      }
+    },
+    {
+      "id": "pot_18",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 18
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 18
+        }
+      }
+    },
+    {
+      "id": "pot_19",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 19
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 19
+        }
+      }
+    },
+    {
+      "id": "pot_20",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 20
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 20
+        }
+      }
+    },
+    {
+      "id": "pot_21",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 21
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 21
+        }
+      }
+    },
+    {
+      "id": "pot_22",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 22
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 22
+        }
+      }
+    },
+    {
+      "id": "pot_23",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 23
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 23
+        }
+      }
+    },
+    {
+      "id": "pot_24",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 24
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 24
+        }
+      }
+    },
+    {
+      "id": "pot_25",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 25
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 25
+        }
+      }
+    },
+    {
+      "id": "pot_26",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 26
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 26
+        }
+      }
+    },
+    {
+      "id": "pot_27",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 27
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 27
+        }
+      }
+    },
+    {
+      "id": "pot_28",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 28
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 28
+        }
+      }
+    },
+    {
+      "id": "pot_29",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 29
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 29
+        }
+      }
+    },
+    {
+      "id": "pot_30",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 30
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 30
+        }
+      }
+    },
+    {
+      "id": "pot_31",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 31
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 31
+        }
+      }
+    },
+    {
+      "id": "pot_32",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 32
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 32
+        }
+      }
+    },
+    {
+      "id": "pot_33",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 33
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 33
+        }
+      }
+    },
+    {
+      "id": "pot_34",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 34
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 34
+        }
+      }
+    },
+    {
+      "id": "pot_35",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 35
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 35
+        }
+      }
+    },
+    {
+      "id": "pot_36",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 36
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 36
+        }
+      }
+    },
+    {
+      "id": "pot_37",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 37
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 37
+        }
+      }
+    },
+    {
+      "id": "pot_38",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 38
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 38
+        }
+      }
+    },
+    {
+      "id": "pot_39",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 39
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 39
+        }
+      }
+    },
+    {
+      "id": "pot_40",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 40
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 40
+        }
+      }
+    },
+    {
+      "id": "pot_41",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 41
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 41
+        }
+      }
+    },
+    {
+      "id": "pot_42",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 42
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 42
+        }
+      }
+    },
+    {
+      "id": "pot_43",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 43
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 43
+        }
+      }
+    },
+    {
+      "id": "pot_44",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 44
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 44
+        }
+      }
+    },
+    {
+      "id": "pot_45",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 45
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 45
+        }
+      }
+    },
+    {
+      "id": "pot_46",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 46
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 46
+        }
+      }
+    },
+    {
+      "id": "pot_47",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 47
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 47
+        }
+      }
+    },
+    {
+      "id": "pot_48",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 48
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 48
+        }
+      }
+    },
+    {
+      "id": "pot_49",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 49
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 49
+        }
+      }
+    },
+    {
+      "id": "pot_50",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 50
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 50
+        }
+      }
+    },
+    {
+      "id": "pot_51",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 51
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 51
+        }
+      }
+    },
+    {
+      "id": "pot_52",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 52
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 52
+        }
+      }
+    },
+    {
+      "id": "pot_53",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 53
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 53
+        }
+      }
+    },
+    {
+      "id": "pot_54",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 54
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 54
+        }
+      }
+    },
+    {
+      "id": "pot_55",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 55
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 55
+        }
+      }
+    },
+    {
+      "id": "pot_56",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 56
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 56
+        }
+      }
+    },
+    {
+      "id": "pot_57",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 57
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 57
+        }
+      }
+    },
+    {
+      "id": "pot_58",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 58
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 58
+        }
+      }
+    },
+    {
+      "id": "pot_59",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 59
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 59
+        }
+      }
+    },
+    {
+      "id": "pot_60",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 60
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 60
+        }
+      }
+    },
+    {
+      "id": "pot_61",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 61
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 61
+        }
+      }
+    },
+    {
+      "id": "pot_62",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 62
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 62
+        }
+      }
+    },
+    {
+      "id": "pot_63",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 63
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 63
+        }
+      }
+    },
+    {
+      "id": "pot_64",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 64
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 64
+        }
+      }
+    },
+    {
+      "id": "pot_65",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 65
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 65
+        }
+      }
+    },
+    {
+      "id": "pot_66",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 66
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 66
+        }
+      }
+    },
+    {
+      "id": "pot_67",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 67
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 67
+        }
+      }
+    },
+    {
+      "id": "pot_68",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 68
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 68
+        }
+      }
+    },
+    {
+      "id": "pot_69",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 69
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 69
+        }
+      }
+    },
+    {
+      "id": "pot_70",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 70
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 70
+        }
+      }
+    },
+    {
+      "id": "pot_71",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 71
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 71
+        }
+      }
+    },
+    {
+      "id": "pot_72",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 72
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 72
+        }
+      }
+    },
+    {
+      "id": "encoder",
+      "kind": "absolute_encoder",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 85
+      },
+      "push": {
+        "message": "cc",
+        "channel": 1,
+        "number": 86
+      },
+      "feedback": {
+        "value": {
+          "message": "cc",
+          "channel": 1,
+          "number": 85
+        }
+      }
+    },
+    {
+      "id": "button_01",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 73
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 73
+        }
+      }
+    },
+    {
+      "id": "button_02",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 74
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 74
+        }
+      }
+    },
+    {
+      "id": "button_03",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 75
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 75
+        }
+      }
+    },
+    {
+      "id": "button_04",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 76
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 76
+        }
+      }
+    },
+    {
+      "id": "button_05",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 77
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 77
+        }
+      }
+    },
+    {
+      "id": "button_06",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 78
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 78
+        }
+      }
+    },
+    {
+      "id": "button_07",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 79
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 79
+        }
+      }
+    },
+    {
+      "id": "button_08",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 80
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 80
+        }
+      }
+    },
+    {
+      "id": "button_09",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 81
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 81
+        }
+      }
+    },
+    {
+      "id": "button_10",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 82
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 82
+        }
+      }
+    },
+    {
+      "id": "button_11",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 83
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 83
+        }
+      }
+    },
+    {
+      "id": "button_12",
+      "kind": "button",
+      "input": {
+        "message": "cc",
+        "channel": 1,
+        "number": 84
+      },
+      "feedback": {
+        "led": {
+          "message": "cc",
+          "channel": 1,
+          "number": 84
+        }
+      }
+    }
+  ]
+}
