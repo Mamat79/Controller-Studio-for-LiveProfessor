@@ -11,6 +11,7 @@ FORBIDDEN_PREFIXES = ("ec4lpbridge/",)
 REQUIRED_ENTRIES = (
     "silemio_control_hub/assets/controller-studio.ico",
     "silemio_control_hub/assets/controller-studio.png",
+    "silemio_control_hub/assets/controller-studio-sidebar.png",
     "silemio_control_hub/assets/paypal-support-qr.png",
     "silemio_control_hub/manuals/Controller-Studio-for-LiveProfessor-Manual-EN.pdf",
     "silemio_control_hub/manuals/Controller-Studio-for-LiveProfessor-Notice-FR.pdf",

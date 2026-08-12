@@ -536,7 +536,7 @@ CONTENT = {
                         [
                             ("1", "Ouvrez la Banque de contrôleurs et choisissez le profil de votre matériel, ou cliquez sur Créer un contrôleur."),
                             ("2", "Exportez le fichier .ctrl2 si vous souhaitez ajouter ce contrôleur à LiveProfessor."),
-                            ("3", "Cliquez sur AutoMap, choisissez un projet .rack2 et lancez l'analyse."),
+                            ("3", "Cliquez sur AutoMap, utilisez le projet ouvert détecté ou choisissez un fichier .rack2, puis lancez l'analyse."),
                             ("4", "Sélectionnez les plug-ins voulus puis créez une nouvelle copie du projet."),
                             ("5", "Chargez le .ctrl2 et la copie AutoMap dans LiveProfessor."),
                         ],
@@ -573,6 +573,10 @@ CONTENT = {
                     ),
                     (
                         "p",
+                        "Raccourcis affiche les boutons et push du contrôleur actif. Chaque appui direct ou combiné à un modificateur peut recevoir une action différente. Les choix sont mémorisés par profil et s'appliquent immédiatement au pilote EC4 ; Réglages d'origine restaure son comportement historique.",
+                    ),
+                    (
+                        "p",
                         "L'option de connexion automatique réutilise toujours le contrôleur sélectionné. Avec l'EC4, le message de connexion suit la langue de l'application. Si LiveProfessor n'a pas encore démarré, l'écran reste sur Attente démarrage / LiveProfessor ou Waiting for / LiveProfessor, puis revient automatiquement aux paramètres dès le premier retour OSC.",
                     ),
                     ("h2", "Exporter vers LiveProfessor"),
@@ -593,10 +597,11 @@ CONTENT = {
                     (
                         "steps",
                         [
-                            ("1", "Choisissez le projet source puis cliquez sur Analyser."),
-                            ("2", "Choisissez le profil du contrôleur et réutilisez de préférence le contrôleur déjà présent dans le projet."),
-                            ("3", "Sélectionnez tous les plug-ins ou cochez seulement les instances voulues."),
-                            ("4", "Choisissez le nombre de commandes par banque puis créez la copie."),
+                            ("1", "Utilisez le projet ouvert détecté ou choisissez un fichier source, puis cliquez sur Analyser."),
+                            ("2", "Pour un projet ouvert, vérifiez le chemin affiché et enregistrez-le dans LiveProfessor quand l'assistant le demande."),
+                            ("3", "Choisissez le profil du contrôleur et réutilisez de préférence le contrôleur déjà présent dans le projet."),
+                            ("4", "Sélectionnez tous les plug-ins ou cochez seulement les instances voulues."),
+                            ("5", "Choisissez le nombre de commandes par banque, créez la copie, puis acceptez de l'ouvrir dans LiveProfessor si vous le souhaitez."),
                         ],
                     ),
                     ("h2", "Ordre des paramètres"),
@@ -741,7 +746,7 @@ CONTENT = {
                 "1. Quick start",
                 [
                     ("h2", "The shortest workflow"),
-                    ("steps", [("1", "Open the Controller bank and choose the profile for your hardware, or click Create a controller."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, choose a .rack2 project, and analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
+                    ("steps", [("1", "Open the Controller bank and choose the profile for your hardware, or click Create a controller."), ("2", "Export the .ctrl2 file when you want to add that controller to LiveProfessor."), ("3", "Click AutoMap, use the detected open project or choose a .rack2 file, then analyze it."), ("4", "Select the required plug-ins and create a new project copy."), ("5", "Load the .ctrl2 file and the AutoMap copy in LiveProfessor.")]),
                     ("callout", "Always preserve the original LiveProfessor project. Work only with the copy created by AutoMap."),
                 ],
             ),
@@ -755,6 +760,7 @@ CONTENT = {
                     ("p", "Edit / duplicate creates a personal copy of a built-in profile without changing the original. Import a profile installs validated JSON. Every personal replacement keeps a backup."),
                     ("h2", "Active controller"),
                     ("p", "The Live page selector stays synchronized with the bank. Configure / MIDI Learn opens the editor for the active controller. When a real-time driver is available, Start, Stop, bank, and matching settings become available. The setup and group shown with the EC4 are specific to that hardware. Otherwise, the profile remains ready for export and AutoMap."),
+                    ("p", "Shortcuts lists the buttons and pushes of the active controller. Every direct press or modifier combination can trigger a different action. Choices are remembered per profile and apply immediately to the EC4 driver; Factory settings restores its historical layout."),
                     ("p", "Automatic connection always reuses the selected controller. On the EC4, the connection message follows the application language. If LiveProfessor has not started yet, the screen remains on Attente demarrage / LiveProfessor or Waiting for / LiveProfessor, then automatically restores the parameter display on the first OSC feedback."),
                     ("h2", "Export to LiveProfessor"),
                     ("steps", [("1", "Select the controller in the bank."), ("2", "Click Export controller .ctrl2."), ("3", "In LiveProfessor, open Hardware Controllers Setup, then Load from file.")]),
@@ -764,7 +770,7 @@ CONTENT = {
                 "3. Create an AutoMap copy",
                 [
                     ("h2", "Analyze and choose"),
-                    ("steps", [("1", "Choose the source project, then click Analyze."), ("2", "Choose the controller profile and preferably reuse the controller already present in the project."), ("3", "Select all plug-ins or check only the required instances."), ("4", "Choose the number of controls per bank, then create the copy.")]),
+                    ("steps", [("1", "Use the detected open project or choose a source file, then click Analyze."), ("2", "For an open project, verify the displayed path and save it in LiveProfessor when prompted."), ("3", "Choose the controller profile and preferably reuse the controller already present in the project."), ("4", "Select all plug-ins or check only the required instances."), ("5", "Choose the number of controls per bank, create the copy, then accept the offer to open it in LiveProfessor if required.")]),
                     ("h2", "Parameter order"),
                     ("p", "Existing manual assignments remain authoritative. Free slots then follow the Plugin Studio profile so every instance of a plug-in type keeps the same order."),
                     ("callout", "Multiple controllers sharing the same Companion addresses can mix labels. Reuse the existing controller when the assistant offers it."),

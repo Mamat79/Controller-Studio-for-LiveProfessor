@@ -34,6 +34,7 @@ foreach ($requiredEntry in $requiredMidiEntries) {
 $requiredAssetEntries = @(
     'controller-studio.ico',
     'controller-studio.png',
+    'controller-studio-sidebar.png',
     'paypal-support-qr.png',
     'Controller-Studio-for-LiveProfessor-Manual-EN.pdf',
     'Controller-Studio-for-LiveProfessor-Notice-FR.pdf'

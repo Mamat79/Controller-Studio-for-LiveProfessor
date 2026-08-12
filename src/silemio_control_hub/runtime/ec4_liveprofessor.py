@@ -8,7 +8,7 @@ import unicodedata
 import re
 import threading
 import time
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass
 from typing import Any
 
@@ -33,6 +33,10 @@ from ..adapters.devices.ec4_protocol import (
 from ..transports.midi import MidiBackendError, MidiConnection
 from ..transports.osc import OSCClient, OSCServer
 from .plugin_labels import load_profile, profile_names, short_label
+from ..controller_shortcuts import (
+    EC4_DEFAULT_SHORTCUTS,
+    SHORTCUT_ACTION_BY_ID,
+)
 
 
 LOGGER = logging.getLogger(__name__)
@@ -79,11 +83,15 @@ class EC4LiveProfessorBridge:
         config: BridgeConfig,
         status_callback: StatusCallback | None = None,
         log_callback: LogCallback | None = None,
+        shortcut_bindings: Mapping[str, str] | None = None,
     ) -> None:
         config.validate()
         self.config = config
         self.status_callback = status_callback
         self.log_callback = log_callback
+        self.shortcut_bindings = self._validated_shortcut_bindings(
+            EC4_DEFAULT_SHORTCUTS if shortcut_bindings is None else shortcut_bindings
+        )
         self.profile = load_profile(config.profile_file)
         self.names, self.short_names = profile_names(self.profile, config.max_controls)
         if self.config.mode == "companion":
@@ -144,6 +152,22 @@ class EC4LiveProfessorBridge:
     @property
     def running(self) -> bool:
         return self._running
+
+    @staticmethod
+    def _validated_shortcut_bindings(bindings: Mapping[str, str]) -> dict[str, str]:
+        return {
+            str(binding): str(action_id)
+            for binding, action_id in bindings.items()
+            if action_id in SHORTCUT_ACTION_BY_ID
+        }
+
+    def set_shortcut_bindings(self, bindings: Mapping[str, str]) -> None:
+        """Apply shortcut choices immediately without reconnecting MIDI/OSC."""
+
+        with self._lock:
+            self.shortcut_bindings = self._validated_shortcut_bindings(bindings)
+            if self._shift_held:
+                self._send_shift_shortcuts()
 
     def snapshot(self) -> BridgeSnapshot:
         state = self.setup_state
@@ -728,9 +752,12 @@ class EC4LiveProfessorBridge:
             )
 
     def _handle_parameter_push(self, physical_index: int, *, pressed: bool = True) -> None:
-        if physical_index == 15:
+        direct_action = self.shortcut_bindings.get(
+            f"encoder_{physical_index + 1:02d}"
+        )
+        if direct_action:
             if pressed:
-                self._command("/Command/Transport&Tempo/TempoTap", "Tap tempo")
+                self._execute_shortcut_action(direct_action)
             return
         if self.config.mode == "companion":
             self._send_osc(
@@ -798,81 +825,64 @@ class EC4LiveProfessorBridge:
             return
         if kind != "shift_push" or index is None or not pressed:
             return
-        if index == 0:
+        action_id = self.shortcut_bindings.get(f"shift+encoder_{index + 1:02d}")
+        if action_id:
+            self._execute_shortcut_action(action_id)
+
+    def _execute_shortcut_action(self, action_id: str) -> bool:
+        action = SHORTCUT_ACTION_BY_ID.get(action_id)
+        if action is None:
+            return False
+        label = action.label(self.config.ui_language)
+        if action_id == "previous_bank":
             self.change_bank(-1)
-            return
-        if index == 1:
+        elif action_id == "next_bank":
             self.change_bank(1)
-            return
-        if index == 2:
+        elif action_id == "previous_view":
             self._navigate_viewset(-1)
-            return
-        if index == 3:
+        elif action_id == "next_view":
             self._navigate_viewset(1)
-            return
-        if index == 4:
-            self._command(self.config.show_hide_command, "Afficher/masquer plugin")
-            return
-        if index == 5:
+        elif action_id == "show_hide_plugin":
+            self._command(self.config.show_hide_command, label)
+        elif action_id == "toggle_processing":
+            self._command(self.config.enable_processing_command, label)
+        elif action_id == "previous_chain":
             self._command(
                 "/Command/PluginWindows/SelectPreviousChain",
-                "Chaine precedente",
+                label,
                 refresh_companion=True,
             )
-            return
-        if index == 6:
-            self._command(
-                "/Command/PluginWindows/SelectPreviousPlugin",
-                "Plugin precedent",
-                refresh_companion=True,
-            )
-            return
-        if index == 7:
-            self._command(
-                "/Command/PluginWindows/SelectNextPlugin",
-                "Plugin suivant",
-                refresh_companion=True,
-            )
-            return
-        if index == 8:
-            self._command(
-                self.config.enable_processing_command,
-                "Traitement plugin active/desactive",
-            )
-            return
-        if index == 9:
+        elif action_id == "next_chain":
             self._command(
                 "/Command/PluginWindows/SelectNextChain",
-                "Chaine suivante",
+                label,
                 refresh_companion=True,
             )
-            return
-        if index == 10:
+        elif action_id == "previous_plugin":
             self._command(
                 "/Command/PluginWindows/SelectPreviousPlugin",
-                "Plugin precedent",
+                label,
                 refresh_companion=True,
             )
-            return
-        if index == 11:
+        elif action_id == "next_plugin":
             self._command(
                 "/Command/PluginWindows/SelectNextPlugin",
-                "Plugin suivant",
+                label,
                 refresh_companion=True,
             )
-            return
-        if index == 12:
-            self._command(self.config.cue_previous_command, "Cue precedent")
-            return
-        if index == 13:
-            self._command(self.config.cue_next_command, "Cue suivant")
-            return
-        if index == 14:
-            self._command(self.config.snapshot_previous_command, "Snapshot precedent")
-            return
-        if index == 15:
-            self._command(self.config.snapshot_next_command, "Snapshot suivant")
-            return
+        elif action_id == "previous_cue":
+            self._command(self.config.cue_previous_command, label)
+        elif action_id == "next_cue":
+            self._command(self.config.cue_next_command, label)
+        elif action_id == "previous_snapshot":
+            self._command(self.config.snapshot_previous_command, label)
+        elif action_id == "next_snapshot":
+            self._command(self.config.snapshot_next_command, label)
+        elif action_id == "tap_tempo":
+            self._command("/Command/Transport&Tempo/TempoTap", label)
+        else:
+            return False
+        return True
 
     def _command(
         self,
@@ -1074,7 +1084,13 @@ class EC4LiveProfessorBridge:
         self._overlay_parameter_index = None
 
     def _send_shift_shortcuts(self) -> None:
-        labels = list(self._SHIFT_SHORTCUT_LABELS)
+        labels = [
+            SHORTCUT_ACTION_BY_ID[action_id].display_label
+            if (action_id := self.shortcut_bindings.get(f"shift+encoder_{index:02d}"))
+            in SHORTCUT_ACTION_BY_ID
+            else "-"
+            for index in range(1, 17)
+        ]
         try:
             self._midi.send_sysex(main_display_message(labels))
             self._midi.send_sysex(parameter_grid_message(labels))

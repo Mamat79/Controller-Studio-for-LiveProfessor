@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 import json
 import os
 from pathlib import Path
@@ -13,6 +13,7 @@ from .platform_paths import (
     previous_product_data_dir,
     product_data_dir,
 )
+from .controller_shortcuts import normalize_shortcuts_by_controller
 
 
 SUPPORTED_LANGUAGES = frozenset({"fr", "en"})
@@ -24,6 +25,7 @@ class DesktopSettings:
     close_to_tray: bool = True
     active_controller_id: str | None = None
     auto_start_runtime: bool = False
+    shortcuts_by_controller: dict[str, dict[str, str]] = field(default_factory=dict)
 
 
 def default_desktop_settings_path() -> Path:
@@ -60,6 +62,9 @@ def load_desktop_settings(path: Path | None = None) -> DesktopSettings:
     close_to_tray = raw.get("close_to_tray", True)
     active_controller_id = raw.get("active_controller_id")
     auto_start_runtime = raw.get("auto_start_runtime", False)
+    shortcuts_by_controller = normalize_shortcuts_by_controller(
+        raw.get("shortcuts_by_controller", {})
+    )
     if language not in SUPPORTED_LANGUAGES:
         language = "fr"
     if not isinstance(close_to_tray, bool):
@@ -73,6 +78,7 @@ def load_desktop_settings(path: Path | None = None) -> DesktopSettings:
         close_to_tray=close_to_tray,
         active_controller_id=active_controller_id,
         auto_start_runtime=auto_start_runtime,
+        shortcuts_by_controller=shortcuts_by_controller,
     )
 
 
