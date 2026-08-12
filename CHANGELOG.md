@@ -6,6 +6,9 @@
 - Simplifie la page Contrôle en direct autour de l'état du moteur, de l'action principale, des banques et des accès rapides, tout en gardant visibles le démarrage Windows et la connexion automatique.
 - Regroupe les outils EC4, l'apprentissage MIDI et les réglages techniques dans une section avancée repliable sans supprimer aucune fonction.
 - Protège les libellés français et anglais contre la troncature avec une fenêtre minimale plus large, des zones redimensionnables et des actions réorganisées.
+- Remplace « Raccourcis EC4 » par un éditeur de raccourcis propre au contrôleur actif : chaque bouton ou push peut recevoir une action directe ou avec modificateur, les choix sont mémorisés par profil et appliqués immédiatement au pilote EC4.
+- Détecte le projet enregistré actuellement ouvert dans LiveProfessor, affiche son chemin, demande sa sauvegarde avant analyse et conserve aussi le choix manuel d'un fichier `.rack2`.
+- Régénère le logo latéral à sa taille d'affichage avec un redimensionnement haute qualité afin de supprimer la pixellisation.
 
 ## V.2026 (2026.4) — 2026-08-10
 

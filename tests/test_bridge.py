@@ -361,6 +361,26 @@ class BridgeTests(unittest.TestCase):
             "/Command/PluginWindows/SelectNextPlugin",
         )
 
+    def test_shortcuts_can_be_reassigned_without_restarting_runtime(self):
+        bridge = self.make_bridge()
+        bridge.set_shortcut_bindings(
+            {
+                "shift+encoder_01": "next_snapshot",
+                "encoder_01": "tap_tempo",
+            }
+        )
+
+        bridge._handle_sysex_button("shift_push", 0)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/GlobalSnapshots/RecallNextGlobalSnapshot",
+        )
+        bridge._handle_parameter_push(0)
+        self.assertEqual(
+            bridge._osc_client.messages[-1][0],
+            "/Command/Transport&Tempo/TempoTap",
+        )
+
     def test_holding_shift_displays_shortcuts_then_restores_parameters(self):
         bridge = self.make_bridge(
             display_enabled=True,

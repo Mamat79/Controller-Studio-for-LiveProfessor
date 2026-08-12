@@ -28,7 +28,7 @@ Direct downloads:
 
 [Lire cette présentation en français](README.md)
 
-> **Public V.2026.5 Windows release.** Controller Studio introduces clearer sidebar navigation, always works on a new AutoMap copy, and keeps the source `.rack2` project untouched.
+> **Public V.2026.5 Windows release.** Controller Studio introduces clearer sidebar navigation, per-controller shortcuts, and detection of the project open in LiveProfessor before it creates a safe AutoMap copy.
 
 ## What does Controller Studio do?
 
@@ -36,7 +36,7 @@ Controller Studio turns a MIDI controller into an organized control surface for 
 
 | Live control | Controller bank | Plugin Studio | AutoMap |
 |---|---|---|---|
-| Real-time EC4 driver, banks, push, Shift, labels, values and reconnection | Ready-to-export profiles and a controller editor | Real names read from installed plug-ins, batch retrieval, priorities and individual checkboxes | Plug-in and instance selection, UniBank or FullBank, validated `.rack2` copy |
+| Real-time EC4 driver, banks, push, labels, values, reconnection, and configurable shortcuts | Ready-to-export profiles and a controller editor | Real names read from installed plug-ins, batch retrieval, priorities and individual checkboxes | Detected open project or chosen file, instance selection, UniBank or FullBank, validated `.rack2` copy |
 
 The interface is available in French and English, minimizes to the notification area and keeps the real-time log in a separate window.
 
@@ -44,7 +44,7 @@ The interface is available in French and English, minimizes to the notification 
 
 1. In **Controller bank**, select your hardware or create its profile, then export the `.ctrl2` file.
 2. Add that controller to LiveProfessor and analyze your `.rack2` project with **Plugin Studio**.
-3. Click the blue **AutoMap** button, choose the useful plug-ins and parameters, then open the new copy.
+3. Click the blue **AutoMap** button, use the detected open project or choose a file, select the useful plug-ins, then open the new copy.
 
 Controller Studio reloads the generated copy before presenting it. Existing manual assignments remain authoritative.
 
@@ -67,7 +67,7 @@ As a result, one properly described controller can work with every prepared plug
 | Select useful parameters | Manually browse every exposed parameter | Select, exclude, prioritize and name them once in Plugin Studio |
 | Banks and parameter-rich plug-ins | Manual organization that often differs between plug-ins | UniBank for a simple layout or FullBank for up to 99 logical controls |
 | Labels and feedback | Depend on the mappings built by hand | Short names, values and Companion feedback follow the same order as the controls |
-| Project safety | Mapping is performed inside the open project | AutoMap creates and validates a new `.rack2` copy; the source project remains untouched |
+| Project safety | Mapping is performed inside the open project | AutoMap detects the open project or accepts a chosen file, asks you to save, then creates and validates a new `.rack2` copy; the source remains untouched |
 
 Existing manual mappings are never overwritten: they remain authoritative and AutoMap fills only the available slots. The result is a reusable system that maintains one controller bank and one plug-in bank instead of many **controller × plug-in × instance** mappings.
 
@@ -112,6 +112,8 @@ Click **Create a controller…** to start with eight encoders, then add, remove,
 
 **Save to my bank** validates the profile and makes it available offline. **Save + create .ctrl2** immediately produces the LiveProfessor file. Replacing a personal profile keeps a backup of the previous version. The Live page also provides **Configure / MIDI Learn…** for the active controller; the setup/group section shown with the EC4 remains hardware-specific.
 
+The **Shortcuts** button follows the active profile. It lists the actual buttons and pushes declared by that controller, with one direct-press column and one column for each available modifier. Choices are saved independently for every profile; on the EC4 they apply immediately and the factory layout can always be restored.
+
 The Live page **Settings** window restores EC4 Bridge’s advanced controls: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are available to every compatible controller; setup/group and SysEx tools remain EC4-only.
 
 To submit a controller to the shared library:
@@ -132,11 +134,11 @@ The public library lives in this repository under [`library/`](library/). It con
 - generate LiveProfessor Companion/OSC `.ctrl2` controllers;
 - complete EC4 engine inherited from EC4 Bridge;
 - remembered controller selection and MIDI/OSC reconnection;
-- display labels and values, banks, push and shortcuts;
+- display labels and values, banks, push, and configurable per-controller shortcuts;
 - read-only plug-in and Controller Map analysis;
 - select all plug-ins, one instance or any precise subset;
 - per-parameter selection and priority in Plugin Studio;
-- UniBank and FullBank AutoMap in a new copy;
+- open-project detection or manual file selection for UniBank and FullBank AutoMap in a new copy;
 - preserve manual mappings and existing learned assignments;
 - verified application and controller-library updates;
 - FR/EN interface, notification-area mode and separate log window;

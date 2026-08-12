@@ -19,6 +19,12 @@ def test_desktop_settings_round_trip_is_atomic(tmp_path):
             close_to_tray=False,
             active_controller_id="behringer.x-touch-compact.layer-a",
             auto_start_runtime=True,
+            shortcuts_by_controller={
+                "faderfox.ec4": {
+                    "shift+encoder_01": "next_bank",
+                    "encoder_16": "",
+                }
+            },
         ),
         path,
     )
@@ -29,6 +35,12 @@ def test_desktop_settings_round_trip_is_atomic(tmp_path):
         close_to_tray=False,
         active_controller_id="behringer.x-touch-compact.layer-a",
         auto_start_runtime=True,
+        shortcuts_by_controller={
+            "faderfox.ec4": {
+                "shift+encoder_01": "next_bank",
+                "encoder_16": "",
+            }
+        },
     )
     assert not list(tmp_path.glob("*.tmp"))
 
@@ -105,3 +117,29 @@ def test_empty_active_controller_is_ignored(tmp_path):
 
     assert load_desktop_settings(path).active_controller_id is None
     assert load_desktop_settings(path).auto_start_runtime is False
+
+
+def test_invalid_shortcut_settings_are_filtered(tmp_path):
+    path = tmp_path / "settings.json"
+    path.write_text(
+        json.dumps(
+            {
+                "shortcuts_by_controller": {
+                    "faderfox.ec4": {
+                        "shift+encoder_01": "next_bank",
+                        "shift+encoder_02": "not-an-action",
+                        "encoder_16": "",
+                    },
+                    "bad": "not-a-dictionary",
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    assert load_desktop_settings(path).shortcuts_by_controller == {
+        "faderfox.ec4": {
+            "shift+encoder_01": "next_bank",
+            "encoder_16": "",
+        }
+    }

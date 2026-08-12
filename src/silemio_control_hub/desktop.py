@@ -55,6 +55,13 @@ from .controller_studio import (
     editable_controller_payload,
     save_user_controller_profile,
 )
+from .controller_shortcuts import (
+    SHORTCUT_ACTIONS,
+    configurable_shortcut_bindings,
+    default_shortcuts,
+    effective_shortcuts,
+    shortcut_binding_key,
+)
 from .identity import BRAND_NAME, FULL_PRODUCT_NAME, PRODUCT_NAME
 from .help_resources import (
     PAYPAL_QR_PATH,
@@ -64,6 +71,7 @@ from .help_resources import (
     open_paypal_support,
 )
 from .library_remote import GitHubLibraryClient, update_library
+from .liveprofessor_session import detect_liveprofessor_session
 from .plugin_profiles import (
     PluginParameterKind,
     PluginParameterProfile,
@@ -105,6 +113,9 @@ from .workflow import prepare_liveprofessor_project
 
 PRODUCT_ICON_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.ico"
 PRODUCT_LOGO_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.png"
+PRODUCT_SIDEBAR_LOGO_PATH = (
+    Path(__file__).resolve().parent / "assets" / "controller-studio-sidebar.png"
+)
 DISPLAY_VERSION = f"V.{__version__}"
 AUTO_START_RETRY_DELAYS_MS = (1200, 3000, 6000, 12000, 20000)
 
@@ -225,19 +236,23 @@ UI_TEXT = {
         ),
         "diagnostic": "Diagnostic",
         "diagnostic_title": "Diagnostic Controller Studio",
-        "shortcuts": "Raccourcis EC4",
-        "shortcuts_title": "Raccourcis EC4",
-        "shortcuts_text": (
-            "Shift + push 1 / 2 : banque précédente / suivante\n"
-            "Shift + push 3 / 4 : View Set précédent / suivant\n\n"
-            "Shift + push 5 : afficher / masquer le plug-in\n"
-            "Shift + push 9 : activer / désactiver le plug-in\n"
-            "Shift + push 6 / 10 : chaîne précédente / suivante\n"
-            "Shift + push 7 / 8 et 11 / 12 : plug-in précédent / suivant\n"
-            "Shift + push 13 / 14 : cue précédent / suivant\n"
-            "Shift + push 15 / 16 : snapshot précédent / suivant\n"
-            "Push 16 seul : Tap Tempo"
+        "shortcuts": "Raccourcis",
+        "shortcuts_title": "Raccourcis — {controller}",
+        "shortcuts_intro": (
+            "Choisissez l’action de chaque bouton ou push. La configuration est "
+            "enregistrée séparément pour ce contrôleur."
         ),
+        "shortcuts_driver_note": (
+            "Ce profil n’a pas encore de pilote Live direct : les choix sont conservés "
+            "et seront utilisés dès qu’un pilote compatible est disponible."
+        ),
+        "shortcuts_no_controls": "Ce profil ne déclare aucun bouton ou push configurable.",
+        "shortcut_control": "Contrôle",
+        "shortcut_direct": "Appui direct",
+        "shortcut_none": "— Aucune action —",
+        "shortcut_save": "Enregistrer",
+        "shortcut_reset": "Réglages d’origine",
+        "shortcut_saved": "Raccourcis enregistrés pour {controller}.",
         "previous_bank": "Banque précédente",
         "next_bank": "Banque suivante",
         "import_legacy_config": "Importer la configuration EC4 Bridge…",
@@ -274,6 +289,21 @@ UI_TEXT = {
             "plug-ins à mapper. Le projet source reste toujours inchangé."
         ),
         "automap_project": "Projet LiveProfessor source (.rack2)",
+        "automap_current_project": "Projet actuellement ouvert dans LiveProfessor",
+        "automap_choose_project": "Choisir un fichier .rack2",
+        "automap_detect": "Détecter",
+        "automap_detected": "Projet détecté : {path}",
+        "automap_not_running": "LiveProfessor n’est pas ouvert.",
+        "automap_not_detected": (
+            "LiveProfessor est ouvert, mais aucun projet enregistré n’a été détecté."
+        ),
+        "automap_save_current_title": "Sauvegarder le projet dans LiveProfessor",
+        "automap_save_current_body": (
+            "Projet détecté :\n{path}\n\nDans LiveProfessor, enregistrez maintenant le "
+            "projet (Ctrl+S). Revenez ensuite ici et cliquez sur Continuer.\n\n"
+            "Controller Studio lira ce fichier et créera une copie : le projet source "
+            "ne sera jamais modifié."
+        ),
         "automap_browse": "Parcourir…",
         "automap_analyze": "Analyser",
         "automap_controller_profile": "Profil du contrôleur physique",
@@ -771,19 +801,23 @@ UI_TEXT = {
         "wrong_zone_message": "Select setup {setup}, group {group} on the EC4 first.",
         "diagnostic": "Diagnostics",
         "diagnostic_title": "Controller Studio diagnostics",
-        "shortcuts": "EC4 shortcuts",
-        "shortcuts_title": "EC4 shortcuts",
-        "shortcuts_text": (
-            "Shift + push 1 / 2: previous / next bank\n"
-            "Shift + push 3 / 4: previous / next View Set\n\n"
-            "Shift + push 5: show / hide selected plug-in\n"
-            "Shift + push 9: enable / disable selected plug-in\n"
-            "Shift + push 6 / 10: previous / next chain\n"
-            "Shift + push 7 / 8 and 11 / 12: previous / next plug-in\n"
-            "Shift + push 13 / 14: previous / next cue\n"
-            "Shift + push 15 / 16: previous / next snapshot\n"
-            "Push 16 only: Tap Tempo"
+        "shortcuts": "Shortcuts",
+        "shortcuts_title": "Shortcuts — {controller}",
+        "shortcuts_intro": (
+            "Choose the action for each button or push. Settings are stored separately "
+            "for this controller."
         ),
+        "shortcuts_driver_note": (
+            "This profile does not have a native Live driver yet. These choices are "
+            "saved and will be used when a compatible driver is available."
+        ),
+        "shortcuts_no_controls": "This profile does not declare any configurable button or push.",
+        "shortcut_control": "Control",
+        "shortcut_direct": "Direct press",
+        "shortcut_none": "— No action —",
+        "shortcut_save": "Save",
+        "shortcut_reset": "Factory settings",
+        "shortcut_saved": "Shortcuts saved for {controller}.",
         "previous_bank": "Previous bank",
         "next_bank": "Next bank",
         "import_legacy_config": "Import EC4 Bridge configuration…",
@@ -820,6 +854,20 @@ UI_TEXT = {
             "The source project always remains unchanged."
         ),
         "automap_project": "Source LiveProfessor project (.rack2)",
+        "automap_current_project": "Project currently open in LiveProfessor",
+        "automap_choose_project": "Choose a .rack2 file",
+        "automap_detect": "Detect",
+        "automap_detected": "Detected project: {path}",
+        "automap_not_running": "LiveProfessor is not running.",
+        "automap_not_detected": (
+            "LiveProfessor is running, but no saved project could be detected."
+        ),
+        "automap_save_current_title": "Save the project in LiveProfessor",
+        "automap_save_current_body": (
+            "Detected project:\n{path}\n\nSave the project now in LiveProfessor "
+            "(Ctrl+S). Then return here and click Continue.\n\nController Studio will "
+            "read this file and create a copy; the source project is never changed."
+        ),
         "automap_browse": "Browse…",
         "automap_analyze": "Analyze",
         "automap_controller_profile": "Physical controller profile",
@@ -1426,10 +1474,10 @@ class ControlHubDesktop:
         sidebar.grid(row=0, column=0, sticky="nsew")
         sidebar.grid_propagate(False)
         self.sidebar_logo_image: tk.PhotoImage | None = None
-        if PRODUCT_LOGO_PATH.is_file():
+        if PRODUCT_SIDEBAR_LOGO_PATH.is_file():
             try:
-                self.sidebar_logo_image = tk.PhotoImage(file=str(PRODUCT_LOGO_PATH)).subsample(
-                    12, 12
+                self.sidebar_logo_image = tk.PhotoImage(
+                    file=str(PRODUCT_SIDEBAR_LOGO_PATH)
                 )
             except tk.TclError:
                 self.sidebar_logo_image = None
@@ -3525,6 +3573,8 @@ class ControlHubDesktop:
                 pass
 
         self.automap_project_var = tk.StringVar()
+        self.automap_source_mode_var = tk.StringVar(value="file")
+        self.automap_detection_var = tk.StringVar()
         self.automap_profile_var = tk.StringVar()
         self.automap_project_controller_var = tk.StringVar()
         self.automap_bank_mode_var = tk.StringVar(value="unibank")
@@ -3545,15 +3595,50 @@ class ControlHubDesktop:
             justify="left",
         ).grid(row=0, column=0, columnspan=3, sticky="ew", pady=(0, 12))
 
-        ttk.Label(frame, text=self._t("automap_project")).grid(
-            row=1, column=0, columnspan=3, sticky="w"
+        source_row = ttk.Frame(frame)
+        source_row.grid(row=1, column=0, columnspan=3, sticky="ew")
+        source_row.columnconfigure(3, weight=1)
+        ttk.Label(source_row, text=self._t("automap_project")).grid(
+            row=0, column=0, sticky="w", padx=(0, 12)
         )
-        ttk.Entry(frame, textvariable=self.automap_project_var).grid(
+        ttk.Radiobutton(
+            source_row,
+            text=self._t("automap_current_project"),
+            variable=self.automap_source_mode_var,
+            value="current",
+            command=lambda: self._set_automap_source_mode("current"),
+        ).grid(row=0, column=1, sticky="w", padx=(0, 10))
+        ttk.Radiobutton(
+            source_row,
+            text=self._t("automap_choose_project"),
+            variable=self.automap_source_mode_var,
+            value="file",
+            command=lambda: self._set_automap_source_mode("file"),
+        ).grid(row=0, column=2, sticky="w")
+        ttk.Button(
+            source_row,
+            text=self._t("automap_detect"),
+            command=lambda: self._set_automap_source_mode("current"),
+        ).grid(row=0, column=4, sticky="e", padx=(8, 0))
+        ttk.Label(
+            source_row,
+            textvariable=self.automap_detection_var,
+            foreground="#476273",
+            wraplength=800,
+            justify="left",
+        ).grid(row=1, column=0, columnspan=5, sticky="ew", pady=(4, 0))
+        self.automap_project_entry = ttk.Entry(
+            frame, textvariable=self.automap_project_var
+        )
+        self.automap_project_entry.grid(
             row=2, column=0, sticky="ew", pady=(4, 10)
         )
-        ttk.Button(
+        self.automap_browse_button = ttk.Button(
             frame, text=self._t("automap_browse"), command=self._browse_automap_project
-        ).grid(row=2, column=1, padx=(8, 0), pady=(4, 10))
+        )
+        self.automap_browse_button.grid(
+            row=2, column=1, padx=(8, 0), pady=(4, 10)
+        )
         ttk.Button(
             frame, text=self._t("automap_analyze"), command=self._analyze_automap_project
         ).grid(row=2, column=2, padx=(8, 0), pady=(4, 10))
@@ -3706,6 +3791,7 @@ class ControlHubDesktop:
         self.automap_create_button.grid(row=10, column=2, sticky="e")
         self._update_automap_bank_options()
         self._update_automap_plugin_states()
+        window.after_idle(lambda: self._detect_current_automap_project(silent=True))
 
         def close_window() -> None:
             self.automap_window = None
@@ -3733,6 +3819,7 @@ class ControlHubDesktop:
             self.automap_bank_mode_var.set("unibank")
 
     def _browse_automap_project(self) -> None:
+        self._set_automap_source_mode("file", detect=False)
         selected = filedialog.askopenfilename(
             parent=self.automap_window or self.root,
             title=self._t("source_title"),
@@ -3742,7 +3829,58 @@ class ControlHubDesktop:
             self.automap_project_var.set(selected)
             self._analyze_automap_project()
 
+    def _set_automap_source_mode(self, mode: str, *, detect: bool = True) -> None:
+        if mode not in {"current", "file"}:
+            return
+        self.automap_source_mode_var.set(mode)
+        current = mode == "current"
+        self.automap_project_entry.configure(
+            state="readonly" if current else "normal"
+        )
+        self.automap_browse_button.configure(
+            state="disabled" if current else "normal"
+        )
+        if current and detect:
+            self._detect_current_automap_project(silent=False)
+        elif not current:
+            self.automap_detection_var.set("")
+
+    def _detect_current_automap_project(self, *, silent: bool) -> bool:
+        session = detect_liveprofessor_session()
+        if session.project_path is not None:
+            self.automap_source_mode_var.set("current")
+            self.automap_project_var.set(str(session.project_path))
+            self.automap_detection_var.set(
+                self._t("automap_detected", path=session.project_path)
+            )
+            self.automap_project_entry.configure(state="readonly")
+            self.automap_browse_button.configure(state="disabled")
+            return True
+        if session.running:
+            message = self._t("automap_not_detected")
+        else:
+            message = self._t("automap_not_running")
+        if not silent or self.automap_source_mode_var.get() == "current":
+            self.automap_detection_var.set(message)
+        if silent:
+            self.automap_source_mode_var.set("file")
+            self.automap_project_entry.configure(state="normal")
+            self.automap_browse_button.configure(state="normal")
+        return False
+
     def _analyze_automap_project(self) -> None:
+        if self.automap_source_mode_var.get() == "current":
+            if not self._detect_current_automap_project(silent=False):
+                return
+            if not messagebox.askokcancel(
+                self._t("automap_save_current_title"),
+                self._t(
+                    "automap_save_current_body",
+                    path=self.automap_project_var.get(),
+                ),
+                parent=self.automap_window or self.root,
+            ):
+                return
         try:
             inventory = inspect_project(
                 Path(self.automap_project_var.get()),
@@ -4302,10 +4440,15 @@ class ControlHubDesktop:
             config = self._runtime_config_from_form()
             save_config(config, self.runtime_config_path)
             self.log_path = configure_runtime_logging(config.log_level)
+            active_profile = self.registry.get(self.selected_profile_id)
             runtime = EC4LiveProfessorRuntime(
                 config,
                 status_callback=self._queue_runtime_snapshot,
                 log_callback=self._queue_runtime_log,
+                shortcut_bindings=effective_shortcuts(
+                    active_profile,
+                    self.settings.shortcuts_by_controller,
+                ),
             )
             self.runtime_config = config
             self.runtime = runtime
@@ -4585,9 +4728,191 @@ class ControlHubDesktop:
         )
 
     def show_shortcuts(self) -> None:
-        messagebox.showinfo(
-            self._t("shortcuts_title"), self._t("shortcuts_text"), parent=self.root
+        profile = self._selected_profile()
+        if profile is None:
+            return
+
+        window = tk.Toplevel(self.root)
+        window.title(
+            self._t("shortcuts_title", controller=profile.display_name)
         )
+        window.geometry("920x650")
+        window.minsize(760, 520)
+        window.transient(self.root)
+        if PRODUCT_ICON_PATH.is_file():
+            try:
+                window.iconbitmap(default=str(PRODUCT_ICON_PATH))
+            except tk.TclError:
+                pass
+
+        outer = ttk.Frame(window, padding=16)
+        outer.pack(fill="both", expand=True)
+        outer.columnconfigure(0, weight=1)
+        outer.rowconfigure(2, weight=1)
+        ttk.Label(
+            outer,
+            text=self._t("shortcuts_intro"),
+            wraplength=850,
+            justify="left",
+        ).grid(row=0, column=0, sticky="ew")
+        if not live_runtime_supported(profile.id):
+            ttk.Label(
+                outer,
+                text=self._t("shortcuts_driver_note"),
+                wraplength=850,
+                justify="left",
+                foreground="#6a5a1a",
+            ).grid(row=1, column=0, sticky="ew", pady=(6, 10))
+
+        controls = tuple(control for control in profile.controls if control.supports_press)
+        if not controls:
+            ttk.Label(outer, text=self._t("shortcuts_no_controls")).grid(
+                row=2, column=0, sticky="nw", pady=(20, 0)
+            )
+            ttk.Button(outer, text=self._t("close"), command=window.destroy).grid(
+                row=3, column=0, sticky="e", pady=(12, 0)
+            )
+            return
+
+        choices = (self._t("shortcut_none"),) + tuple(
+            action.label(self.language_var.get()) for action in SHORTCUT_ACTIONS
+        )
+        action_by_label = {
+            action.label(self.language_var.get()): action.id
+            for action in SHORTCUT_ACTIONS
+        }
+        label_by_action = {
+            action.id: action.label(self.language_var.get())
+            for action in SHORTCUT_ACTIONS
+        }
+        current = effective_shortcuts(
+            profile,
+            self.settings.shortcuts_by_controller,
+        )
+        bindings = set(configurable_shortcut_bindings(profile))
+        variables: dict[str, tk.StringVar] = {}
+
+        box = ttk.Frame(outer, relief="sunken", borderwidth=1)
+        box.grid(row=2, column=0, sticky="nsew", pady=(4, 10))
+        box.columnconfigure(0, weight=1)
+        box.rowconfigure(0, weight=1)
+        canvas = tk.Canvas(box, highlightthickness=0)
+        scrollbar = ttk.Scrollbar(box, orient="vertical", command=canvas.yview)
+        canvas.configure(yscrollcommand=scrollbar.set)
+        canvas.grid(row=0, column=0, sticky="nsew")
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        table = ttk.Frame(canvas, padding=8)
+        table_window = canvas.create_window((0, 0), window=table, anchor="nw")
+        canvas.bind(
+            "<Configure>",
+            lambda event: canvas.itemconfigure(table_window, width=event.width),
+        )
+        table.bind(
+            "<Configure>",
+            lambda _event: canvas.configure(scrollregion=canvas.bbox("all")),
+        )
+
+        columns = ((None, self._t("shortcut_direct")),) + tuple(
+            (modifier.id, modifier.id.replace("_", " ").title())
+            for modifier in profile.modifiers
+        )
+        ttk.Label(
+            table,
+            text=self._t("shortcut_control"),
+            font=("Segoe UI Semibold", 9),
+        ).grid(row=0, column=0, sticky="w", padx=(2, 10), pady=(0, 6))
+        table.columnconfigure(0, weight=1)
+        for column, (_modifier_id, heading) in enumerate(columns, start=1):
+            ttk.Label(
+                table,
+                text=heading,
+                font=("Segoe UI Semibold", 9),
+            ).grid(row=0, column=column, sticky="ew", padx=4, pady=(0, 6))
+            table.columnconfigure(column, weight=2)
+
+        for row, control in enumerate(controls, start=1):
+            ttk.Label(
+                table,
+                text=control.id.replace("_", " ").title(),
+            ).grid(row=row, column=0, sticky="w", padx=(2, 10), pady=3)
+            for column, (modifier_id, _heading) in enumerate(columns, start=1):
+                binding = shortcut_binding_key(control.id, modifier_id)
+                if binding not in bindings:
+                    continue
+                selected = current.get(binding, "")
+                variable = tk.StringVar(
+                    value=label_by_action.get(selected, self._t("shortcut_none"))
+                )
+                variables[binding] = variable
+                ttk.Combobox(
+                    table,
+                    textvariable=variable,
+                    values=choices,
+                    state="readonly",
+                    width=28,
+                ).grid(row=row, column=column, sticky="ew", padx=4, pady=3)
+
+        actions = ttk.Frame(outer)
+        actions.grid(row=3, column=0, sticky="ew")
+
+        def reset_shortcuts() -> None:
+            factory = default_shortcuts(profile)
+            for binding, variable in variables.items():
+                variable.set(
+                    label_by_action.get(
+                        factory.get(binding, ""), self._t("shortcut_none")
+                    )
+                )
+
+        def save_shortcuts() -> None:
+            controller_bindings = {
+                binding: action_by_label.get(variable.get(), "")
+                for binding, variable in variables.items()
+            }
+            all_shortcuts = {
+                controller_id: dict(saved_bindings)
+                for controller_id, saved_bindings in self.settings.shortcuts_by_controller.items()
+            }
+            all_shortcuts[profile.id] = controller_bindings
+            self.settings = replace(
+                self.settings,
+                shortcuts_by_controller=all_shortcuts,
+            )
+            try:
+                save_desktop_settings(self.settings, self.settings_path)
+            except OSError as exc:
+                messagebox.showerror(
+                    self._t("shortcuts_title", controller=profile.display_name),
+                    str(exc),
+                    parent=window,
+                )
+                return
+            if self.runtime is not None and profile.id == self.selected_profile_id:
+                self.runtime.set_shortcut_bindings(
+                    effective_shortcuts(profile, all_shortcuts)
+                )
+            messagebox.showinfo(
+                self._t("shortcuts_title", controller=profile.display_name),
+                self._t("shortcut_saved", controller=profile.display_name),
+                parent=window,
+            )
+
+        ttk.Button(
+            actions,
+            text=self._t("shortcut_reset"),
+            command=reset_shortcuts,
+        ).pack(side="left")
+        ttk.Button(
+            actions,
+            text=self._t("close"),
+            command=window.destroy,
+        ).pack(side="right")
+        ttk.Button(
+            actions,
+            text=self._t("shortcut_save"),
+            command=save_shortcuts,
+            style="Accent.TButton",
+        ).pack(side="right", padx=(0, 8))
 
     def show_live_settings(self) -> None:
         window = self.live_settings_window
