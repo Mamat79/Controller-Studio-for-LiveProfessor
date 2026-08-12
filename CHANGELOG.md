@@ -1,5 +1,12 @@
 # Historique des versions
 
+## V.2026 (2026.5) — 2026-08-12
+
+- Réorganise l'interface autour d'une navigation latérale stable : Contrôle en direct, Contrôleurs, Plug-ins, Bibliothèque et accès AutoMap dédié.
+- Simplifie la page Contrôle en direct autour de l'état du moteur, de l'action principale, des banques et des accès rapides, tout en gardant visibles le démarrage Windows et la connexion automatique.
+- Regroupe les outils EC4, l'apprentissage MIDI et les réglages techniques dans une section avancée repliable sans supprimer aucune fonction.
+- Protège les libellés français et anglais contre la troncature avec une fenêtre minimale plus large, des zones redimensionnables et des actions réorganisées.
+
 ## V.2026 (2026.4) — 2026-08-10
 
 - Simplifie l'écran d'attente EC4 en retirant la signature « By Mamat » et efface cet écran dès l'arrêt du moteur ou la fermeture de Controller Studio.

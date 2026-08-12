@@ -1,6 +1,6 @@
 # Sources et modes des profils de contrôleurs
 
-Controller Studio V.2026.4 fournit 33 profils déclaratifs. Un profil `community`
+Controller Studio V.2026.5 fournit 33 profils déclaratifs. Un profil `community`
 est utilisable pour l'export `.ctrl2`, AutoMap et l'apprentissage MIDI, mais son
 plan complet n'a pas encore été validé sur un exemplaire physique par le projet.
 Les profils programmables utilisent un plan SiLeMIO simple et reproductible à
