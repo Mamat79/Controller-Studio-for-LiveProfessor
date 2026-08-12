@@ -104,6 +104,7 @@ from .workflow import prepare_liveprofessor_project
 
 
 PRODUCT_ICON_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.ico"
+PRODUCT_LOGO_PATH = Path(__file__).resolve().parent / "assets" / "controller-studio.png"
 DISPLAY_VERSION = f"V.{__version__}"
 AUTO_START_RETRY_DELAYS_MS = (1200, 3000, 6000, 12000, 20000)
 
@@ -121,6 +122,8 @@ UI_TEXT = {
         "tab_controllers": "Banque de contrôleurs",
         "tab_plugins": "Plug-ins",
         "tab_library": "Bibliothèque",
+        "nav_automap": "⚡  AutoMap",
+        "sidebar_footer": "Journal · Aide · Réglages",
         "menu_file": "Fichier",
         "menu_options": "Options",
         "menu_tools": "Outils",
@@ -132,6 +135,16 @@ UI_TEXT = {
             "utiles à son pilote temps réel."
         ),
         "active_controller": "Contrôleur actif",
+        "automation_options": "Automatisation",
+        "quick_access": "Accès rapides",
+        "advanced_controller": "Réglages avancés du contrôleur",
+        "advanced_controller_open": "▼  Réglages avancés du contrôleur",
+        "advanced_controller_closed": "▶  Réglages avancés du contrôleur",
+        "controllers_title": "Banque de contrôleurs",
+        "controllers_description": (
+            "Choisissez un profil existant, fabriquez votre contrôleur ou exportez "
+            "son fichier LiveProfessor."
+        ),
         "driver_ready": "PILOTE TEMPS RÉEL PRÊT",
         "driver_profile_only": "PROFIL AUTOMAP / EXPORT",
         "driver_profile_only_body": (
@@ -662,6 +675,8 @@ UI_TEXT = {
         "tab_controllers": "Controller bank",
         "tab_plugins": "Plug-ins",
         "tab_library": "Library",
+        "nav_automap": "⚡  AutoMap",
+        "sidebar_footer": "Log · Help · Settings",
         "menu_file": "File",
         "menu_options": "Options",
         "menu_tools": "Tools",
@@ -673,6 +688,16 @@ UI_TEXT = {
             "to its real-time driver."
         ),
         "active_controller": "Active controller",
+        "automation_options": "Automation",
+        "quick_access": "Quick access",
+        "advanced_controller": "Advanced controller settings",
+        "advanced_controller_open": "▼  Advanced controller settings",
+        "advanced_controller_closed": "▶  Advanced controller settings",
+        "controllers_title": "Controller bank",
+        "controllers_description": (
+            "Choose an existing profile, build your controller, or export its "
+            "LiveProfessor file."
+        ),
         "driver_ready": "REAL-TIME DRIVER READY",
         "driver_profile_only": "AUTOMAP / EXPORT PROFILE",
         "driver_profile_only_body": (
@@ -1332,14 +1357,16 @@ class ControlHubDesktop:
         self._library_buttons: list[ttk.Button] = []
         self._closing = False
         self._suppress_unmap = False
+        self.current_page = "live"
+        self._live_advanced_open = False
         try:
             self.log_path = configure_runtime_logging(self.runtime_config.log_level)
         except OSError as exc:
             self.log_path = default_log_path()
             self._configuration_load_error = self._configuration_load_error or str(exc)
 
-        root.geometry("1040x680")
-        root.minsize(840, 540)
+        root.geometry("1180x760")
+        root.minsize(1080, 680)
         if PRODUCT_ICON_PATH.is_file():
             try:
                 root.iconbitmap(default=str(PRODUCT_ICON_PATH))
@@ -1384,73 +1411,154 @@ class ControlHubDesktop:
         style.configure("Treeview", rowheight=26, font=("Segoe UI", 9))
         style.configure("Treeview.Heading", font=("Segoe UI Semibold", 9))
         style.configure("Accent.TButton", font=("Segoe UI Semibold", 9))
+        style.configure("Section.TLabelframe", padding=(12, 10))
+        style.configure("Section.TLabelframe.Label", font=("Segoe UI Semibold", 10))
 
     def _build_ui(self) -> None:
         self.root.title(self._t("window_title", version=DISPLAY_VERSION))
         self._build_menu()
-        brand = tk.Frame(
-            self.root,
-            bg="#111820",
-            height=72,
-            highlightthickness=1,
-            highlightbackground="#2a4050",
-        )
-        brand.pack(fill="x", padx=18, pady=(14, 8))
-        brand.pack_propagate(False)
+        shell = ttk.Frame(self.root)
+        shell.pack(fill="both", expand=True)
+        shell.columnconfigure(1, weight=1)
+        shell.rowconfigure(0, weight=1)
+
+        sidebar = tk.Frame(shell, bg="#101c26", width=210)
+        sidebar.grid(row=0, column=0, sticky="nsew")
+        sidebar.grid_propagate(False)
+        self.sidebar_logo_image: tk.PhotoImage | None = None
+        if PRODUCT_LOGO_PATH.is_file():
+            try:
+                self.sidebar_logo_image = tk.PhotoImage(file=str(PRODUCT_LOGO_PATH)).subsample(
+                    12, 12
+                )
+            except tk.TclError:
+                self.sidebar_logo_image = None
+        if self.sidebar_logo_image is not None:
+            tk.Label(
+                sidebar,
+                image=self.sidebar_logo_image,
+                bg="#101c26",
+                borderwidth=0,
+            ).pack(pady=(16, 4))
         tk.Label(
-            brand,
+            sidebar,
             text=PRODUCT_NAME,
-            bg="#111820",
-            fg="#e8f4f8",
-            font=("Segoe UI Semibold", 20),
-        ).pack(side="left", padx=(18, 12))
+            bg="#101c26",
+            fg="#f2f8fb",
+            font=("Segoe UI Semibold", 17),
+            anchor="center",
+            justify="center",
+        ).pack(fill="x", padx=14, pady=(0 if self.sidebar_logo_image else 24, 2))
         tk.Label(
-            brand,
+            sidebar,
             text=self._t("brand_context", version=DISPLAY_VERSION),
-            bg="#111820",
-            fg="#91a9b5",
-            font=("Segoe UI", 11),
-        ).pack(side="left")
-        signature = tk.Frame(brand, bg="#111820")
-        signature.pack(side="right", padx=16)
+            bg="#101c26",
+            fg="#8ca4b3",
+            font=("Segoe UI", 9),
+            anchor="center",
+            justify="center",
+        ).pack(fill="x", padx=14, pady=(0, 18))
+
+        self.sidebar_buttons: dict[str, tk.Button] = {}
+        nav = tk.Frame(sidebar, bg="#101c26")
+        nav.pack(fill="x", padx=12)
+        for page, label in (
+            ("live", self._t("tab_live")),
+            ("controllers", self._t("tab_controllers")),
+            ("plugins", self._t("tab_plugins")),
+            ("library", self._t("tab_library")),
+        ):
+            button = tk.Button(
+                nav,
+                text=label,
+                command=lambda selected=page: self._show_page(selected),
+                anchor="w",
+                padx=14,
+                pady=10,
+                relief="flat",
+                borderwidth=0,
+                font=("Segoe UI Semibold", 10),
+                cursor="hand2",
+            )
+            button.pack(fill="x", pady=2)
+            self.sidebar_buttons[page] = button
+        tk.Button(
+            nav,
+            text=self._t("nav_automap"),
+            command=self.prepare_automap,
+            bg="#08a7c8",
+            fg="#ffffff",
+            activebackground="#0ab4d7",
+            activeforeground="#ffffff",
+            anchor="w",
+            padx=14,
+            pady=10,
+            relief="flat",
+            borderwidth=0,
+            font=("Segoe UI Semibold", 10),
+            cursor="hand2",
+        ).pack(fill="x", pady=(12, 2))
+
+        sidebar_footer = tk.Frame(sidebar, bg="#101c26")
+        sidebar_footer.pack(side="bottom", fill="x", padx=20, pady=18)
+        signature = tk.Frame(sidebar_footer, bg="#101c26")
+        signature.pack(fill="x")
         tk.Label(
             signature,
             text=BRAND_NAME,
-            bg="#111820",
-            fg="#12c9e8",
-            font=("Segoe UI Semibold", 14),
-        ).pack(side="left", padx=(0, 12))
+            bg="#101c26",
+            fg="#19d6f2",
+            font=("Segoe UI Semibold", 12),
+            anchor="w",
+        ).pack(side="left")
         tk.Label(
             signature,
-            text="By Mamat\n-------[]--",
-            bg="#111820",
-            fg="#91a9b5",
-            font=("Segoe UI", 9),
-            justify="right",
-        ).pack(side="left")
+            text="By Mamat",
+            bg="#101c26",
+            fg="#8ca4b3",
+            font=("Segoe UI", 8),
+            anchor="e",
+        ).pack(side="right")
+        tk.Label(
+            sidebar_footer,
+            text="-------[]--",
+            bg="#101c26",
+            fg="#8ca4b3",
+            font=("Consolas", 8),
+            anchor="w",
+        ).pack(fill="x")
+        tk.Label(
+            sidebar_footer,
+            text=self._t("sidebar_footer"),
+            bg="#101c26",
+            fg="#6f8999",
+            font=("Segoe UI", 8),
+            anchor="w",
+        ).pack(fill="x", pady=(5, 0))
 
-        ttk.Label(
-            self.root,
-            text=self._t("intro"),
-            style="Subtitle.TLabel",
-        ).pack(anchor="w", padx=20, pady=(0, 7))
-
-        notebook = ttk.Notebook(self.root)
-        self.notebook = notebook
-        notebook.pack(fill="both", expand=True, padx=18, pady=(4, 10))
-        live_tab = ttk.Frame(notebook, padding=12)
+        content = ttk.Frame(shell, padding=(24, 20, 24, 14))
+        content.grid(row=0, column=1, sticky="nsew")
+        content.columnconfigure(0, weight=1)
+        content.rowconfigure(0, weight=1)
+        self.page_frames: dict[str, ttk.Frame] = {}
+        live_tab = ttk.Frame(content)
         self.live_tab = live_tab
-        controllers_tab = ttk.Frame(notebook, padding=12)
-        plugins_tab = ttk.Frame(notebook, padding=12)
-        library_tab = ttk.Frame(notebook, padding=12)
-        notebook.add(live_tab, text=self._t("tab_live"))
-        notebook.add(controllers_tab, text=self._t("tab_controllers"))
-        notebook.add(plugins_tab, text=self._t("tab_plugins"))
-        notebook.add(library_tab, text=self._t("tab_library"))
+        controllers_tab = ttk.Frame(content)
+        plugins_tab = ttk.Frame(content)
+        library_tab = ttk.Frame(content)
+        self.page_frames.update(
+            live=live_tab,
+            controllers=controllers_tab,
+            plugins=plugins_tab,
+            library=library_tab,
+        )
+        for frame in self.page_frames.values():
+            frame.grid(row=0, column=0, sticky="nsew")
         self._build_live_tab(live_tab)
         self._build_controllers_tab(controllers_tab)
         self._build_plugins_tab(plugins_tab)
         self._build_library_tab(library_tab)
+        self._show_page(self.current_page)
 
         ttk.Separator(self.root).pack(fill="x")
         ttk.Label(
@@ -1459,6 +1567,27 @@ class ControlHubDesktop:
             style="Status.TLabel",
             anchor="w",
         ).pack(fill="x")
+
+    def _show_page(self, page: str) -> None:
+        if page not in self.page_frames:
+            page = "live"
+        self.current_page = page
+        self.page_frames[page].tkraise()
+        for name, button in self.sidebar_buttons.items():
+            if name == page:
+                button.configure(
+                    bg="#173647",
+                    fg="#ffffff",
+                    activebackground="#1c455a",
+                    activeforeground="#ffffff",
+                )
+            else:
+                button.configure(
+                    bg="#101c26",
+                    fg="#b8c8d2",
+                    activebackground="#17303f",
+                    activeforeground="#ffffff",
+                )
 
     def _build_menu(self) -> None:
         menu = tk.Menu(self.root)
@@ -1557,20 +1686,37 @@ class ControlHubDesktop:
 
     def _build_live_tab(self, parent: ttk.Frame) -> None:
         parent.columnconfigure(0, weight=1)
-        parent.rowconfigure(6, weight=1)
-        ttk.Label(parent, text=self._t("live_title"), style="Title.TLabel").grid(
+        parent.rowconfigure(5, weight=1)
+        header = ttk.Frame(parent)
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+        header.columnconfigure(0, weight=1)
+        ttk.Label(header, text=self._t("live_title"), style="Title.TLabel").grid(
             row=0, column=0, sticky="w"
         )
         ttk.Label(
-            parent,
+            header,
             text=self._t("live_description"),
             style="Subtitle.TLabel",
-            wraplength=900,
+            wraplength=720,
             justify="left",
-        ).grid(row=1, column=0, sticky="ew", pady=(2, 8))
+        ).grid(row=1, column=0, sticky="ew", pady=(3, 0))
+        self.live_driver_badge = tk.Label(
+            header,
+            bg="#e9f7f1",
+            fg="#16825d",
+            font=("Segoe UI Semibold", 8),
+            padx=10,
+            pady=5,
+        )
+        self.live_driver_badge.grid(row=0, column=1, rowspan=2, sticky="ne")
 
-        controller = ttk.LabelFrame(parent, text=self._t("active_controller"), padding=10)
-        controller.grid(row=2, column=0, sticky="ew")
+        controller = ttk.LabelFrame(
+            parent,
+            text=self._t("active_controller"),
+            padding=12,
+            style="Section.TLabelframe",
+        )
+        controller.grid(row=1, column=0, sticky="ew")
         controller.columnconfigure(0, weight=1)
         self.live_controller_combo = ttk.Combobox(
             controller,
@@ -1586,125 +1732,201 @@ class ControlHubDesktop:
             text=self._t("configure_active_controller"),
             command=self.edit_controller,
         ).grid(row=0, column=1, sticky="e", padx=(0, 8))
-        self.live_driver_badge = tk.Label(
-            controller,
-            bg="#dff5fb",
-            fg="#087d9d",
-            font=("Segoe UI Semibold", 8),
-            padx=9,
-            pady=3,
-        )
-        self.live_driver_badge.grid(row=0, column=2, sticky="e")
         self.live_driver_note = ttk.Label(
             controller,
             style="Subtitle.TLabel",
-            wraplength=850,
+            wraplength=780,
             justify="left",
         )
         self.live_driver_note.grid(
-            row=1, column=0, columnspan=3, sticky="ew", pady=(7, 0)
+            row=1, column=0, columnspan=2, sticky="ew", pady=(7, 0)
         )
-        startup_options = ttk.Frame(controller)
-        startup_options.grid(
-            row=2, column=0, columnspan=3, sticky="ew", pady=(8, 0)
+
+        startup_options = ttk.LabelFrame(
+            parent,
+            text=self._t("automation_options"),
+            padding=10,
+            style="Section.TLabelframe",
         )
-        ttk.Checkbutton(
+        startup_options.grid(row=2, column=0, sticky="ew", pady=(10, 0))
+        startup_options.columnconfigure(0, weight=1, uniform="automation")
+        startup_options.columnconfigure(1, weight=1, uniform="automation")
+        windows_start = tk.Checkbutton(
             startup_options,
             text=self._t("start_with_windows"),
             variable=self.start_with_windows_var,
             command=self._save_start_with_windows,
-        ).pack(side="left")
-        self.auto_start_runtime_check = ttk.Checkbutton(
+            anchor="w",
+            justify="left",
+            wraplength=300,
+            bg="#ffffff",
+            activebackground="#ffffff",
+            highlightthickness=0,
+            font=("Segoe UI", 9),
+        )
+        windows_start.grid(row=0, column=0, sticky="ew", padx=(0, 12))
+        self.auto_start_runtime_check = tk.Checkbutton(
             startup_options,
             text=self._t("auto_start_runtime"),
             variable=self.auto_start_runtime_var,
             command=self._save_auto_start_runtime,
+            anchor="w",
+            justify="left",
+            wraplength=340,
+            bg="#ffffff",
+            activebackground="#ffffff",
+            highlightthickness=0,
+            font=("Segoe UI", 9),
         )
-        self.auto_start_runtime_check.pack(side="left", padx=(18, 0))
+        self.auto_start_runtime_check.grid(row=0, column=1, sticky="ew")
 
-        actions = ttk.Frame(parent)
-        actions.grid(row=3, column=0, sticky="ew", pady=(9, 5))
-        tk.Button(
-            actions,
-            text=self._t("prepare_automap"),
-            command=self.prepare_automap,
-            bg="#087d9d",
-            fg="#ffffff",
-            activebackground="#0aa1c9",
-            activeforeground="#ffffff",
-            relief="flat",
-            borderwidth=0,
-            padx=14,
-            pady=5,
-            font=("Segoe UI Semibold", 10),
-            cursor="hand2",
-        ).pack(side="right")
-        ttk.Button(
-            actions,
-            text=self._t("live_settings"),
-            command=self.show_live_settings,
-        ).pack(side="right", padx=(0, 7))
-        ttk.Button(
-            actions,
-            text=self._t("log_window"),
-            command=self.show_runtime_log,
-        ).pack(side="right", padx=(0, 7))
-        self.runtime_start_button = ttk.Button(
-            actions, text=self._t("start"), command=self.start_runtime
-        )
-        self.runtime_stop_button = ttk.Button(
-            actions, text=self._t("stop"), command=self.stop_runtime
-        )
-        self.runtime_restart_button = ttk.Button(
-            actions, text=self._t("restart"), command=self.restart_runtime
-        )
-        self.runtime_start_button.pack(side="left")
-        self.runtime_stop_button.pack(side="left", padx=(6, 0))
-        self.runtime_restart_button.pack(side="left", padx=(6, 0))
-        ttk.Button(
-            actions,
-            text=self._t("minimize"),
-            command=self.minimize_to_tray,
-        ).pack(side="left", padx=(6, 0))
+        dashboard = ttk.Frame(parent)
+        dashboard.grid(row=3, column=0, sticky="nsew", pady=(10, 0))
+        dashboard.columnconfigure(0, weight=2, uniform="dashboard")
+        dashboard.columnconfigure(1, weight=1, uniform="dashboard")
+        dashboard.rowconfigure(0, weight=1)
 
-        self.runtime_action_buttons: list[ttk.Button] = []
-        self.runtime_settings_action_buttons: list[ttk.Button] = []
-
-        state_frame = ttk.LabelFrame(parent, text=self._t("state_frame"), padding=10)
-        state_frame.grid(row=4, column=0, sticky="ew", pady=(4, 6))
+        state_frame = ttk.LabelFrame(
+            dashboard,
+            text=self._t("state_frame"),
+            padding=14,
+            style="Section.TLabelframe",
+        )
+        state_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 6))
         state_frame.columnconfigure(0, weight=1)
         ttk.Label(
             state_frame,
             textvariable=self.runtime_status,
-            wraplength=500,
+            wraplength=470,
             justify="left",
-        ).grid(
-            row=0, column=0, sticky="ew"
+            font=("Segoe UI Semibold", 12),
+        ).grid(row=0, column=0, columnspan=3, sticky="ew")
+
+        runtime_controls = ttk.Frame(state_frame)
+        runtime_controls.grid(row=1, column=0, columnspan=3, sticky="ew", pady=(13, 12))
+        runtime_controls.columnconfigure(0, weight=1)
+        self.runtime_start_button = tk.Button(
+            runtime_controls,
+            text=f"▶  {self._t('start')}",
+            command=self.start_runtime,
+            bg="#08a7c8",
+            fg="#ffffff",
+            activebackground="#0ab4d7",
+            activeforeground="#ffffff",
+            disabledforeground="#d7eef3",
+            relief="flat",
+            borderwidth=0,
+            padx=16,
+            pady=8,
+            font=("Segoe UI Semibold", 10),
+            cursor="hand2",
         )
+        self.runtime_stop_button = ttk.Button(
+            runtime_controls, text=self._t("stop"), command=self.stop_runtime
+        )
+        self.runtime_restart_button = ttk.Button(
+            runtime_controls, text=self._t("restart"), command=self.restart_runtime
+        )
+        self.runtime_start_button.grid(row=0, column=0, sticky="ew")
+        self.runtime_stop_button.grid(row=0, column=1, padx=(8, 0))
+        self.runtime_restart_button.grid(row=0, column=2, padx=(8, 0))
+
+        self.runtime_action_buttons: list[ttk.Button] = []
+        self.runtime_settings_action_buttons: list[ttk.Button] = []
+
         self.previous_bank_button = ttk.Button(
             state_frame,
             text=self._t("previous_bank"),
             command=lambda: self.change_bank(-1),
         )
-        self.previous_bank_button.grid(row=0, column=1, padx=(8, 4))
+        self.previous_bank_button.grid(row=2, column=0, sticky="w")
         ttk.Label(
             state_frame,
             textvariable=self.runtime_bank,
-            width=12,
+            width=9,
             anchor="center",
             font=("Segoe UI Semibold", 10),
-        ).grid(row=0, column=2)
+        ).grid(row=2, column=1, padx=8)
         self.next_bank_button = ttk.Button(
             state_frame,
             text=self._t("next_bank"),
             command=lambda: self.change_bank(1),
         )
-        self.next_bank_button.grid(row=0, column=3, padx=(4, 0))
-
-        self.ec4_live_frame = ttk.LabelFrame(
-            parent, text=self._t("ec4_zone"), padding=10
+        self.next_bank_button.grid(row=2, column=2, sticky="e")
+        ttk.Separator(state_frame).grid(
+            row=3, column=0, columnspan=3, sticky="ew", pady=(14, 10)
         )
-        self.ec4_live_frame.grid(row=5, column=0, sticky="ew", pady=(0, 6))
+        ttk.Label(
+            state_frame,
+            text=self._t("last_event"),
+            style="Subtitle.TLabel",
+        ).grid(row=4, column=0, columnspan=3, sticky="w")
+        ttk.Label(
+            state_frame,
+            textvariable=self.runtime_last_event,
+            anchor="w",
+            justify="left",
+            wraplength=470,
+        ).grid(row=5, column=0, columnspan=3, sticky="ew", pady=(3, 0))
+
+        quick = ttk.LabelFrame(
+            dashboard,
+            text=self._t("quick_access"),
+            padding=14,
+            style="Section.TLabelframe",
+        )
+        quick.grid(row=0, column=1, sticky="nsew", padx=(6, 0))
+        quick.columnconfigure(0, weight=1)
+        ttk.Button(
+            quick,
+            text=self._t("log_window"),
+            command=self.show_runtime_log,
+        ).grid(row=0, column=0, sticky="ew")
+        ttk.Button(
+            quick,
+            text=self._t("shortcuts"),
+            command=self.show_shortcuts,
+        ).grid(row=1, column=0, sticky="ew", pady=(8, 0))
+        ttk.Button(
+            quick,
+            text=self._t("diagnostic"),
+            command=self.show_diagnostics,
+        ).grid(row=2, column=0, sticky="ew", pady=(8, 0))
+        ttk.Button(
+            quick,
+            text=self._t("minimize"),
+            command=self.minimize_to_tray,
+        ).grid(row=3, column=0, sticky="ew", pady=(8, 0))
+
+        self.live_advanced_button = ttk.Button(
+            parent,
+            text=self._t("advanced_controller_closed"),
+            command=self._toggle_live_advanced,
+        )
+        self.live_advanced_button.grid(row=4, column=0, sticky="ew", pady=(10, 0))
+        self.live_advanced_frame = ttk.Frame(parent)
+        self.live_advanced_frame.grid(row=5, column=0, sticky="nsew", pady=(8, 0))
+        self.live_advanced_frame.columnconfigure(0, weight=1)
+        self.live_advanced_frame.rowconfigure(1, weight=1)
+        advanced_actions = ttk.Frame(self.live_advanced_frame)
+        advanced_actions.grid(row=0, column=0, sticky="ew", pady=(0, 8))
+        ttk.Button(
+            advanced_actions,
+            text=self._t("live_settings"),
+            command=self.show_live_settings,
+        ).pack(side="left")
+        ttk.Button(
+            advanced_actions,
+            text=self._t("configure_active_controller"),
+            command=self.edit_controller,
+        ).pack(side="left", padx=(8, 0))
+        self.ec4_live_frame = ttk.LabelFrame(
+            self.live_advanced_frame,
+            text=self._t("ec4_zone"),
+            padding=10,
+            style="Section.TLabelframe",
+        )
+        self.ec4_live_frame.grid(row=1, column=0, sticky="nsew")
         target_row = ttk.Frame(self.ec4_live_frame)
         target_row.pack(fill="x")
         ttk.Label(target_row, text=self._t("target_setup")).pack(side="left")
@@ -1746,22 +1968,43 @@ class ControlHubDesktop:
         ttk.Button(
             learn_row, text=self._t("diagnostic"), command=self.show_diagnostics
         ).pack(side="right")
-
-        event_frame = ttk.LabelFrame(parent, text=self._t("last_event"), padding=10)
-        event_frame.grid(row=6, column=0, sticky="nsew", pady=(2, 0))
-        ttk.Label(
-            event_frame,
-            textvariable=self.runtime_last_event,
-            anchor="w",
-            justify="left",
-            wraplength=900,
-        ).pack(fill="both", expand=True)
+        if self._live_advanced_open:
+            self.live_advanced_button.configure(
+                text=self._t("advanced_controller_open")
+            )
+        else:
+            self.live_advanced_frame.grid_remove()
         self._update_mapping_status()
         self._set_runtime_widget_states()
 
+    def _toggle_live_advanced(self) -> None:
+        self._live_advanced_open = not self._live_advanced_open
+        if self._live_advanced_open:
+            self.live_advanced_frame.grid()
+            self.live_advanced_button.configure(
+                text=self._t("advanced_controller_open")
+            )
+        else:
+            self.live_advanced_frame.grid_remove()
+            self.live_advanced_button.configure(
+                text=self._t("advanced_controller_closed")
+            )
+
     def _build_controllers_tab(self, parent: ttk.Frame) -> None:
         parent.columnconfigure(0, weight=1)
-        parent.rowconfigure(0, weight=1)
+        parent.rowconfigure(2, weight=1)
+        ttk.Label(
+            parent,
+            text=self._t("controllers_title"),
+            style="Title.TLabel",
+        ).grid(row=0, column=0, columnspan=2, sticky="w")
+        ttk.Label(
+            parent,
+            text=self._t("controllers_description"),
+            style="Subtitle.TLabel",
+            wraplength=850,
+            justify="left",
+        ).grid(row=1, column=0, columnspan=2, sticky="ew", pady=(3, 12))
         columns = ("maker", "model", "status", "version", "controls", "layout")
         self.controller_tree = ttk.Treeview(
             parent,
@@ -1792,13 +2035,13 @@ class ControlHubDesktop:
             parent, orient="vertical", command=self.controller_tree.yview
         )
         self.controller_tree.configure(yscrollcommand=scrollbar.set)
-        self.controller_tree.grid(row=0, column=0, sticky="nsew")
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        self.controller_tree.grid(row=2, column=0, sticky="nsew")
+        scrollbar.grid(row=2, column=1, sticky="ns")
         self.controller_tree.bind("<<TreeviewSelect>>", self._select_controller)
         self.controller_tree.bind("<Double-1>", lambda _event: self.edit_controller())
 
         actions = ttk.Frame(parent, padding=(0, 12, 0, 0))
-        actions.grid(row=1, column=0, columnspan=2, sticky="ew")
+        actions.grid(row=3, column=0, columnspan=2, sticky="ew")
         primary = ttk.Frame(actions)
         primary.pack(fill="x")
         tk.Button(
@@ -1826,22 +2069,6 @@ class ControlHubDesktop:
             text=self._t("controller_import"),
             command=self.import_controller,
         ).pack(side="left", padx=(8, 0))
-        tk.Button(
-            primary,
-            text=self._t("prepare_automap"),
-            command=self.prepare_automap,
-            bg="#087d9d",
-            fg="#ffffff",
-            activebackground="#0aa1c9",
-            activeforeground="#ffffff",
-            relief="flat",
-            borderwidth=0,
-            padx=14,
-            pady=5,
-            font=("Segoe UI Semibold", 10),
-            cursor="hand2",
-        ).pack(side="right")
-
         secondary = ttk.Frame(actions)
         secondary.pack(fill="x", pady=(7, 0))
         ttk.Button(secondary, text=self._t("refresh"), command=self.reload_catalog).pack(
@@ -1856,11 +2083,6 @@ class ControlHubDesktop:
             secondary,
             text=self._t("contribute_controller"),
             command=self.contribute_controller,
-        ).pack(side="left", padx=(8, 0))
-        ttk.Button(
-            secondary,
-            text=self._t("minimize"),
-            command=self.minimize_to_tray,
         ).pack(side="left", padx=(8, 0))
 
     def _build_plugins_tab(self, parent: ttk.Frame) -> None:
@@ -1922,34 +2144,38 @@ class ControlHubDesktop:
             toolbar,
             textvariable=self.plugin_analysis_status_var,
             style="Subtitle.TLabel",
-        ).grid(row=0, column=0, sticky="w")
+            wraplength=820,
+            justify="left",
+        ).grid(row=0, column=0, sticky="ew", pady=(0, 7))
+        plugin_actions = ttk.Frame(toolbar)
+        plugin_actions.grid(row=1, column=0, sticky="ew")
         self.plugin_scan_all_button = ttk.Button(
-            toolbar,
+            plugin_actions,
             text=self._t("plugin_scan_all"),
             command=self._scan_all_plugin_names,
             state="disabled",
             style="Accent.TButton",
         )
-        self.plugin_scan_all_button.grid(row=0, column=1, padx=(8, 0))
+        self.plugin_scan_all_button.pack(side="left")
         self.plugin_edit_button = ttk.Button(
-            toolbar,
+            plugin_actions,
             text=self._t("plugin_edit"),
             command=self._open_plugin_profile_editor,
             state="disabled",
         )
-        self.plugin_edit_button.grid(row=0, column=2, padx=(8, 0))
+        self.plugin_edit_button.pack(side="left", padx=(8, 0))
         self.plugin_automap_button = ttk.Button(
-            toolbar,
+            plugin_actions,
             text=self._t("plugin_use_automap"),
             command=self._use_plugin_project_in_automap,
             state="disabled",
         )
-        self.plugin_automap_button.grid(row=0, column=3, padx=(8, 0))
+        self.plugin_automap_button.pack(side="left", padx=(8, 0))
         ttk.Button(
-            toolbar,
+            plugin_actions,
             text=self._t("plugin_open_folder"),
             command=self._open_plugin_profile_folder,
-        ).grid(row=0, column=4, padx=(8, 0))
+        ).pack(side="right")
 
         tree_frame = ttk.Frame(parent)
         tree_frame.grid(row=4, column=0, sticky="nsew")

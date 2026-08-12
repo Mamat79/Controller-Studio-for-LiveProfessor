@@ -1,5 +1,5 @@
 #define MyAppName "Controller Studio for LiveProfessor"
-#define MyAppVersion "2026.4"
+#define MyAppVersion "2026.5"
 #define MyAppPublisher "Mamat"
 #define MyAppExeName "Controller-Studio-for-LiveProfessor.exe"
 #define MyShortcutName "Controller Studio for LiveProfessor"
@@ -23,7 +23,7 @@ ArchitecturesAllowed=x64compatible
 PrivilegesRequired=lowest
 UsedUserAreasWarning=no
 UninstallDisplayIcon={app}\{#MyAppExeName}
-VersionInfoVersion=2026.4.0.0
+VersionInfoVersion=2026.5.0.0
 VersionInfoCompany={#MyAppPublisher}
 VersionInfoDescription={#MyAppName} installer
 VersionInfoProductName={#MyAppName}

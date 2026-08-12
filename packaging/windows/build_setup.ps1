@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 $projectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $application = Join-Path $projectRoot 'dist\Controller-Studio-for-LiveProfessor.exe'
 $setupScript = Join-Path $PSScriptRoot 'SiLeMIO-Controller-Studio.iss'
-$setup = Join-Path $projectRoot 'dist\Controller-Studio-for-LiveProfessor-Setup-v2026.4.exe'
+$setup = Join-Path $projectRoot 'dist\Controller-Studio-for-LiveProfessor-Setup-v2026.5.exe'
 $checksum = "$setup.sha256"
 
 if ($RebuildApplication -or -not (Test-Path -LiteralPath $application -PathType Leaf)) {

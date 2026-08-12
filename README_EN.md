@@ -10,25 +10,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4"><img alt="Version V.2026.4" src="https://img.shields.io/badge/version-V.2026.4-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.5"><img alt="Version V.2026.5" src="https://img.shields.io/badge/version-V.2026.5-0b9fc6"></a>
   <img alt="Windows 10 and 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
   <img alt="French and English" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Latest version (quick access)
 
-**Stable release: [Controller Studio V.2026.4](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.4)**<br>
+**Stable release: [Controller Studio V.2026.5](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.5)**<br>
 Direct downloads:
 
-- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Setup-v2026.4.exe)
-- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor.exe)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.4/SHA256SUMS.txt)
+- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Setup-v2026.5.exe)
+- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor.exe)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/SHA256SUMS.txt)
 
 [Lire cette présentation en français](README.md)
 
-> **Public V.2026.4 Windows release.** Controller Studio always works on a new AutoMap copy and keeps the source `.rack2` project untouched.
+> **Public V.2026.5 Windows release.** Controller Studio introduces clearer sidebar navigation, always works on a new AutoMap copy, and keeps the source `.rack2` project untouched.
 
 ## What does Controller Studio do?
 
@@ -91,7 +91,7 @@ VST is a registered trademark of Steinberg Media Technologies GmbH. Third-party 
 
 ## Built-in controller bank
 
-V.2026.4 includes 33 declarative profiles ready to export and can build more directly in the application:
+V.2026.5 includes 33 declarative profiles ready to export and can build more directly in the application:
 
 - Akai Professional LPD8 MK2, MIDImix, APC Mini MK2, MPK Mini MK3, MPK Mini IV, and MPK Mini Plus;
 - Arturia MiniLab 3, KeyLab Essential MK3, and BeatStep;

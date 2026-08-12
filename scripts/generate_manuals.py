@@ -156,7 +156,7 @@ CONTENT = {
                     (
                         "steps",
                         [
-                            ("1", "Ouvrez l'onglet Plug-ins puis choisissez un projet .rack2."),
+                            ("1", "Ouvrez Plug-ins dans la navigation latérale puis choisissez un projet .rack2."),
                             ("2", "Cliquez sur Analyser les plug-ins. Les instances identiques sont regroupées par type."),
                             ("3", "Sélectionnez un type puis ouvrez Créer / modifier le profil."),
                             ("4", "Renseignez le nom, le libellé court, le type, le rôle, l'unité et la priorité des paramètres utiles."),
@@ -617,7 +617,7 @@ CONTENT = {
                     (
                         "steps",
                         [
-                            ("1", "Ouvrez l'onglet Plug-ins et choisissez un projet .rack2."),
+                            ("1", "Ouvrez Plug-ins dans la navigation latérale puis choisissez un projet .rack2."),
                             ("2", "Analysez le projet : les instances identiques sont regroupées automatiquement."),
                             ("3", "Cliquez sur Récupérer tous les vrais noms pour traiter tous les types installés dans des processus isolés."),
                             ("4", "Seuls les inventaires dont le nombre correspond exactement au projet sont enregistrés."),
@@ -663,7 +663,7 @@ CONTENT = {
                     ("h2", "Une première page simple"),
                     (
                         "p",
-                        "La page Live garde uniquement le contrôleur actif, les commandes essentielles, l'état et le dernier événement. Les connexions MIDI/OSC sont dans Réglages et le journal complet s'ouvre dans une fenêtre séparée.",
+                        "La navigation latérale donne un accès direct à Live, Banque de contrôleurs, Plug-ins, Bibliothèque et AutoMap. La page Live garde uniquement le contrôleur actif, les deux options de démarrage automatique, les commandes essentielles, l'état et le dernier événement. Les connexions MIDI/OSC sont regroupées dans Réglages avancés et le journal complet s'ouvre dans une fenêtre séparée.",
                     ),
                     ("h2", "Réactivité, feedback et Overlay"),
                     (
@@ -774,7 +774,7 @@ CONTENT = {
                 "4. Organize parameters with Plugin Studio",
                 [
                     ("h2", "Recognize a plug-in"),
-                    ("steps", [("1", "Open the Plug-ins tab and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Click Retrieve all real names to process every installed type in isolated workers."), ("4", "Only inventories whose count exactly matches the project are saved."), ("5", "Open a profile to use Select all, Select none, or individual checkboxes."), ("6", "Adjust names and priorities if needed, save locally, then use the profile in AutoMap.")]),
+                    ("steps", [("1", "Open Plug-ins from the sidebar and choose a .rack2 project."), ("2", "Analyze the project; matching instances are grouped automatically."), ("3", "Click Retrieve all real names to process every installed type in isolated workers."), ("4", "Only inventories whose count exactly matches the project are saved."), ("5", "Open a profile to use Select all, Select none, or individual checkboxes."), ("6", "Adjust names and priorities if needed, save locally, then use the profile in AutoMap.")]),
                     ("callout", "For an older format or an unusual plug-in, the individual button automatically offers Companion/OSC interception as a fallback."),
                     ("h2", "Safe local profiles"),
                     ("p", "Profiles are declarative JSON files. Replaced versions can be backed up, downloaded code is never executed, and the analyzed project remains unchanged."),
@@ -794,7 +794,7 @@ CONTENT = {
                 "6. Interface, log, and updates",
                 [
                     ("h2", "A simple first page"),
-                    ("p", "The Live page keeps only the active controller, essential actions, status, and last event. MIDI/OSC connections are under Settings, and the complete log opens in a separate window."),
+                    ("p", "The sidebar provides direct access to Live, Controller bank, Plug-ins, Library, and AutoMap. The Live page keeps the active controller, both automatic-start options, essential actions, status, and last event. MIDI/OSC connections are grouped under Advanced settings, and the complete log opens in a separate window."),
                     ("h2", "Responsiveness, feedback, and Overlay"),
                     ("p", "Settings restores EC4 Bridge's compact advanced window: Overlay update rate and duration, Companion and label refresh delays, LiveProfessor feedback timeout, and persistent display. These timings are shared by compatible controllers; setup/group and SysEx commands remain EC4-only."),
                     ("h2", "Automatic server startup"),
@@ -828,12 +828,12 @@ def styles():
         "subtitle": ParagraphStyle("Subtitle", parent=base["Normal"], fontName="Helvetica", fontSize=12, leading=17, textColor=MID, alignment=TA_CENTER),
         "h1": ParagraphStyle("H1", parent=base["Heading1"], fontName="Helvetica-Bold", fontSize=18, leading=22, textColor=NAVY, spaceAfter=5 * mm),
         "h2": ParagraphStyle("H2", parent=base["Heading2"], fontName="Helvetica-Bold", fontSize=12.2, leading=16, textColor=BLUE, spaceBefore=3 * mm, spaceAfter=2 * mm),
-        "body": ParagraphStyle("Body", parent=base["BodyText"], fontName="Helvetica", fontSize=10.2, leading=14.5, textColor=NAVY, alignment=TA_LEFT, spaceAfter=2.7 * mm),
-        "small": ParagraphStyle("Small", parent=base["BodyText"], fontName="Helvetica", fontSize=8.8, leading=12, textColor=MID, alignment=TA_CENTER),
-        "toc": ParagraphStyle("Toc", parent=base["BodyText"], fontName="Helvetica", fontSize=10.7, leading=16, leftIndent=5 * mm, textColor=NAVY),
-        "bullet": ParagraphStyle("Bullet", parent=base["BodyText"], fontName="Helvetica", fontSize=10.1, leading=14.3, leftIndent=6 * mm, firstLineIndent=-3 * mm, textColor=NAVY, spaceAfter=1.5 * mm),
-        "callout": ParagraphStyle("Callout", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.1, leading=14.3, textColor=NAVY, leftIndent=3 * mm, rightIndent=3 * mm),
-        "table_header": ParagraphStyle("TableHeader", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.1, leading=14.3, textColor=colors.white, alignment=TA_LEFT),
+        "body": ParagraphStyle("Body", parent=base["BodyText"], fontName="Helvetica", fontSize=10.8, leading=15.3, textColor=NAVY, alignment=TA_LEFT, spaceAfter=2.7 * mm),
+        "small": ParagraphStyle("Small", parent=base["BodyText"], fontName="Helvetica", fontSize=9.2, leading=12.6, textColor=MID, alignment=TA_CENTER),
+        "toc": ParagraphStyle("Toc", parent=base["BodyText"], fontName="Helvetica", fontSize=11, leading=16.5, leftIndent=5 * mm, textColor=NAVY),
+        "bullet": ParagraphStyle("Bullet", parent=base["BodyText"], fontName="Helvetica", fontSize=10.7, leading=15.1, leftIndent=6 * mm, firstLineIndent=-3 * mm, textColor=NAVY, spaceAfter=1.5 * mm),
+        "callout": ParagraphStyle("Callout", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.7, leading=15.1, textColor=NAVY, leftIndent=3 * mm, rightIndent=3 * mm),
+        "table_header": ParagraphStyle("TableHeader", parent=base["BodyText"], fontName="Helvetica-Bold", fontSize=10.7, leading=15.1, textColor=colors.white, alignment=TA_LEFT),
     }
 
 
