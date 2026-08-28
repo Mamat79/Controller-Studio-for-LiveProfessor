@@ -1,9 +1,7 @@
 name: Quality
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -80,3 +78,4 @@ jobs:
           name: Controller-Studio-for-LiveProfessor-Windows
           path: dist/Controller-Studio-for-LiveProfessor.exe
           if-no-files-found: error
+          retention-days: 1
