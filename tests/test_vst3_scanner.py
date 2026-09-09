@@ -8,6 +8,7 @@ from silemio_control_hub.vst3_scanner import (
     ScannedParameter,
     VST3ScanError,
     VST3ScanResult,
+    default_liveprofessor_plugin_database,
     installed_plugin_paths,
     scan_installed_vst3,
     scan_vst3_module,
@@ -72,3 +73,14 @@ def test_installed_scan_rejects_a_shift_risk_when_counts_differ(monkeypatch, tmp
 
     with pytest.raises(VST3ScanError, match="expose 2 paramètres.*en contient 3"):
         scan_installed_vst3("Test Plug", expected_parameter_count=3)
+
+
+def test_macos_plugin_database_prefers_existing_plugins_xml(monkeypatch, tmp_path):
+    settings = tmp_path / "Library" / "Application Support" / "Audiostrom" / "LiveProfessor 2"
+    settings.mkdir(parents=True)
+    plugins = settings / "Plugins.xml"
+    plugins.write_text("<PLUGINS/>", encoding="utf-8")
+    monkeypatch.setattr("silemio_control_hub.vst3_scanner.sys.platform", "darwin")
+    monkeypatch.setattr("silemio_control_hub.vst3_scanner.Path.home", lambda: tmp_path)
+
+    assert default_liveprofessor_plugin_database() == plugins

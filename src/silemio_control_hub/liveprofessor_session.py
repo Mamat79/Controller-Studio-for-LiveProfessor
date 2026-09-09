@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import ctypes
-from ctypes import wintypes
 from dataclasses import dataclass
 import os
 from pathlib import Path
+import subprocess
+import sys
 import xml.etree.ElementTree as ET
 
 
@@ -20,6 +21,8 @@ class LiveProfessorSession:
 def _liveprofessor_is_running_windows() -> bool:
     if os.name != "nt":
         return False
+
+    from ctypes import wintypes
 
     TH32CS_SNAPPROCESS = 0x00000002
     INVALID_HANDLE_VALUE = ctypes.c_void_p(-1).value
@@ -56,11 +59,30 @@ def _liveprofessor_is_running_windows() -> bool:
     return False
 
 
+def _liveprofessor_is_running_macos() -> bool:
+    if sys.platform != "darwin":
+        return False
+    try:
+        result = subprocess.run(
+            ["pgrep", "-x", "LiveProfessor"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+            timeout=2,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return result.returncode == 0
+
+
 def _default_settings_dirs() -> tuple[Path, ...]:
-    appdata = os.environ.get("APPDATA")
-    if not appdata:
-        return ()
-    vendor = Path(appdata) / "audiostrom"
+    if sys.platform == "darwin":
+        vendor = Path.home() / "Library" / "Application Support" / "Audiostrom"
+    else:
+        appdata = os.environ.get("APPDATA")
+        if not appdata:
+            return ()
+        vendor = Path(appdata) / "audiostrom"
     if not vendor.is_dir():
         return ()
     candidates = tuple(
@@ -103,11 +125,14 @@ def detect_liveprofessor_session(
     for confirmation before Controller Studio reads it.
     """
 
-    running = (
-        _liveprofessor_is_running_windows()
-        if process_running is None
-        else bool(process_running)
-    )
+    if process_running is None:
+        running = (
+            _liveprofessor_is_running_macos()
+            if sys.platform == "darwin"
+            else _liveprofessor_is_running_windows()
+        )
+    else:
+        running = bool(process_running)
     if not running:
         return LiveProfessorSession(running=False)
 

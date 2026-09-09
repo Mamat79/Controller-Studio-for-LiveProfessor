@@ -1,0 +1,94 @@
+workflows:
+  controller-studio-macos-release:
+    name: Controller Studio macOS release
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      groups:
+        - silemio_release
+      vars:
+        PUBLIC_REPOSITORY: "Mamat79/Controller-Studio-for-LiveProfessor"
+        PYTHON_VERSION: "3.12.10"
+        SILEMIO_MACOS_PYTHON: "/Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12"
+    triggering:
+      events:
+        - tag
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+      tag_patterns:
+        - pattern: 'v*'
+          include: true
+      cancel_previous_builds: false
+    scripts:
+      - name: Install pinned universal2 Python and Rosetta
+        script: |
+          set -euo pipefail
+          if ! /usr/bin/pgrep oahd >/dev/null 2>&1; then
+            /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+          fi
+          package="$CM_BUILD_DIR/python-${PYTHON_VERSION}-macos11.pkg"
+          curl -fsSL "https://www.python.org/ftp/python/${PYTHON_VERSION}/python-${PYTHON_VERSION}-macos11.pkg" -o "$package"
+          pkgutil --check-signature "$package"
+          sudo installer -pkg "$package" -target /
+          "$SILEMIO_MACOS_PYTHON" --version
+          file "$SILEMIO_MACOS_PYTHON"
+
+      - name: Validate version and run portable tests
+        script: |
+          set -euo pipefail
+          version="$($SILEMIO_MACOS_PYTHON -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')"
+          echo "CONTROLLER_STUDIO_VERSION=$version" >> "$CM_ENV"
+          if [[ -n "${CM_TAG:-}" && "$CM_TAG" != "v$version" ]]; then
+            echo "Tag $CM_TAG does not match project version v$version." >&2
+            exit 1
+          fi
+          "$SILEMIO_MACOS_PYTHON" -m venv .venv-macos-tests
+          .venv-macos-tests/bin/python -m pip install --disable-pip-version-check -r requirements-build.txt pytest
+          .venv-macos-tests/bin/python -m pytest -q
+
+      - name: Build and verify Apple Silicon DMG
+        script: bash ./packaging/macos/build-macos.sh arm64
+
+      - name: Build and verify Intel DMG through Rosetta
+        script: bash ./packaging/macos/build-macos.sh x86_64
+
+      - name: Verify release checksums
+        script: |
+          set -euo pipefail
+          cd artifacts/release
+          for checksum in *.dmg.sha256; do shasum -a 256 -c "$checksum"; done
+
+      - name: Add macOS assets to the matching public GitHub Release
+        script: |
+          set -euo pipefail
+          if [[ -z "${CM_TAG:-}" ]]; then
+            echo "Manual/branch build: artifacts kept in Codemagic, GitHub publication skipped."
+            exit 0
+          fi
+          if [[ -z "${GITHUB_RELEASE_TOKEN:-}" ]]; then
+            echo "Missing secret GITHUB_RELEASE_TOKEN from Codemagic group silemio_release." >&2
+            exit 1
+          fi
+          export GH_TOKEN="$GITHUB_RELEASE_TOKEN"
+          if ! gh release view "$CM_TAG" --repo "$PUBLIC_REPOSITORY" >/dev/null 2>&1; then
+            echo "Public release $PUBLIC_REPOSITORY@$CM_TAG does not exist yet. Publish the Windows release first, then rerun this tagged Codemagic build." >&2
+            exit 1
+          fi
+          files=(artifacts/release/*.dmg artifacts/release/*.dmg.sha256)
+          existing="$(gh release view "$CM_TAG" --repo "$PUBLIC_REPOSITORY" --json assets --jq '.assets[].name')"
+          for file in "${files[@]}"; do
+            name="$(basename "$file")"
+            if grep -Fxq "$name" <<< "$existing"; then
+              echo "Refusing to overwrite existing release asset: $name" >&2
+              exit 1
+            fi
+          done
+          gh release upload "$CM_TAG" "${files[@]}" --repo "$PUBLIC_REPOSITORY"
+
+    artifacts:
+      - artifacts/release/*.dmg
+      - artifacts/release/*.dmg.sha256
+      - artifacts/qa/**/*.json
+      - artifacts/qa/**/*.txt

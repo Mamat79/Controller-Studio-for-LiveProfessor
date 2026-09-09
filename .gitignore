@@ -3,11 +3,14 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .venv/
+.venv-*/
 build/
 dist/
+artifacts/
 output/
 tmp/
 *.spec
 !packaging/windows/*.spec
+!packaging/macos/*.spec
 *.log
 config.json

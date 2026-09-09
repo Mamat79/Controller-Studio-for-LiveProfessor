@@ -1,5 +1,13 @@
 # Historique des versions
 
+## V.2026 (2026.6) — 2026-09-09
+
+- première distribution macOS native pour Apple Silicon et Intel, construite et vérifiée par Codemagic ;
+- images disque `.dmg` distinctes avec sommes SHA-256 et installation par glisser-déposer dans Applications ;
+- dossiers utilisateur, ouverture de fichiers, détection de LiveProfessor et démarrage à l’ouverture de session adaptés à macOS ;
+- mise à jour intégrée capable de choisir automatiquement le DMG correspondant à l’architecture du Mac ;
+- comportement Windows, AutoMap, profils de contrôleurs, Plugin Studio et moteur EC4 conservés et retestés.
+
 ## V.2026 (2026.5) — 2026-08-12
 
 - Réorganise l'interface autour d'une navigation latérale stable : Contrôle en direct, Contrôleurs, Plug-ins, Bibliothèque et accès AutoMap dédié.

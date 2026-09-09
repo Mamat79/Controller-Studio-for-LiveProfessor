@@ -1,4 +1,4 @@
-"""Bilingual Windows desktop shell for the independent SiLeMI/O product."""
+"""Bilingual desktop shell for the independent SiLeMI/O product."""
 
 from __future__ import annotations
 
@@ -93,6 +93,8 @@ from .plugin_studio import (
     retrieve_installed_parameter_names,
     save_user_profile,
 )
+from .platform_shell import open_path
+from .platform_startup import set_start_with_system, starts_with_system
 from .registry import ControllerRegistry, default_user_profile_dir
 from .runtime import (
     BridgeConfig,
@@ -107,7 +109,6 @@ from .runtime.config import default_config_path, legacy_config_path
 from .transports.midi import input_names, output_names
 from .transports.osc import decode_message, encode_message
 from .windows_tray import TrayCommand, WindowsTray
-from .windows_startup import set_start_with_windows, starts_with_windows
 from .workflow import prepare_liveprofessor_project
 
 
@@ -357,6 +358,15 @@ UI_TEXT = {
         ),
         "startup_windows_disabled": "Démarrage avec Windows désactivé.",
         "startup_registration_error": "Démarrage avec Windows impossible : {error}",
+        "minimize_macos": "Réduire dans le Dock",
+        "close_to_tray_macos": "Réduire dans le Dock à la fermeture",
+        "start_with_macos": "Lancer Controller Studio à l’ouverture de session",
+        "startup_macos_enabled": (
+            "Controller Studio démarrera à l’ouverture de session et sera réduit dans le Dock."
+        ),
+        "startup_macos_disabled": "Démarrage à l’ouverture de session désactivé.",
+        "startup_registration_error_macos": "Démarrage automatique macOS impossible : {error}",
+        "tray_hidden_macos": "Controller Studio est réduit dans le Dock.",
         "runtime_auto_start_attempt": "Connexion automatique à {controller}…",
         "runtime_auto_start_retry": (
             "Connexion automatique impossible ; nouvel essai dans {seconds} s."
@@ -919,6 +929,15 @@ UI_TEXT = {
         ),
         "startup_windows_disabled": "Windows startup disabled.",
         "startup_registration_error": "Could not configure Windows startup: {error}",
+        "minimize_macos": "Minimize to Dock",
+        "close_to_tray_macos": "Minimize to Dock when closing",
+        "start_with_macos": "Launch Controller Studio at login",
+        "startup_macos_enabled": (
+            "Controller Studio will launch at login and remain minimized in the Dock."
+        ),
+        "startup_macos_disabled": "Launch at login disabled.",
+        "startup_registration_error_macos": "Could not configure macOS login startup: {error}",
+        "tray_hidden_macos": "Controller Studio is minimized to the Dock.",
         "runtime_auto_start_attempt": "Connecting automatically to {controller}…",
         "runtime_auto_start_retry": (
             "Automatic connection failed; trying again in {seconds} s."
@@ -1255,6 +1274,16 @@ UI_TEXT = {
 
 
 def translated_text(language: str, key: str, **values: object) -> str:
+    if sys.platform == "darwin":
+        key = {
+            "minimize": "minimize_macos",
+            "close_to_tray": "close_to_tray_macos",
+            "start_with_windows": "start_with_macos",
+            "startup_windows_enabled": "startup_macos_enabled",
+            "startup_windows_disabled": "startup_macos_disabled",
+            "startup_registration_error": "startup_registration_error_macos",
+            "tray_hidden": "tray_hidden_macos",
+        }.get(key, key)
     catalog = UI_TEXT.get(language, UI_TEXT["fr"])
     text = catalog.get(key, UI_TEXT["fr"].get(key, key))
     return text.format(**values) if values else text
@@ -1316,7 +1345,7 @@ class ControlHubDesktop:
         self.settings = load_desktop_settings(self.settings_path)
         self.language_var = tk.StringVar(value=self.settings.language)
         self.close_to_tray_var = tk.BooleanVar(value=self.settings.close_to_tray)
-        self.start_with_windows_var = tk.BooleanVar(value=starts_with_windows())
+        self.start_with_windows_var = tk.BooleanVar(value=starts_with_system())
         self.auto_start_runtime_var = tk.BooleanVar(
             value=self.settings.auto_start_runtime
         )
@@ -1417,7 +1446,11 @@ class ControlHubDesktop:
         root.minsize(1080, 680)
         if PRODUCT_ICON_PATH.is_file():
             try:
-                root.iconbitmap(default=str(PRODUCT_ICON_PATH))
+                if sys.platform == "darwin" and PRODUCT_LOGO_PATH.is_file():
+                    self._application_icon = tk.PhotoImage(file=str(PRODUCT_LOGO_PATH))
+                    root.iconphoto(True, self._application_icon)
+                else:
+                    root.iconbitmap(default=str(PRODUCT_ICON_PATH))
             except tk.TclError:
                 pass
         root.protocol("WM_DELETE_WINDOW", self.on_close)
@@ -2461,7 +2494,7 @@ class ControlHubDesktop:
         folder = default_user_plugin_profile_dir()
         folder.mkdir(parents=True, exist_ok=True)
         try:
-            os.startfile(str(folder))
+            open_path(folder)
         except OSError as exc:
             messagebox.showerror(
                 self._t("plugin_folder_error"),
@@ -4086,7 +4119,7 @@ class ControlHubDesktop:
         )
         if open_now:
             try:
-                os.startfile(str(result.automap.output_path))
+                open_path(result.automap.output_path)
             except OSError as exc:
                 messagebox.showerror(
                     self._t("automap_open_title"),
@@ -5180,11 +5213,11 @@ class ControlHubDesktop:
 
     def _open_runtime_log_file(self) -> None:
         if self.log_path.is_file():
-            os.startfile(str(self.log_path))
+            open_path(self.log_path)
 
     def _open_runtime_log_folder(self) -> None:
         self.log_path.parent.mkdir(parents=True, exist_ok=True)
-        os.startfile(str(self.log_path.parent))
+        open_path(self.log_path.parent)
 
     def _save_settings(self) -> bool:
         try:
@@ -5205,7 +5238,7 @@ class ControlHubDesktop:
     def _save_start_with_windows(self) -> None:
         enabled = bool(self.start_with_windows_var.get())
         try:
-            set_start_with_windows(enabled)
+            set_start_with_system(enabled)
         except OSError as exc:
             self.start_with_windows_var.set(not enabled)
             details = self._t("startup_registration_error", error=exc)
