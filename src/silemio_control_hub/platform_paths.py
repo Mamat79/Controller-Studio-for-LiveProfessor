@@ -117,6 +117,8 @@ def local_app_data_dir() -> Path:
     override = os.environ.get("SILEMIO_LOCAL_APP_DATA")
     if override:
         return Path(override).expanduser()
+    if sys.platform == "darwin":
+        return Path.home() / "Library" / "Application Support"
     unredirected = _windows_unredirected_local_app_data()
     if unredirected is not None:
         return unredirected

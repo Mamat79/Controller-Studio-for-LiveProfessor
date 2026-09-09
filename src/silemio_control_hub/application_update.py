@@ -6,6 +6,7 @@ from dataclasses import dataclass
 import hashlib
 import json
 import os
+import platform
 from pathlib import Path
 import re
 import subprocess
@@ -24,10 +25,20 @@ LATEST_RELEASE_API_URL = (
 )
 GITHUB_API_VERSION = "2022-11-28"
 MAXIMUM_INSTALLER_BYTES = 512 * 1024 * 1024
-INSTALLER_NAME = re.compile(
+WINDOWS_INSTALLER_NAME = re.compile(
     r"^(?:Controller-Studio-for-LiveProfessor|"
     r"SiLeMIO-Controller-Studio(?:-for-LiveProfessor)?)-Setup"
     r"(?:-v?\d+(?:\.\d+){1,3})?\.exe$",
+    re.IGNORECASE,
+)
+MACOS_APPLE_SILICON_INSTALLER_NAME = re.compile(
+    r"^Controller-Studio-for-LiveProfessor-macOS-(?:Apple-Silicon|arm64)"
+    r"(?:-v?\d+(?:\.\d+){1,3})?\.dmg$",
+    re.IGNORECASE,
+)
+MACOS_INTEL_INSTALLER_NAME = re.compile(
+    r"^Controller-Studio-for-LiveProfessor-macOS-(?:Intel|x86_64)"
+    r"(?:-v?\d+(?:\.\d+){1,3})?\.dmg$",
     re.IGNORECASE,
 )
 SHA256_VALUE = re.compile(r"^[0-9a-fA-F]{64}$")
@@ -139,7 +150,30 @@ def _parse_asset(raw: dict[str, Any]) -> ReleaseAsset | None:
     return ReleaseAsset(name, size, url, sha256)
 
 
-def parse_release(payload: dict[str, Any]) -> ApplicationRelease:
+def _compatible_installer_pattern(
+    *,
+    platform_name: str | None = None,
+    machine_name: str | None = None,
+) -> re.Pattern[str]:
+    active_platform = platform_name or sys.platform
+    if active_platform == "win32":
+        return WINDOWS_INSTALLER_NAME
+    if active_platform == "darwin":
+        active_machine = (machine_name or platform.machine()).casefold()
+        if active_machine in {"x86_64", "amd64", "i386"}:
+            return MACOS_INTEL_INSTALLER_NAME
+        return MACOS_APPLE_SILICON_INSTALLER_NAME
+    raise NoCompatibleRelease(
+        f"aucun installateur Controller Studio n'est publié pour {active_platform}"
+    )
+
+
+def parse_release(
+    payload: dict[str, Any],
+    *,
+    platform_name: str | None = None,
+    machine_name: str | None = None,
+) -> ApplicationRelease:
     if not isinstance(payload, dict) or payload.get("draft") or payload.get("prerelease"):
         raise ApplicationUpdateError("la réponse GitHub n'est pas une version stable")
     version_match = re.fullmatch(
@@ -162,7 +196,14 @@ def parse_release(payload: dict[str, Any]) -> ApplicationRelease:
         for raw in raw_assets
         if isinstance(raw, dict) and (asset := _parse_asset(raw)) is not None
     ]
-    installer = next((item for item in assets if INSTALLER_NAME.fullmatch(item.name)), None)
+    installer_pattern = _compatible_installer_pattern(
+        platform_name=platform_name,
+        machine_name=machine_name,
+    )
+    installer = next(
+        (item for item in assets if installer_pattern.fullmatch(item.name)),
+        None,
+    )
     if installer is None:
         raise NoCompatibleRelease(
             "aucun installateur Controller Studio compatible n'est publié"
@@ -305,13 +346,22 @@ def download_update(
 def launch_installer(
     path: Path,
     launcher: Callable[[str], object] | None = None,
+    *,
+    platform_name: str | None = None,
+    machine_name: str | None = None,
 ) -> None:
     installer = Path(path).expanduser().resolve()
-    if not installer.is_file() or not INSTALLER_NAME.fullmatch(installer.name):
+    installer_pattern = _compatible_installer_pattern(
+        platform_name=platform_name,
+        machine_name=machine_name,
+    )
+    if not installer.is_file() or not installer_pattern.fullmatch(installer.name):
         raise ApplicationUpdateError("installateur Controller Studio invalide")
     if launcher is not None:
         launcher(str(installer))
-    elif sys.platform == "win32":
+    elif (platform_name or sys.platform) == "win32":
         os.startfile(str(installer))
+    elif (platform_name or sys.platform) == "darwin":
+        subprocess.Popen(["open", str(installer)], close_fds=True)
     else:
         subprocess.Popen([str(installer)], close_fds=True)

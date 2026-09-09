@@ -113,6 +113,10 @@ class VST3ScanResult:
 
 
 def default_liveprofessor_plugin_database() -> Path:
+    if sys.platform == "darwin":
+        settings = Path.home() / "Library" / "Application Support" / "Audiostrom" / "LiveProfessor 2"
+        candidates = (settings / "Plugins.xml", settings / "PluginsX64.xml")
+        return next((candidate for candidate in candidates if candidate.is_file()), candidates[0])
     appdata = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming"))
     return appdata / "audiostrom" / "LiveProfessor 2" / "PluginsX64.xml"
 

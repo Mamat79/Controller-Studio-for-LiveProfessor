@@ -17,6 +17,7 @@ def test_known_folder_path_wins_over_environment_fallbacks(tmp_path, monkeypatch
     redirected = tmp_path / "redirected"
     monkeypatch.delenv("SILEMIO_LOCAL_APP_DATA", raising=False)
     monkeypatch.setenv("LOCALAPPDATA", str(redirected))
+    monkeypatch.setattr(platform_paths.sys, "platform", "win32")
     monkeypatch.setattr(
         platform_paths,
         "_windows_unredirected_local_app_data",
@@ -34,3 +35,14 @@ def test_known_folder_path_wins_over_environment_fallbacks(tmp_path, monkeypatch
     )
 
     assert local_app_data_dir() == stable
+
+
+def test_macos_uses_application_support(tmp_path, monkeypatch):
+    monkeypatch.delenv("SILEMIO_LOCAL_APP_DATA", raising=False)
+    monkeypatch.setattr(platform_paths.sys, "platform", "darwin")
+    monkeypatch.setattr(platform_paths.Path, "home", classmethod(lambda _cls: tmp_path))
+
+    assert local_app_data_dir() == tmp_path / "Library" / "Application Support"
+    assert product_data_dir() == (
+        tmp_path / "Library" / "Application Support" / "Controller Studio for LiveProfessor"
+    )

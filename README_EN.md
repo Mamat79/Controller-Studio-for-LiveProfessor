@@ -6,29 +6,32 @@
 
 <p align="center">
   <strong>SiLeMI/O — By Mamat</strong><br>
-  MIDI controllers, Plugin Studio and AutoMap in one Windows application.
+  MIDI controllers, Plugin Studio and AutoMap on Windows and macOS.
 </p>
 
 <p align="center">
-  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.5"><img alt="Version V.2026.5" src="https://img.shields.io/badge/version-V.2026.5-0b9fc6"></a>
+  <a href="https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.6"><img alt="Version V.2026.6" src="https://img.shields.io/badge/version-V.2026.6-0b9fc6"></a>
   <img alt="Windows 10 and 11 x64" src="https://img.shields.io/badge/Windows-10%20%7C%2011%20x64-1674d1">
+  <img alt="macOS 11 or newer" src="https://img.shields.io/badge/macOS-11%2B-111820">
   <img alt="French and English" src="https://img.shields.io/badge/interface-FR%20%7C%20EN-445064">
 </p>
 
 ## Latest version (quick access)
 
-**Stable release: [Controller Studio V.2026.5](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.5)**<br>
+**Stable release: [Controller Studio V.2026.6](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/tag/v2026.6)**<br>
 Direct downloads:
 
-- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Setup-v2026.5.exe)
-- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor.exe)
-- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
-- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
-- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.5/SHA256SUMS.txt)
+- [Controller Studio installer for Windows x64 (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor-Setup-v2026.6.exe)
+- [Portable Windows x64 version (.exe)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor.exe)
+- [macOS Apple Silicon (.dmg)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor-macOS-Apple-Silicon-v2026.6.dmg)
+- [macOS Intel (.dmg)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor-macOS-Intel-v2026.6.dmg)
+- [Full English manual (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor-Manual-EN.pdf)
+- [Notice complète en français (.pdf)](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/Controller-Studio-for-LiveProfessor-Notice-FR.pdf)
+- [SHA-256 checksums](https://github.com/Mamat79/Controller-Studio-for-LiveProfessor/releases/download/v2026.6/SHA256SUMS.txt)
 
 [Lire cette présentation en français](README.md)
 
-> **Public V.2026.5 Windows release.** Controller Studio introduces clearer sidebar navigation, per-controller shortcuts, and detection of the project open in LiveProfessor before it creates a safe AutoMap copy.
+> **Public V.2026.6 release for Windows and macOS.** The Apple Silicon and Intel Mac builds are produced by Codemagic, verified separately, and published with SHA-256 checksums.
 
 ## What does Controller Studio do?
 
@@ -38,7 +41,7 @@ Controller Studio turns a MIDI controller into an organized control surface for 
 |---|---|---|---|
 | Real-time EC4 driver, banks, push, labels, values, reconnection, and configurable shortcuts | Ready-to-export profiles and a controller editor | Real names read from installed plug-ins, batch retrieval, priorities and individual checkboxes | Detected open project or chosen file, instance selection, UniBank or FullBank, validated `.rack2` copy |
 
-The interface is available in French and English, minimizes to the notification area and keeps the real-time log in a separate window.
+The interface is available in French and English, minimizes to the Windows notification area or the macOS Dock, and keeps the real-time log in a separate window.
 
 ## Three-step workflow
 
@@ -73,7 +76,7 @@ Existing manual mappings are never overwritten: they remain authoritative and Au
 
 ## Plugin Studio
 
-A `.rack2` file stores parameter order and identifiers, but not always their human-readable labels. Plugin Studio retrieves that data directly from installed VST3 plug-ins, each in an isolated process. A result is accepted only when its parameter count exactly matches the LiveProfessor project.
+A `.rack2` file stores parameter order and identifiers, but not always their human-readable labels. On Windows, Plugin Studio can retrieve that data directly from installed VST3 plug-ins, each in an isolated process. On both Windows and macOS, LiveProfessor Companion/OSC feedback remains available for label retrieval. A result is accepted only when its parameter count exactly matches the LiveProfessor project.
 
 After project analysis, **Retrieve all real names** processes every plug-in type in one operation, creates or updates local profiles, and automatically backs up previous versions.
 
@@ -91,7 +94,7 @@ VST is a registered trademark of Steinberg Media Technologies GmbH. Third-party 
 
 ## Built-in controller bank
 
-V.2026.5 includes 33 declarative profiles ready to export and can build more directly in the application:
+V.2026.6 includes 33 declarative profiles ready to export and can build more directly in the application:
 
 - Akai Professional LPD8 MK2, MIDImix, APC Mini MK2, MPK Mini MK3, MPK Mini IV, and MPK Mini Plus;
 - Arturia MiniLab 3, KeyLab Essential MK3, and BeatStep;
@@ -141,7 +144,7 @@ The public library lives in this repository under [`library/`](library/). It con
 - open-project detection or manual file selection for UniBank and FullBank AutoMap in a new copy;
 - preserve manual mappings and existing learned assignments;
 - verified application and controller-library updates;
-- FR/EN interface, notification-area mode and separate log window;
+- FR/EN interface, notification-area or Dock mode, and separate log window;
 - built-in PDF manual and optional PayPal support.
 
 ## Documentation
@@ -156,9 +159,9 @@ The manual matching the interface language is also available from **Help > Open 
 
 ## Installation and updates
 
-The installer places Controller Studio in the user’s Windows profile and creates Desktop and Start menu shortcuts. It can then be removed from Windows Apps.
+On Windows, the installer places Controller Studio in the user profile and creates Desktop and Start menu shortcuts. On macOS, open the DMG matching your processor and drag **Controller Studio for LiveProfessor** into **Applications**. These first DMGs are locally signed by the build pipeline but are not yet Apple-notarized; on first launch, use **right-click > Open** if Gatekeeper displays a warning.
 
-**Help > Check for updates** queries the latest Release in this repository, verifies the download and starts the installer. The controller library is updated separately from the **Library** menu.
+**Help > Check for updates** queries the latest Release, automatically selects the Windows installer or the DMG matching the Mac processor, verifies its checksum, and opens it. The controller library is updated separately from the **Library** menu.
 
 ## Development and verification
 

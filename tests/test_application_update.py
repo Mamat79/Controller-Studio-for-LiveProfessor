@@ -77,7 +77,8 @@ def test_release_parser_accepts_only_controller_studio_installer_with_sha256():
                 data,
                 digest=f"sha256:{digest}",
             )
-        )
+        ),
+        platform_name="win32",
     )
 
     assert release.version == "0.3.0"
@@ -93,6 +94,40 @@ def test_old_ec4_bridge_release_is_never_offered_as_controller_studio_update():
         )
 
 
+def test_release_parser_selects_apple_silicon_dmg_on_arm64():
+    apple_data = b"apple silicon dmg"
+    intel_data = b"intel dmg"
+    apple_name = "Controller-Studio-for-LiveProfessor-macOS-Apple-Silicon-v0.3.0.dmg"
+    intel_name = "Controller-Studio-for-LiveProfessor-macOS-Intel-v0.3.0.dmg"
+    release = parse_release(
+        _release_payload(
+            _asset(apple_name, apple_data, digest=f"sha256:{hashlib.sha256(apple_data).hexdigest()}"),
+            _asset(intel_name, intel_data, digest=f"sha256:{hashlib.sha256(intel_data).hexdigest()}"),
+        ),
+        platform_name="darwin",
+        machine_name="arm64",
+    )
+
+    assert release.installer.name == apple_name
+
+
+def test_release_parser_selects_intel_dmg_on_x86_64():
+    apple_data = b"apple silicon dmg"
+    intel_data = b"intel dmg"
+    apple_name = "Controller-Studio-for-LiveProfessor-macOS-Apple-Silicon-v0.3.0.dmg"
+    intel_name = "Controller-Studio-for-LiveProfessor-macOS-Intel-v0.3.0.dmg"
+    release = parse_release(
+        _release_payload(
+            _asset(apple_name, apple_data, digest=f"sha256:{hashlib.sha256(apple_data).hexdigest()}"),
+            _asset(intel_name, intel_data, digest=f"sha256:{hashlib.sha256(intel_data).hexdigest()}"),
+        ),
+        platform_name="darwin",
+        machine_name="x86_64",
+    )
+
+    assert release.installer.name == intel_name
+
+
 def test_download_is_published_only_after_size_and_hash_validation(tmp_path):
     data = b"verified installer payload"
     digest = hashlib.sha256(data).hexdigest()
@@ -103,7 +138,8 @@ def test_download_is_published_only_after_size_and_hash_validation(tmp_path):
                 data,
                 digest=f"sha256:{digest}",
             )
-        )
+        ),
+        platform_name="win32",
     )
 
     def opener(request, **_kwargs):
@@ -125,7 +161,7 @@ def test_download_rejects_tampering_and_removes_partial_file(tmp_path):
         tampered,
         digest=f"sha256:{digest}",
     )
-    release = parse_release(_release_payload(raw))
+    release = parse_release(_release_payload(raw), platform_name="win32")
 
     def opener(request, **_kwargs):
         return _Response(tampered, request.full_url)
@@ -143,7 +179,8 @@ def test_checksum_sidecar_is_used_when_github_digest_is_absent(tmp_path):
         _release_payload(
             _asset(installer_name, data),
             _asset(f"{installer_name}.sha256", f"{digest}  {installer_name}\n".encode()),
-        )
+        ),
+        platform_name="win32",
     )
 
     def opener(request, **_kwargs):

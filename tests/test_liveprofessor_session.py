@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from silemio_control_hub.liveprofessor_session import detect_liveprofessor_session
+from silemio_control_hub.liveprofessor_session import (
+    _default_settings_dirs,
+    _liveprofessor_is_running_macos,
+    detect_liveprofessor_session,
+)
 
 
 def write_recent_projects(settings_dir: Path, *projects: Path) -> None:
@@ -67,3 +71,27 @@ def test_detection_reports_running_without_a_saved_project(tmp_path):
 
     assert session.running is True
     assert session.project_path is None
+
+
+def test_macos_process_detection_uses_exact_process_name(monkeypatch):
+    calls = []
+
+    def fake_run(command, **kwargs):
+        calls.append((command, kwargs))
+        return type("Result", (), {"returncode": 0})()
+
+    monkeypatch.setattr("silemio_control_hub.liveprofessor_session.sys.platform", "darwin")
+    monkeypatch.setattr("silemio_control_hub.liveprofessor_session.subprocess.run", fake_run)
+
+    assert _liveprofessor_is_running_macos() is True
+    assert calls[0][0] == ["pgrep", "-x", "LiveProfessor"]
+
+
+def test_macos_settings_directory_uses_application_support(monkeypatch, tmp_path):
+    vendor = tmp_path / "Library" / "Application Support" / "Audiostrom"
+    settings = vendor / "LiveProfessor 2"
+    settings.mkdir(parents=True)
+    monkeypatch.setattr("silemio_control_hub.liveprofessor_session.sys.platform", "darwin")
+    monkeypatch.setattr("silemio_control_hub.liveprofessor_session.Path.home", lambda: tmp_path)
+
+    assert _default_settings_dirs() == (settings,)
