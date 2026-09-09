@@ -17,6 +17,7 @@ def test_known_folder_path_wins_over_environment_fallbacks(tmp_path, monkeypatch
     redirected = tmp_path / "redirected"
     monkeypatch.delenv("SILEMIO_LOCAL_APP_DATA", raising=False)
     monkeypatch.setenv("LOCALAPPDATA", str(redirected))
+    monkeypatch.setattr(platform_paths.sys, "platform", "win32")
     monkeypatch.setattr(
         platform_paths,
         "_windows_unredirected_local_app_data",

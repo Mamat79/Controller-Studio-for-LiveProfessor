@@ -77,7 +77,8 @@ def test_release_parser_accepts_only_controller_studio_installer_with_sha256():
                 data,
                 digest=f"sha256:{digest}",
             )
-        )
+        ),
+        platform_name="win32",
     )
 
     assert release.version == "0.3.0"
@@ -137,7 +138,8 @@ def test_download_is_published_only_after_size_and_hash_validation(tmp_path):
                 data,
                 digest=f"sha256:{digest}",
             )
-        )
+        ),
+        platform_name="win32",
     )
 
     def opener(request, **_kwargs):
@@ -159,7 +161,7 @@ def test_download_rejects_tampering_and_removes_partial_file(tmp_path):
         tampered,
         digest=f"sha256:{digest}",
     )
-    release = parse_release(_release_payload(raw))
+    release = parse_release(_release_payload(raw), platform_name="win32")
 
     def opener(request, **_kwargs):
         return _Response(tampered, request.full_url)
@@ -177,7 +179,8 @@ def test_checksum_sidecar_is_used_when_github_digest_is_absent(tmp_path):
         _release_payload(
             _asset(installer_name, data),
             _asset(f"{installer_name}.sha256", f"{digest}  {installer_name}\n".encode()),
-        )
+        ),
+        platform_name="win32",
     )
 
     def opener(request, **_kwargs):
